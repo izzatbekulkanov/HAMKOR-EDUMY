@@ -1,0 +1,67 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Tables - Basic Tables{% endblock %}
+
+{% block content %}
+<!-- Logs table -->
+<div class="card shadow-sm border-0 rounded-3 mt-4">
+  <h5 class="card-header text-primary bg-light border-bottom-0">Loglar</h5>
+  <div class="table-responsive">
+    <table class="table table-striped table-hover table-sm align-middle" id="logsTable">
+      <thead class="table-light">
+        <tr>
+          <th class="text-center">#</th>
+          <th>Foydalanuvchi</th>
+          <th>Ism</th>
+          <th>Familiya</th>
+          <th>Telefon</th>
+          <th>Kirish vaqti</th>
+          <th>Chiqish vaqti</th>
+        </tr>
+      </thead>
+      <tbody class="table-border-bottom-0">
+        <!-- Dinamik tarzda to'ldiriladi -->
+      </tbody>
+    </table>
+  </div>
+</div>
+<!--/ Logs Table -->
+{% endblock %}
+
+{% block page_js %}
+<script>
+  // DOM tayyor bo'lganda AJAX so'rovni yuborish
+  document.addEventListener("DOMContentLoaded", function () {
+    fetchUserActivityLogs();
+  });
+
+  // Foydalanuvchi faoliyat loglarini AJAX orqali yuklash funksiyasi
+  function fetchUserActivityLogs() {
+    fetch("{% url 'user_activity_logs' %}")
+      .then(response => response.json())
+      .then(data => {
+        const logsTableBody = document.querySelector("#logsTable tbody");
+        logsTableBody.innerHTML = "";  // Oldingi ma'lumotlarni tozalash
+
+        data.forEach((log, index) => {
+          const row = `
+            <tr>
+              <td class="text-center">${index + 1}</td>
+              <td>${log.username}</td>
+              <td>${log.first_name}</td>
+              <td>${log.last_name}</td>
+              <td>${log.phone}</td>
+              <td>${new Date(log.login_time).toLocaleString()}</td>
+              <td>${log.logout_time ? new Date(log.logout_time).toLocaleString() : "Chiqmagan"}</td>
+            </tr>
+          `;
+          logsTableBody.innerHTML += row;
+        });
+      })
+      .catch(error => console.error("Xatolik:", error));
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,121 @@
+{
+  "menu": [
+    {
+      "menu_header": "Asosiy sahifa"
+    },
+    {
+      "url": "main-administrator",
+      "name": "Administrator",
+      "icon": "menu-icon tf-icons ti ti-shield-half",
+      "slug": "main-administrator"
+    },
+    {
+      "url": "main-manager",
+      "name": "Menejer",
+      "icon": "menu-icon tf-icons ti ti-user-cog",
+      "slug": "main-manager"
+    },
+    {
+      "url": "main-director",
+      "name": "Direktor",
+      "icon": "menu-icon tf-icons ti ti-user-up",
+      "slug": "main-director"
+    },
+    {
+      "url": "main-teacher",
+      "name": "O'qituvchi",
+      "icon": "menu-icon tf-icons ti ti-user-screen",
+      "slug": "main-teacher"
+    },
+    {
+      "url": "main-student",
+      "name": "O'quvchi",
+      "icon": "menu-icon tf-icons ti ti-user",
+      "slug": "main-student"
+    },
+    {
+      "menu_header": "Foydalanuvchilar"
+    },
+    {
+      "url": "user-directors",
+      "name": "Direktorlar",
+      "icon": "menu-icon tf-icons ti ti-microscope",
+      "slug": "user-directors"
+    },
+    {
+      "url": "user-teachers",
+      "name": "O'qituvchilar",
+      "icon": "menu-icon tf-icons ti ti-ballpen",
+      "slug": "user-teachers"
+    },
+    {
+      "url": "user-students",
+      "name": "O'quvchilar",
+      "icon": "menu-icon tf-icons ti ti-users",
+      "slug": "user-students"
+    },
+    {
+      "url": "user-administrator",
+      "name": "Adminlar",
+      "icon": "menu-icon tf-icons ti ti-user-circle",
+      "slug": "user-administrator"
+    },
+    {
+      "menu_header": "O'quv markaz"
+    },
+    {
+      "url": "learning-center",
+      "name": "O'quv markaz",
+      "icon": "menu-icon tf-icons ti ti-building",
+      "slug": "learning-center"
+    },
+    {
+      "url": "occupations",
+      "name": "Kasblar",
+      "icon": "menu-icon tf-icons ti ti-certificate-2",
+      "slug": "occupations"
+    },
+    {
+      "url": "learning-groups",
+      "name": "Guruhlar",
+      "icon": "menu-icon tf-icons ti ti-users-group",
+      "slug": "learning-groups"
+    },
+    {
+      "url": "learning-statistics",
+      "name": "Hisobotlar",
+      "icon": "menu-icon tf-icons ti ti-chart-infographic",
+      "slug": "learning-statistics"
+    },
+    {
+      "menu_header": "Maktab"
+    },
+    {
+      "url": "app-email",
+      "name": "Maktablar",
+      "icon": "menu-icon tf-icons ti ti-building-arch",
+      "slug": "app-email"
+    },
+    {
+      "url": "app-email",
+      "name": "Sinflar",
+      "icon": "menu-icon tf-icons ti ti-school",
+      "slug": "app-email"
+    },
+    {
+      "menu_header": "Sozlamalar"
+    },
+    {
+      "url": "setting-log",
+      "name": "Loglar",
+      "icon": "menu-icon tf-icons ti ti-blockquote",
+      "slug": "setting-log"
+    },
+    {
+      "url": "setting-role",
+      "name": "Rollar",
+      "icon": "menu-icon tf-icons ti ti-shield-half",
+      "slug": "setting-role"
+    }
+  ]
+}

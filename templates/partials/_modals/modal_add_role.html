@@ -1,0 +1,153 @@
+<!-- Add Role Modal -->
+<div class="modal fade" id="addRoleModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-simple modal-dialog-centered modal-add-new-role">
+    <div class="modal-content">
+      <div class="modal-body">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="text-center mb-6">
+          <h4 class="role-title mb-2">Standart rollar qo'shish</h4>
+          <p>Standart rollarni tanlang</p>
+        </div>
+
+        <!-- Add role form -->
+        <form id="addRoleForm" class="row g-6" onsubmit="return false">
+          {% csrf_token %}
+          <div class="col-12">
+            <h5 class="mb-6">Standart rollar</h5>
+            <!-- Permission table -->
+            <div class="table-responsive">
+              <table class="table table-flush-spacing">
+                <tbody>
+                  <tr>
+                    <td class="text-nowrap fw-medium text-heading">Barcha rollarni tanlash</td>
+                    <td>
+                      <div class="d-flex justify-content-end">
+                        <div class="form-check mb-0">
+                          <input class="form-check-input" type="checkbox" id="selectAll" onclick="toggleCheckboxes(this)" />
+                          <label class="form-check-label" for="selectAll">Hammasini tanlash</label>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="text-nowrap fw-medium text-heading">CEO_Administrator</td>
+                    <td>
+                      <div class="d-flex justify-content-end">
+                        <div class="form-check mb-0">
+                          <input class="form-check-input" type="checkbox" id="roleCeoAdmin" value="ceo_administrator" />
+                          <label class="form-check-label" for="roleCeoAdmin">Tanlash</label>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="text-nowrap fw-medium text-heading">Administrator</td>
+                    <td>
+                      <div class="d-flex justify-content-end">
+                        <div class="form-check mb-0">
+                          <input class="form-check-input" type="checkbox" id="roleAdmin" value="administrator" />
+                          <label class="form-check-label" for="roleAdmin">Tanlash</label>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="text-nowrap fw-medium text-heading">O'qituvchi</td>
+                    <td>
+                      <div class="d-flex justify-content-end">
+                        <div class="form-check mb-0">
+                          <input class="form-check-input" type="checkbox" id="roleTeacher" value="teacher" />
+                          <label class="form-check-label" for="roleTeacher">Tanlash</label>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="text-nowrap fw-medium text-heading">O'quvchi</td>
+                    <td>
+                      <div class="d-flex justify-content-end">
+                        <div class="form-check mb-0">
+                          <input class="form-check-input" type="checkbox" id="roleStudent" value="student" />
+                          <label class="form-check-label" for="roleStudent">Tanlash</label>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="text-nowrap fw-medium text-heading">Direktor</td>
+                    <td>
+                      <div class="d-flex justify-content-end">
+                        <div class="form-check mb-0">
+                          <input class="form-check-input" type="checkbox" id="roleDirector" value="director" />
+                          <label class="form-check-label" for="roleDirector">Tanlash</label>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- Permission table -->
+          </div>
+          <div class="col-12 text-center">
+            <button type="button" onclick="saveRoles()" class="btn btn-success me-3">Saqlash</button>
+            <button type="reset" class="btn btn-label-secondary" data-bs-dismiss="modal" aria-label="Close">Bekor qilish</button>
+          </div>
+        </form>
+        <!--/ Add role form -->
+      </div>
+    </div>
+  </div>
+</div>
+<!--/ Add Role Modal -->
+
+<script>
+  // "Hammasini tanlash" checkboxi bilan barcha checkboxlarni tanlash yoki bekor qilish funksiyasi
+  function toggleCheckboxes(selectAllCheckbox) {
+    const checkboxes = document.querySelectorAll('#addRoleForm .form-check-input:not(#selectAll)');
+    checkboxes.forEach(checkbox => checkbox.checked = selectAllCheckbox.checked);
+  }
+
+  // Saqlash tugmasi bosilganda AJAX orqali rollarni saqlash
+  async function saveRoles() {
+    // Tanlangan rollarni olish
+    const selectedRoles = Array.from(document.querySelectorAll('#addRoleForm .form-check-input:checked'))
+      .filter(checkbox => checkbox.id !== 'selectAll')
+      .map(checkbox => checkbox.value);
+
+    // Agar hech narsa tanlanmagan bo‘lsa, xatolik xabarini ko‘rsatish
+    if (selectedRoles.length === 0) {
+      toastr.error("Hech qanday rol tanlanmagan. Iltimos, kamida bitta rolni tanlang.", "Xatolik");
+      return;
+    }
+
+    // AJAX so'rovni yuborish
+    try {
+      const response = await fetch("{% url 'save_roles' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: new URLSearchParams({ "roles[]": selectedRoles })
+      });
+
+      const data = await response.json();
+
+      // Javobni tekshirish va muvaffaqiyat yoki xatolik xabarini ko‘rsatish
+      if (data.status === "success") {
+        toastr.success(data.message || "Rollar muvaffaqiyatli saqlandi!", "Muvaffaqiyat");
+        fetchRolesWithUsers();
+        $('#addRoleModal').modal('hide');  // Modalni yopish
+      } else {
+        toastr.error(data.message || "Xatolik yuz berdi, iltimos qayta urinib ko'ring.", "Xatolik");
+      }
+    } catch (error) {
+      console.error("Xatolik:", error);
+      toastr.error("Xatolik yuz berdi. Tarmoq bilan bog'liq muammo.", "Xatolik");
+    }
+  }
+
+
+</script>
+

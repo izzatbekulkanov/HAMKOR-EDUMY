@@ -1,0 +1,114 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Roles - Apps{% endblock %}
+
+{% block vendor_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/@form-validation/form-validation.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/toastr/toastr.css' %}" />  <!-- Corrected toastr CSS import -->
+  <link rel="stylesheet" href="{% static 'vendor/libs/animate-css/animate.css' %}" />
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+  {{ block.super }}
+  <script src="{% static 'vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
+  <script src="{% static 'vendor/libs/@form-validation/popular.js' %}"></script>
+  <script src="{% static 'vendor/libs/@form-validation/bootstrap5.js' %}"></script>
+  <script src="{% static 'vendor/libs/@form-validation/auto-focus.js' %}"></script>
+  <script src="{% static 'vendor/libs/toastr/toastr.js' %}"></script>  <!-- Corrected toastr JS import -->
+{% endblock vendor_js %}
+
+{% block page_js %}
+  {{ block.super }}
+  <script src="{% static 'js/ui-toasts.js' %}"></script>
+  <script src="{% static 'js/modal-add-role.js' %}"></script>
+{% endblock page_js %}
+
+{% block content %}
+  <h4 class="mb-1">Rollar Ro'yxati</h4>
+  <p class="mb-6">Rol oldindan belgilangan menyu va xususiyatlarga kirish imkonini beradi, shuning uchun <br>
+    belgilangan rolga qarab administrator foydalanuvchi ehtiyojlariga ko'ra kirish huquqiga ega bo'lishi mumkin.</p>
+  <!-- Rol kartalari -->
+  <div class="row g-6">
+    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+      <div class="card h-100 shadow-sm border-0 rounded-3 d-flex justify-content-center align-items-center p-2"
+           style="background: linear-gradient(135deg, #f8f9fa, #e9ecef);">
+        <button data-bs-target="#addRoleModal" data-bs-toggle="modal"
+                class="btn btn-light btn-sm fw-semibold rounded-pill px-4 d-flex align-items-center"
+                style="box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);">
+          <i class="ti ti-user-plus me-2" style="font-size: 1.2em; color: #007bff;"></i> <!-- Tabler ikoni bilan -->
+          Standart rollar yaratish
+        </button>
+      </div>
+    </div>
+    <!-- Dinamik rol kartalari joylashadigan joy -->
+    <div class="all-roles row g-6" id="rolesContainer">
+      <!-- Rollar AJAX orqali qo'shiladi -->
+    </div>
+  </div>
+  <!--/ Rol kartalari -->
+
+  <!-- Add Role Modal -->
+  {% include "partials/_modals/modal_add_role.html" %}
+  <!-- / Add Role Modal -->
+
+  <script>
+    // Rollar va ularga tegishli foydalanuvchilarni olish va ularni HTMLga joylashtirish
+    async function fetchRolesWithUsers() {
+      try {
+        const response = await fetch("{% url 'roles_with_users' %}");
+        const data = await response.json();
+        console.log(data)
+
+        if (data.status === "success") {
+          const rolesContainer = document.getElementById("rolesContainer");
+          rolesContainer.innerHTML = "";  // Avvalgi kontentni tozalash
+
+          data.roles.forEach(role => {
+            const userAvatars = role.users.map(user => `
+              <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top" title="${user.first_name} ${user.second_name}"
+                  class="avatar pull-up">
+                <img class="rounded-circle" src="${user.imageFile || ''}" alt="Avatar">
+              </li>
+            `).join('');
+
+            const roleCard = `
+              <div class="col-xl-4 col-lg-6 col-md-6">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                      <h6 class="fw-normal mb-0 text-body">Jami ${role.users.length} foydalanuvchi</h6>
+                      <ul class="list-unstyled d-flex align-items-center avatar-group mb-0">
+                        ${userAvatars}
+                      </ul>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-end">
+                      <div class="role-heading">
+                        <h5 class="mb-1">${role.role_name}</h5>
+                        {#<a href="javascript:;" data-bs-toggle="modal" data-bs-target="#addRoleModal"#}
+                        {#   class="role-edit-modal"><span>Rolni tahrirlash</span></a>#}
+                      </div>
+{#                      <a href="javascript:void(0);"><i class="ti ti-copy ti-md text-heading"></i></a>#}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+            rolesContainer.innerHTML += roleCard;
+          });
+        }
+      } catch (error) {
+        console.error("Xatolik:", error);
+      }
+    }
+
+    // Sahifa yuklanganda funksiyani chaqirish
+    document.addEventListener("DOMContentLoaded", fetchRolesWithUsers);
+  </script>
+{% endblock %}
