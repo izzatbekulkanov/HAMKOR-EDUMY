@@ -91,19 +91,31 @@
       "menu_header": "Maktab"
     },
     {
-      "url": "app-email",
+      "url": "schools",
       "name": "Maktablar",
       "icon": "menu-icon tf-icons ti ti-building-arch",
-      "slug": "app-email"
+      "slug": "schools"
     },
     {
-      "url": "app-email",
+      "url": "classes",
       "name": "Sinflar",
       "icon": "menu-icon tf-icons ti ti-school",
-      "slug": "app-email"
+      "slug": "classes"
     },
     {
       "menu_header": "Sozlamalar"
+    },
+    {
+      "url": "setting-regions",
+      "name": "Manzillar",
+      "icon": "menu-icon tf-icons ti ti-location",
+      "slug": "setting-regions"
+    },
+    {
+      "url": "setting-cashback",
+      "name": "Cashback",
+      "icon": "menu-icon tf-icons ti ti-moneybag",
+      "slug": "setting-cashback"
     },
     {
       "url": "setting-log",

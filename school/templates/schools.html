@@ -1,0 +1,72 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Yangi Maktab Qo'shish{% endblock %}
+
+{% block vendor_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/libs/select2/select2.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/toastr/toastr.css' %}" />
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+  {{ block.super }}
+  <script src="{% static 'vendor/libs/select2/select2.js' %}"></script>
+  <script src="{% static 'vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
+  <script src="{% static 'vendor/libs/toastr/toastr.js' %}"></script>
+{% endblock vendor_js %}
+
+{% block page_js %}
+  {{ block.super }}
+  <script src="{% static 'customJs/schools/addSchool.js' %}"></script>
+{% endblock page_js %}
+
+{% block content %}
+<div class="container mt-5">
+  <h3 class="text-primary mb-4">Yangi Maktab Qo'shish</h3>
+  <form id="addSchoolForm">
+    {% csrf_token %}
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label for="regionSelect" class="form-label">Viloyat</label>
+        <select id="regionSelect" name="viloyat" class="form-select select2" required>
+          <option value="" disabled selected>Viloyatni tanlang</option>
+        </select>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label for="districtSelect" class="form-label">Tuman</label>
+        <select id="districtSelect" name="tuman" class="form-select select2" required disabled>
+          <option value="" disabled selected>Tuman tanlang</option>
+        </select>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label for="schoolNumber" class="form-label">Maktab Raqami</label>
+        <input type="number" id="schoolNumber" name="maktab_raqami" class="form-control"
+               placeholder="Maktab raqamini kiriting" required>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary mt-3">Qo'shish</button>
+  </form>
+
+  <hr class="mt-5">
+
+  <h3 class="text-primary mb-4">Maktablar Ro'yxati</h3>
+  <table id="schoolTable" class="table table-bordered table-hover">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Viloyat</th>
+        <th>Tuman</th>
+        <th>Maktab Raqami</th>
+        <th>Status</th>
+        <th>Yaratilgan Vaqti</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+{% endblock %}

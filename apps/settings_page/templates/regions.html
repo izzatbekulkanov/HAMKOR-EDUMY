@@ -1,0 +1,106 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Manzillarni boshqarish{% endblock %}
+
+{% block vendor_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/toastr/toastr.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/select2/select2.css' %}" />
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+  {{ block.super }}
+  <script src="{% static 'vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
+  <script src="{% static 'vendor/libs/toastr/toastr.js' %}"></script>
+  <script src="{% static 'vendor/libs/select2/select2.js' %}"></script>
+{% endblock vendor_js %}
+
+{% block page_js %}
+  {{ block.super }}
+  <script src="{% static 'customJs/settings/regions.js' %}"></script>
+  <script src="{% static 'customJs/settings/getLocations.js' %}"></script>
+  <script src="{% static 'customJs/settings/settingJson.js' %}"></script>
+
+{% endblock page_js %}
+
+{% block content %}
+  <div class="container mt-4">
+    <h3>Manzillarni boshqarish</h3>
+    <form id="addLocationForm" class="mb-4">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="level" class="form-label">Daraja</label>
+        <select id="level" name="level" class="form-select">
+          <option value="region">Viloyat</option>
+          <option value="district">Tuman</option>
+          <option value="quarter">Mahalla</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label for="parentId" class="form-label">Ota-ona elementi</label>
+        <select id="parentId" name="parent_id" class="form-select" disabled>
+          <option value="" disabled selected>Ota-ona elementni tanlang</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label for="name" class="form-label">Nomi</label>
+        <input type="text" id="name" name="name" class="form-control" placeholder="Nomi" required>
+      </div>
+      <div class="mb-3">
+        <label for="code" class="form-label">Kodi</label>
+        <input type="text" id="code" name="code" class="form-control" placeholder="Kod" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Saqlash</button>
+    </form>
+  </div>
+
+  <hr>
+
+  <div class="container py-4">
+    <h3 class="mb-4">Manzillarni boshqarish</h3>
+
+    <!-- Filter qismi -->
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label for="searchField" class="form-label">Qidiruv</label>
+        <input type="text" id="searchField" class="form-control" placeholder="Nomi yoki kodi bo'yicha qidirish" />
+      </div>
+      <div class="col-md-6">
+        <label for="levelFilter" class="form-label">Daraja</label>
+        <select id="levelFilter" class="form-select">
+          <option value="">Barchasi</option>
+          <option value="Viloyat">Viloyat</option>
+          <option value="Tuman">Tuman</option>
+          <option value="Mahalla">Mahalla</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Jadval qismi -->
+    <div class="table-responsive">
+      <table id="locationTable" class="table table-bordered table-striped">
+        <thead>
+        <tr>
+          <th>Nomi</th>
+          <th>Kodi</th>
+          <th>Daraja</th>
+          <th>Ota-ona elementi</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- JS orqali to'ldiriladi -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <hr>
+
+
+{% endblock %}

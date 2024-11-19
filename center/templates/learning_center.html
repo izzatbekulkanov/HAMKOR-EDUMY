@@ -6,121 +6,163 @@
 {% block title %}Academy - My Courses - App{% endblock %}
 
 {% block vendor_css %}
-{{ block.super }}
-<link rel="stylesheet" href="{% static 'vendor/libs/select2/select2.css' %}" />
-<link rel="stylesheet" href="{% static 'vendor/libs/plyr/plyr.css' %}" />
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/libs/select2/select2.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/plyr/plyr.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/toastr/toastr.css' %}" />
 {% endblock vendor_css %}
 
 {% block vendor_js %}
-{{ block.super }}
-<script src="{% static 'vendor/libs/select2/select2.js' %}"></script>
-<script src="{% static 'vendor/libs/plyr/plyr.js' %}"></script>
+  {{ block.super }}
+  <script src="{% static 'vendor/libs/select2/select2.js' %}"></script>
+  <script src="{% static 'vendor/libs/plyr/plyr.js' %}"></script>
+  <script src="{% static 'vendor/libs/toastr/toastr.js' %}"></script>
 {% endblock vendor_js %}
 
 {% block page_css %}
-{{ block.super }}
-<link rel="stylesheet" href="{% static 'vendor/css/pages/app-academy.css' %}" />
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/css/pages/app-academy.css' %}" />
 {% endblock page_css %}
 
 {% block page_js %}
-{{ block.super }}
-<script src="{% static 'js/app-academy-course.js' %}"></script>
+  {{ block.super }}
+  <script src="{% static 'customJs/center/centerList.js' %}"></script>
 {% endblock page_js %}
 
 {% block content %}
-<div class="app-academy">
-  <div class="card p-0 mb-6">
-  <div class="card-header d-flex justify-content-end align-items-center bg-light">
-    <!-- Tahrirlash va Qo'shish tugmalari -->
-    <button class="btn btn-sm btn-outline-secondary me-2">
-      <i class="ti ti-edit ti-xs me-1"></i> Tahrirlash
-    </button>
-    <button class="btn btn-sm btn-outline-primary">
-      <i class="ti ti-plus ti-xs me-1"></i> Qo'shish
-    </button>
-  </div>
+  <div class="app-academy">
+    <div class="card p-0 mb-6">
+      <div class="card-header d-flex justify-content-end align-items-center bg-light">
+        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addCenterModal">
+          <i class="ti ti-plus ti-xs me-1"></i> Qo'shish
+        </button>
+      </div>
 
-  <div class="card-body d-flex flex-column flex-md-row justify-content-between p-0 pt-4">
-    <!-- Chap tasvir -->
-    <div class="app-academy-md-25 card-body py-0 pt-4 ps-12">
-      <img src="{% static 'img/illustrations/bulb-' %}{{ COOKIES.style|default:style }}.png"
-           class="img-fluid app-academy-img-height scaleX-n1-rtl" alt="Bulb in hand" height="90"
-           data-app-light-img="illustrations/bulb-light.png" data-app-dark-img="illustrations/bulb-dark.png" />
-    </div>
-
-    <!-- Markaziy matn va qidirish -->
-
-      <div class="card-body invoice-preview-header rounded">
-        <div class="d-flex justify-content-between flex-xl-row flex-md-column flex-sm-row flex-column">
-          <div class="mb-xl-0 mb-6 text-heading">
-            <div class="d-flex svg-illustration mb-6 gap-2 align-items-center">
-              <div class="app-brand-logo demo">
-                {% include 'partials/logo.html' with height=20 bgcolor="fill: #fff;" %}
-              </div>
-              <span class="app-brand-text fw-bold fs-4 ms-50">
-               {% get_theme_variables 'template_name' %}
-              </span>
-            </div>
-            <p class="mb-2">Office 149, 450 South Brand Brooklyn</p>
-            <p class="mb-2">San Diego County, CA 91905, USA</p>
-            <p class="mb-0">+1 (123) 456 7891, +44 (876) 543 2198</p>
-          </div>
+      <div class="card-body d-flex flex-column flex-md-row justify-content-between p-0 pt-4">
+        <div class="card-body invoice-preview-header rounded" id="all-centers">
+          <!-- Centers will be dynamically populated here -->
+        </div>
+        <div class="app-academy-md-25 d-flex align-items-end justify-content-end">
+          <img src="{% static 'img/illustrations/pencil-rocket.png' %}" alt="pencil rocket" height="188"
+               class="scaleX-n1-rtl" />
         </div>
       </div>
-    
-
-    <!-- O'ng tasvir -->
-    <div class="app-academy-md-25 d-flex align-items-end justify-content-end">
-      <img src="{% static 'img/illustrations/pencil-rocket.png' %}" alt="pencil rocket" height="188" class="scaleX-n1-rtl" />
     </div>
-  </div>
-</div>
 
-  <div class="card mb-6">
-    <div class="card-header d-flex flex-wrap justify-content-between gap-4">
-      <div class="card-title mb-0 me-1">
-        <h5 class="mb-0">Filliallar</h5>
-        <p class="mb-0">Filliallar soni</p>
-      </div>
-      <div class="d-flex justify-content-md-end align-items-center column-gap-6">
-        <a class="btn btn-primary text-white">Fillial kiritish</a>
-      </div>
+    <!-- Section to display center details -->
+    <div id="center-details" class="mt-4">
+      <p class="text-muted text-center">Ko'proq ma‘lumot ko‘rish uchun markazni tanlang.</p>
     </div>
-    <div class="card-body">
-      <div class="row gy-6 mb-6" id="all-fillials">
-        <div class="col-sm-6 col-lg-4">
-          <div class="card p-2 h-100 shadow-none border">
-            <div class="rounded-2 text-center mb-4">
-              <a href="{% url 'app-academy-course-details' %}"><img class="img-fluid" src="{% static 'img/pages/app-academy-tutor-1.png' %}" alt="tutor image 1" /></a>
-            </div>
-            <div class="card-body p-4 pt-2">
-              <div class="d-flex justify-content-between align-items-center mb-4">
-                <span class="badge bg-label-primary">Web</span>
-                <p class="d-flex align-items-center justify-content-center fw-medium gap-1 mb-0">
-                  4.4 <span class="text-warning"><i class="ti ti-star-filled ti-lg me-1"></i></span><span class="fw-normal">(1.23k)</span>
-                </p>
-              </div>
-              <a href="{% url 'app-academy-course-details' %}" class="h5">Basics of Angular</a>
-              <p class="mt-1">Introductory course for Angular and framework basics in web development.</p>
-              <p class="d-flex align-items-center mb-1"><i class="ti ti-clock me-1"></i>30 minutes</p>
-              <div class="progress rounded-pill mb-4" style="height: 8px">
-                <div class="progress-bar w-75" role="progressbar" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-              </div>
-              <div class="d-flex flex-column flex-md-row gap-4 text-nowrap flex-wrap flex-md-nowrap  flex-lg-wrap flex-xxl-nowrap">
-                <a class="w-100 btn btn-label-secondary d-flex align-items-center" href="{% url 'app-academy-course-details' %}">
-                  <i class="ti ti-rotate-clockwise-2 ti-xs align-middle scaleX-n1-rtl me-2"></i><span>Start Over</span>
-                </a>
-                <a class="w-100 btn btn-label-primary d-flex align-items-center" href="{% url 'app-academy-course-details' %}">
-                  <span class="me-2">Continue</span><i class="ti ti-chevron-right ti-xs scaleX-n1-rtl"></i>
-                </a>
-              </div>
-            </div>
+
+    <!-- Modal for Adding Center -->
+    <div class="modal fade" id="addCenterModal" tabindex="-1" aria-labelledby="addCenterModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addCenterModalLabel">O'quv Markaz Qo'shish</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
+          <form id="addCenterForm">
+            {% csrf_token %}
+            <div class="modal-body">
+              <div class="mb-3">
+                <label for="centerName" class="form-label">Markaz nomi</label>
+                <input type="text" class="form-control" id="centerName" name="centerName"
+                       placeholder="Markaz nomini kiriting" required />
+              </div>
+              <div class="mb-3">
+                <label for="centerAdmin" class="form-label">Admin tanlash</label>
+                <select class="form-select" id="centerAdmin" name="centerAdmin" required>
+                  <option value="" selected disabled>Adminni tanlang</option>
+                </select>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bekor qilish</button>
+              <button type="submit" class="btn btn-primary">Saqlash</button>
+            </div>
+          </form>
         </div>
-
       </div>
     </div>
-  </div>
 
-</div>
+    <!-- Modal for Adding Filial -->
+    <div class="modal fade" id="addFilialModal" tabindex="-1" aria-labelledby="addFilialModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addFilialModalLabel">Filial Qo'shish</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form id="addFilialForm" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="modal-body">
+              <input type="hidden" id="filialCenterId" name="centerId">
+
+              <!-- Joylashuv -->
+              <div class="mb-3">
+                <label for="filialLocation" class="form-label">Joylashuv</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="filialLocation"
+                  name="location"
+                  placeholder="Joylashuvni kiriting"
+                  required
+                />
+              </div>
+
+              <!-- Aloqa -->
+              <div class="mb-3">
+                <label for="filialContact" class="form-label">Aloqa</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="filialContact"
+                  name="contact"
+                  placeholder="Aloqa ma'lumotlarini kiriting"
+                />
+              </div>
+
+              <!-- Telegram -->
+              <div class="mb-3">
+                <label for="filialTelegram" class="form-label">Telegram</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="filialTelegram"
+                  name="telegram"
+                  placeholder="Telegram manzilini kiriting"
+                />
+              </div>
+
+              <!-- Bosh rasm -->
+              <div class="mb-3">
+                <label for="filialImage" class="form-label">Bosh Rasm</label>
+                <input type="file" class="form-control" id="filialImage" name="image" />
+              </div>
+
+              <!-- Qo'shimcha yangi rasmlar -->
+              <div class="mb-3">
+                <label for="newAdditionalImages" class="form-label">Yangi Qo'shimcha Rasmlar</label>
+                <input
+                  type="file"
+                  class="form-control"
+                  id="newAdditionalImages"
+                  name="new_images"
+                  multiple
+                />
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bekor qilish</button>
+              <button type="submit" class="btn btn-primary">Saqlash</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
 {% endblock %}

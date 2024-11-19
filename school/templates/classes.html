@@ -1,0 +1,129 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Sinflar{% endblock %}
+
+{% block vendor_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/select2/select2.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/toastr/toastr.css' %}" />
+  <style>
+    .card-icon {
+      font-size: 3rem;
+      color: #5e72e4;
+    }
+
+    .form-label {
+      font-weight: bold;
+      color: #32325d;
+    }
+
+    .btn-primary {
+      background-color: #5e72e4;
+      border-color: #5e72e4;
+    }
+
+    .btn-primary:hover {
+      background-color: #324cdd;
+      border-color: #324cdd;
+    }
+  </style>
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+  {{ block.super }}
+  <script src="{% static 'vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
+
+  <script src="{% static 'vendor/libs/select2/select2.js' %}"></script>
+  <script src="{% static 'vendor/libs/toastr/toastr.js' %}"></script>
+{% endblock vendor_js %}
+
+{% block page_js %}
+  {{ block.super }}
+  <script src="{% static 'customJs/schools/classes.js' %}"></script>
+{% endblock page_js %}
+
+{% block content %}
+  <div class="container mt-5">
+    <div class="row">
+      <div class="col-md-12">
+        <h3 class="text-primary mb-4">
+          <i class="ti ti-book"></i> Yangi Sinf Qo'shish
+        </h3>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- Formning asosiy qismi -->
+      <div class="col-md-8">
+        <div class="card shadow-sm">
+          <div class="card-header">
+            <h5 class="card-title text-primary">
+              <i class="ti ti-edit-circle"></i> Sinf Ma'lumotlari
+            </h5>
+          </div>
+          <div class="card-body">
+            <form id="addClassForm">
+              {% csrf_token %}
+              <div class="row">
+                <div class="col-md-12 mb-3">
+                  <label for="schoolSelect" class="form-label">
+                    <i class="ti ti-building-school"></i> Maktab
+                  </label>
+                  <select id="schoolSelect" name="maktab" class="form-select select2" required>
+                    <option value="" disabled selected>Maktabni tanlang</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="classNumber" class="form-label">
+                    <i class="ti ti-hash"></i> Sinf Raqami
+                  </label>
+                  <input type="text" id="classNumber" name="sinf_raqami" class="form-control"
+                         placeholder="Sinf raqamini kiriting" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="badgeName" class="form-label">
+                    <i class="ti ti-star"></i> Belgi Nomi
+                  </label>
+                  <input type="text" id="badgeName" name="belgi" class="form-control"
+                         placeholder="Belgi nomini kiriting" required>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary mt-3">
+                <i class="ti ti-plus"></i> Qo'shish
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div class="container mt-5">
+          <!-- Sinflar ro'yxati -->
+          <div class="row mt-5" id="classList"></div>
+        </div>
+      </div>
+
+      <!-- Chiroyli statistika qismi -->
+      <div class="col-md-4">
+        <div class="card shadow-sm text-center">
+          <div class="card-body">
+            <i class="ti ti-chart-pie card-icon"></i>
+            <h5 class="mt-3">Jami Sinflar</h5>
+            <h3 class="text-primary"><span id="totalClasses">0</span></h3>
+          </div>
+        </div>
+        <div class="card shadow-sm text-center mt-3">
+          <div class="card-body">
+            <i class="ti ti-building card-icon"></i>
+            <h5 class="mt-3">Jami Maktablar</h5>
+            <h3 class="text-primary"><span id="totalSchools">0</span></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

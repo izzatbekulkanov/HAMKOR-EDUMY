@@ -1,0 +1,379 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Administrator Qo'shish - Tizim boshqaruvi{% endblock %}
+
+{% block vendor_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/libs/select2/select2.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/flatpickr/flatpickr.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/toastr/toastr.css' %}" />
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+  {{ block.super }}
+  <script src="{% static 'vendor/libs/select2/select2.js' %}"></script>
+  <script src="{% static 'vendor/libs/flatpickr/flatpickr.js' %}"></script>
+  <script src="{% static 'vendor/libs/cleavejs/cleave.js' %}"></script>
+  <script src="{% static 'vendor/libs/cleavejs/cleave-phone.js' %}"></script>
+  <script src="{% static 'vendor/libs/toastr/toastr.js' %}"></script>
+{% endblock vendor_js %}
+
+{% block page_js %}
+  {{ block.super }}
+<script>
+    $(document).ready(function () {
+        // Configure Toastr
+        toastr.options = {
+            closeButton: true,
+            progressBar: true,
+            positionClass: 'toast-top-right',
+            showDuration: 300,
+            hideDuration: 1000,
+            timeOut: 5000,
+            extendedTimeOut: 1000
+        };
+
+        // Phone input auto-formatting
+        const phoneInput = document.getElementById('id_phone_number');
+        phoneInput.addEventListener('input', function (e) {
+            let input = e.target.value.replace(/\D/g, ''); // Remove non-digit characters
+            let formatted = '+998';
+
+            if (input.length > 3) formatted += `-${input.slice(3, 5)}`;
+            if (input.length > 5) formatted += `-${input.slice(5, 8)}`;
+            if (input.length > 8) formatted += `-${input.slice(8, 10)}`;
+            if (input.length > 10) formatted += `-${input.slice(10, 12)}`;
+
+            phoneInput.value = formatted;
+        });
+
+        // Password confirmation validation
+        $('#id_password_confirm').on('input', function () {
+            const password = $('#id_password').val();
+            const confirmPassword = $(this).val();
+
+            if (password !== confirmPassword) {
+                $(this).addClass('is-invalid');
+                toastr.error("Parol va parolni tasdiqlash bir xil emas!");
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+
+        // Form validation
+        const validateForm = () => {
+            let isValid = true;
+
+            // Check required fields
+            $('[required]').each(function () {
+                const field = $(this);
+                if (!field.val().trim()) {
+                    isValid = false;
+                    field.addClass('is-invalid');
+                    toastr.error(`${field.attr('placeholder')} majburiy to‘ldirilishi kerak!`);
+                } else {
+                    field.removeClass('is-invalid');
+                }
+            });
+
+            // Validate phone number
+            const phoneNumber = $('#id_phone_number').val();
+            const phoneRegex = /^\+998-\d{2}-\d{3}-\d{2}-\d{2}$/;
+            if (!phoneRegex.test(phoneNumber)) {
+                isValid = false;
+                toastr.error("Telefon raqam noto‘g‘ri formatda! (+998-XX-XXX-XX-XX shaklida kiriting)");
+                $('#id_phone_number').addClass('is-invalid');
+            } else {
+                $('#id_phone_number').removeClass('is-invalid');
+            }
+
+            // Check password confirmation
+            const password = $('#id_password').val();
+            const confirmPassword = $('#id_password_confirm').val();
+            if (password !== confirmPassword) {
+                isValid = false;
+                toastr.error("Parol va parolni tasdiqlash bir xil emas!");
+                $('#id_password_confirm').addClass('is-invalid');
+            } else {
+                $('#id_password_confirm').removeClass('is-invalid');
+            }
+
+            return isValid;
+        };
+
+        // Form submit handler
+        $('form').on('submit', function (e) {
+            e.preventDefault();
+
+            if (validateForm()) {
+                const formData = new FormData(this);
+
+                $.ajax({
+                    url: this.action,
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response.success) {
+                            toastr.success(response.message);
+                            $('form')[0].reset();
+                        } else {
+                            toastr.error(response.message);
+                        }
+                    },
+                    error: function () {
+                        toastr.error('Xatolik yuz berdi. Iltimos, keyinroq urinib ko‘ring.');
+                    }
+                });
+            }
+        });
+
+        // Real-time validation feedback
+        $('[required]').on('input', function () {
+            const field = $(this);
+            if (field.val().trim()) {
+                field.removeClass('is-invalid');
+            }
+        });
+
+        // Select2 initialization
+        $('#id_regions, #id_district, #id_quarters, #id_roles').select2({
+            placeholder: 'Tanlang',
+            allowClear: true
+        });
+
+        // Handle district and quarter dropdowns
+        $('#id_district').prop('disabled', true);
+        $('#id_quarters').prop('disabled', true);
+
+        // Load districts when region changes
+        $('#id_regions').change(function () {
+            const regionId = $(this).val();
+            const districtSelect = $('#id_district');
+            const quarterSelect = $('#id_quarters');
+
+            districtSelect.empty().append(new Option('Tanlanmagan', '')).prop('disabled', true);
+            quarterSelect.empty().append(new Option('Tanlanmagan', '')).prop('disabled', true);
+
+            if (regionId) {
+                $.ajax({
+                    url: `/api/get-districts/${regionId}/`,
+                    type: 'GET',
+                    success: function (data) {
+                        districtSelect.prop('disabled', false);
+                        data.forEach(function (district) {
+                            districtSelect.append(new Option(district.name, district.id));
+                        });
+                    },
+                    error: function () {
+                        toastr.error('Tumanlarni yuklashda xatolik yuz berdi.');
+                    }
+                });
+            }
+        });
+
+        // Load quarters when district changes
+        $('#id_district').change(function () {
+            const districtId = $(this).val();
+            const quarterSelect = $('#id_quarters');
+
+            quarterSelect.empty().append(new Option('Tanlanmagan', '')).prop('disabled', true);
+
+            if (districtId) {
+                $.ajax({
+                    url: `/api/get-quarters/${districtId}/`,
+                    type: 'GET',
+                    success: function (data) {
+                        quarterSelect.prop('disabled', false);
+                        data.forEach(function (quarter) {
+                            quarterSelect.append(new Option(quarter.name, quarter.id));
+                        });
+                    },
+                    error: function () {
+                        toastr.error('Mahallalarni yuklashda xatolik yuz berdi.');
+                    }
+                });
+            }
+        });
+    });
+</script>
+
+{% endblock page_js %}
+
+
+
+{% block content %}
+  <div class="container mt-5">
+    <h2 class="text-center mb-4"><i class="ti ti-user-plus me-2"></i>Yangi Administrator Qo'shish</h2>
+    <form method="post" enctype="multipart/form-data" class="needs-validation" action="{% url 'add_administrator' %}"
+          novalidate>
+      {% csrf_token %}
+      <div class="row g-4">
+        <!-- Shaxsiy Ma'lumotlar -->
+        <div class="col-md-6">
+          <h5><i class="ti ti-user me-2"></i>Shaxsiy Ma'lumotlar</h5>
+          <div class="mb-3">
+            <label for="id_first_name" class="form-label">Ism</label>
+            <input type="text" name="first_name" class="form-control" id="id_first_name" placeholder="Ism kiriting"
+                   required>
+          </div>
+          <div class="mb-3">
+            <label for="id_second_name" class="form-label">Familiya</label>
+            <input type="text" name="second_name" class="form-control" id="id_second_name"
+                   placeholder="Familiya kiriting" required>
+          </div>
+          <div class="mb-3">
+            <label for="id_third_name" class="form-label">Otasining ismi</label>
+            <input type="text" name="third_name" class="form-control" id="id_third_name"
+                   placeholder="Otasining ismini kiriting" required>
+          </div>
+          <div class="mb-3">
+            <label for="id_username" class="form-label">Foydalanuvchi nomi</label>
+            <input type="text" name="username" class="form-control" id="id_username"
+                   placeholder="Foydalanuvchi nomi kiriting" required>
+          </div>
+          <div class="mb-3">
+            <label for="id_email" class="form-label">Email</label>
+            <input type="email" name="email" class="form-control" id="id_email" placeholder="Email kiriting" required>
+          </div>
+        </div>
+
+        <!-- Kontakt Ma'lumotlari -->
+        <div class="col-md-6">
+          <h5><i class="ti ti-phone me-2"></i>Kontakt Ma'lumotlari</h5>
+          <div class="mb-3">
+            <label for="id_phone_number" class="form-label">Telefon raqam</label>
+            <input type="text" name="phone_number" class="form-control phone-input" id="id_phone_number"
+                   placeholder="Telefon raqam kiriting" required>
+          </div>
+          <div class="mb-3">
+            <label for="id_birth_date" class="form-label">Tug‘ilgan kun</label>
+            <input type="date" name="birth_date" class="form-control" id="id_birth_date" required>
+          </div>
+          <!-- Manzil -->
+          <div class="form-group mb-3">
+            <label for="id_regions">Viloyat:</label>
+            <select name="regions" class="form-control" id="id_regions">
+              <option value="">Tanlanmagan</option>
+              {% for region in regions %}
+                <option value="{{ region.id }}">{{ region.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group mb-3">
+            <label for="id_district">Tuman:</label>
+            <select name="district" class="form-control" id="id_district">
+              <option value="">Tanlanmagan</option>
+              {% for district in districts %}
+                <option value="{{ district.id }}">{{ district.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group mb-3">
+            <label for="id_quarters">Mahalla:</label>
+            <select name="quarters" class="form-control" id="id_quarters">
+              <option value="">Tanlanmagan</option>
+              {% for quarter in quarters %}
+                <option value="{{ quarter.id }}">{{ quarter.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <!-- Hujjatlar -->
+        <div class="col-md-6">
+          <h5><i class="ti ti-id me-2"></i>Hujjatlar</h5>
+          <div class="mb-3">
+            <label for="id_passport_serial" class="form-label">Passport Seriya</label>
+            <input type="text" name="passport_serial" class="form-control" id="id_passport_serial"
+                   placeholder="Seriya kiriting">
+          </div>
+          <div class="mb-3">
+            <label for="id_passport_jshshir" class="form-label">Passport JSHSHIR</label>
+            <input type="text" name="passport_jshshir" class="form-control" id="id_passport_jshshir"
+                   placeholder="JSHSHIR kiriting">
+          </div>
+          <div class="mb-3">
+            <label for="id_image" class="form-label">Rasm yuklash</label>
+            <input type="file" name="image" class="form-control" id="id_image" accept="image/*">
+          </div>
+        </div>
+
+        <!-- Ijtimoiy Tarmoqlar -->
+        <div class="col-md-6">
+          <h5><i class="ti ti-brand-facebook me-2"></i>Ijtimoiy Tarmoqlar</h5>
+          <div class="mb-3">
+            <label for="id_telegram" class="form-label">Telegram</label>
+            <input type="url" name="telegram" class="form-control" id="id_telegram"
+                   placeholder="Telegram havolasini kiriting">
+          </div>
+          <div class="mb-3">
+            <label for="id_instagram" class="form-label">Instagram</label>
+            <input type="url" name="instagram" class="form-control" id="id_instagram"
+                   placeholder="Instagram havolasini kiriting">
+          </div>
+          <div class="mb-3">
+            <label for="id_facebook" class="form-label">Facebook</label>
+            <input type="url" name="facebook" class="form-control" id="id_facebook"
+                   placeholder="Facebook havolasini kiriting">
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <!-- Parol -->
+        <div class="col-md-6">
+          <h5><i class="ti ti-lock me-2"></i>Parol</h5>
+          <div class="mb-3">
+            <label for="id_password" class="form-label">Parol</label>
+            <input type="password" name="password" class="form-control" id="id_password" placeholder="Parol kiriting"
+                   required>
+          </div>
+          <div class="mb-3">
+            <label for="id_password_confirm" class="form-label">Parolni Tasdiqlash</label>
+            <input type="password" name="password_confirm" class="form-control" id="id_password_confirm"
+                   placeholder="Parolni tasdiqlang" required>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rollar -->
+      <div class="mb-4">
+        <h5><i class="ti ti-users me-2"></i>Rollar</h5>
+        <div class="row g-2">
+          {% for role in roles %}
+            <div class="col-md-4">
+              <div class="form-check">
+                <input type="checkbox" name="roles" value="{{ role.id }}" id="role_{{ role.id }}"
+                       class="form-check-input">
+                <label for="role_{{ role.id }}" class="form-check-label">{{ role.name }}</label>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <div class="text-center">
+        <button type="submit" class="btn btn-primary btn-lg">
+          <i class="ti ti-circle-check me-2"></i>Qo'shish
+        </button>
+      </div>
+    </form>
+  </div>
+{% endblock %}
+
+
+
+
+
+
+
+
+

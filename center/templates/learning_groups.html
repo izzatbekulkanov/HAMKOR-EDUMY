@@ -1,10 +1,189 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Title</title>
-</head>
-<body>
+{% extends layout_path %}
 
-</body>
-</html>
+{% load static %}
+{% load i18n %}
+
+{% block title %}eCommerce Manage Groups - App{% endblock %}
+
+{% block vendor_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/select2/select2.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/toastr/toastr.css' %}" />
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+  {{ block.super }}
+  <script src="{% static 'vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
+  <script src="{% static 'vendor/libs/select2/select2.js' %}"></script>
+  <script src="{% static 'vendor/libs/toastr/toastr.js' %}"></script>
+{% endblock vendor_js %}
+
+{% block page_css %}
+  {{ block.super }}
+{% endblock page_css %}
+
+{% block page_js %}
+  {{ block.super }}
+  <script src="{% static 'customJs/center/groups.js' %}"></script>
+
+{% endblock page_js %}
+
+{% block content %}
+  <div class="row mb-6 g-6" id="groupsSection">
+    <!-- Guruhlar statistikasi -->
+    <div class="col-12">
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <h5 class="mb-3 text-primary"><i class="ti ti-bar-chart"></i> Guruhlar statistikasi</h5>
+          <div class="row g-3">
+            <div class="col-sm-4">
+              <div class="d-flex align-items-center">
+                <div class="flex-shrink-0">
+                  <div class="badge bg-label-primary rounded-circle p-3">
+                    <i class="ti ti-users ti-lg"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <h6 class="mb-0">Umumiy guruhlar</h6>
+                  <p class="mb-0 text-muted"><span id="totalGroupsCount">0</span> ta</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="d-flex align-items-center">
+                <div class="flex-shrink-0">
+                  <div class="badge bg-label-success rounded-circle p-3">
+                    <i class="ti ti-user-check ti-lg"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <h6 class="mb-0">Faol guruhlar</h6>
+                  <p class="mb-0 text-muted"><span id="activeGroupsCount">0</span> ta</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="d-flex align-items-center">
+                <div class="flex-shrink-0">
+                  <div class="badge bg-label-warning rounded-circle p-3">
+                    <i class="ti ti-users-off ti-lg"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <h6 class="mb-0">Nofaol guruhlar</h6>
+                  <p class="mb-0 text-muted"><span id="inactiveGroupsCount">0</span> ta</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ajratuvchi chiziq -->
+    <hr>
+
+    <!-- Yangi guruh qo'shish -->
+    <div class="col-12">
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <h5 class="mb-3 text-primary"><i class="ti ti-plus"></i> Yangi Guruh Qo'shish</h5>
+          <form id="addGroupForm">
+            {% csrf_token %}
+            <div class="row gy-3">
+              <!-- Guruh nomi -->
+              <div class="col-md-6">
+                <label for="groupName" class="form-label fw-bold"><i class="ti ti-users"></i> Guruh nomi</label>
+                <input type="text" id="groupName" name="group_name" class="form-control"
+                       placeholder="Guruh nomini kiriting" required />
+              </div>
+              <!-- Kasb tanlash -->
+              <div class="col-md-6">
+                <label for="kasbSelect" class="form-label fw-bold"><i class="ti ti-briefcase"></i> Kasbni
+                  tanlang</label>
+                <select id="kasbSelect" class="form-select" required>
+                  <option value="" disabled selected>Kasbni tanlang</option>
+                </select>
+              </div>
+              <!-- Yo'nalish tanlash -->
+              <div class="col-md-6">
+                <label for="yonalishSelect" class="form-label fw-bold"><i class="ti ti-layers"></i> Yo'nalishni tanlang</label>
+                <select id="yonalishSelect" class="form-select" required disabled>
+                  <option value="" disabled selected>Yo'nalishni tanlang</option>
+                </select>
+              </div>
+              <!-- Kurs tanlash -->
+              <div class="col-md-6">
+                <label for="kursSelect" class="form-label fw-bold"><i class="ti ti-book"></i> Kursni tanlang</label>
+                <select id="kursSelect" name="kurs" class="form-select" required disabled>
+                  <option value="" disabled selected>Kursni tanlang</option>
+                </select>
+              </div>
+            </div>
+            <!-- Dars kunlari -->
+            <div class="mt-4">
+              <label class="form-label fw-bold"><i class="ti ti-calendar-event"></i> Dars kunlari</label>
+              <div class="d-flex flex-wrap gap-2">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="days_of_week" value="Monday" id="dayMonday">
+                  <label class="form-check-label" for="dayMonday">Dushanba</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="days_of_week" value="Tuesday" id="dayTuesday">
+                  <label class="form-check-label" for="dayTuesday">Seshanba</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="days_of_week" value="Wednesday"
+                         id="dayWednesday">
+                  <label class="form-check-label" for="dayWednesday">Chorshanba</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="days_of_week" value="Thursday" id="dayThursday">
+                  <label class="form-check-label" for="dayThursday">Payshanba</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="days_of_week" value="Friday" id="dayFriday">
+                  <label class="form-check-label" for="dayFriday">Juma</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="days_of_week" value="Saturday" id="daySaturday">
+                  <label class="form-check-label" for="daySaturday">Shanba</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="days_of_week" value="Sunday" id="daySunday">
+                  <label class="form-check-label" for="daySunday">Yakshanba</label>
+                </div>
+              </div>
+            </div>
+            <!-- Qo'shish tugmasi -->
+            <div class="text-end mt-4">
+              <button type="submit" class="btn btn-primary">
+                <i class="ti ti-check"></i> Qo'shish
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Ajratuvchi chiziq -->
+    <hr>
+
+    <!-- Guruhlar ro'yxati -->
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h5 class="mb-3 text-primary"><i class="ti ti-users"></i> Guruhlar ro'yxati</h5>
+          <div class="row gy-3" id="groupsList">
+            <!-- Guruhlar dinamik ravishda bu yerga yuklanadi -->
+            <div class="col-12 text-center text-muted" id="emptyGroupsMessage">Guruhlar mavjud emas.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

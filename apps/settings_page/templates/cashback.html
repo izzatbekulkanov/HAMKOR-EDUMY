@@ -1,0 +1,134 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Cashback Boshqaruvi{% endblock %}
+
+{% block vendor_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/toastr/toastr.css' %}" />
+  <style>
+    .card-header {
+      background-color: #5e72e4;
+      color: white;
+    }
+
+    .btn-primary {
+      background-color: #5e72e4;
+      border-color: #5e72e4;
+    }
+
+    .btn-primary:hover {
+      background-color: #324cdd;
+      border-color: #324cdd;
+    }
+
+    .card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .badge {
+      font-size: 0.9rem;
+      padding: 0.5em 0.75em;
+      border-radius: 10px;
+    }
+
+    .btn {
+      font-weight: bold;
+      padding: 0.5em 1.5em;
+    }
+
+    .list-unstyled li {
+      font-size: 0.95rem;
+    }
+
+    .list-unstyled li i {
+      font-size: 1.2rem;
+    }
+  </style>
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+  {{ block.super }}
+  <script src="{% static 'vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
+  <script src="{% static 'vendor/libs/toastr/toastr.js' %}"></script>
+{% endblock vendor_js %}
+
+{% block page_js %}
+  {{ block.super }}
+  <script src="{% static 'customJs/settings/cashback.js' %}"></script>
+{% endblock page_js %}
+
+{% block content %}
+  <div class="container py-4">
+    <div class="row">
+      <div class="col-md-12">
+        <h3 class="text-primary mb-4">Cashback Yaratish</h3>
+      </div>
+    </div>
+
+    <!-- Cashback yaratish formasi -->
+    <div class="row mb-5">
+      <div class="col-md-8">
+        <div class="card shadow-sm">
+          <div class="card-header">
+            <h5 class="card-title">Cashback Ma'lumotlari</h5>
+          </div>
+          <div class="card-body">
+            <form id="addCashbackForm">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label for="cashbackName" class="form-label">Cashback Nomi</label>
+                <input type="text" id="cashbackName" name="name" class="form-control"
+                       placeholder="Cashback nomini kiriting" required>
+              </div>
+              <div class="mb-3">
+                <label for="cashbackAmount" class="form-label">Summasi</label>
+                <input type="number" id="cashbackAmount" name="summasi" class="form-control"
+                       placeholder="Cashback summasini kiriting" required>
+              </div>
+              <div class="mb-3">
+                <label for="cashbackType" class="form-label">Turi</label>
+                <select id="cashbackType" name="type" class="form-select" required>
+                  <option value="" disabled selected>Cashback turini tanlang</option>
+                  <option value="1">Referal tizim</option>
+                  <option value="2">Kurs uchun to'lov</option>
+                  <option value="3">Admin</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="userType" class="form-label">Foydalanuvchi Turi</label>
+                <select id="userType" name="user_type" class="form-select" required>
+                  <option value="" disabled selected>Foydalanuvchi turini tanlang</option>
+                  {% for user_type in user_types %}
+                    <option value="{{ user_type.0 }}">{{ user_type.1 }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary">Qo'shish</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cashback ro'yhati -->
+    <div class="row">
+      <div class="col-md-12">
+        <h3 class="text-primary mb-4">Cashback Ro'yxati</h3>
+      </div>
+      <div id="cashbackList" class="row">
+        <!-- Cashback kartalari bu yerda ko'rsatiladi -->
+      </div>
+    </div>
+  </div>
+{% endblock %}
