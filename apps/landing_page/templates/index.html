@@ -1,134 +1,532 @@
-{% load static %}
-
 <!DOCTYPE html>
+<html lang="uz">
+    {% load static %}
+    <head>
+        <meta charset="utf-8">
+        <title>HAMKOR | EDUMY - Ta'lim va Hamkorlik Platformasi</title>
+        <meta content="width=device-width, initial-scale=1.0" name="viewport">
+        <meta content="Ta'lim platformasi, Hamkorlik imkoniyatlari, Kurslar" name="keywords">
+        <meta content="HAMKOR | EDUMY - maktablar va ta'lim markazlari uchun hamkorlik platformasi. Bonus tizimi, kurslar va o'qituvchilar uchun maxsus imkoniyatlar." name="description">
+        <!-- Sayt belgisi (favicon) -->
+        <link href="{% static 'landing/favicon/favicon.ico' %}" rel="icon">
+        <!-- Google Shriftlar -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500&family=Roboto:wght@500;700&display=swap" rel="stylesheet">
+        <!-- Belgilar uchun shriftlar -->
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+        <!-- Kutubxonalar uchun uslublar -->
+        <link href="{% static 'landing/lib/animate/animate.min.css' %}" rel="stylesheet">
+        <link href="{% static 'landing/lib/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
+        <!-- Moslashtirilgan Bootstrap uslublari -->
+        <link href="{% static 'landing/css/bootstrap.min.css' %}" rel="stylesheet">
+        <!-- Sayt uslublari -->
+        <link href="{% static 'landing/css/style.css' %}" rel="stylesheet">
+    </head>
+    <body>
+        <!-- Spinner Start -->
+        <div id="spinner"
+            class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+            <div class="spinner-grow text-primary" role="status"></div>
+        </div>
+        <!-- Spinner End -->
+        <!-- Navbar Start -->
+        <nav class="navbar navbar-expand-lg bg-white navbar-light sticky-top p-0 px-4 px-lg-5">
+            <a href="index.html" class="navbar-brand d-flex align-items-center">
+                <h2 class="m-0 text-primary"><img class="img-fluid me-2" src="{% static 'landing/img/learning.png' %}" alt=""
+                    style="width: 45px;">HAMKOR | EDUMY</h2>
+            </a>
+            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+            <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <div class="navbar-nav ms-auto py-4 py-lg-0">
+                    <a href="index.html" class="nav-item nav-link active">Bosh sahifa</a>
+                    <a href="schools.html" class="nav-item nav-link">Hamkor maktablar</a>
+                    <a href="teachers.html" class="nav-item nav-link">O'qituvchilar</a>
+                    <a href="courses.html" class="nav-item nav-link">Kurslar</a>
+                    <a href="contact.html" class="nav-item nav-link">Biz bilan bog‘lanish</a>
+                </div>
+                <div class="h-100 d-lg-inline-flex align-items-center d-none">
+                    <a class="btn btn-square rounded-circle bg-light text-primary me-2" href=""><i class="fab fa-facebook-f"></i></a>
+                    <a class="btn btn-square rounded-circle bg-light text-primary me-2" href=""><i class="fab fa-twitter"></i></a>
+                    <a class="btn btn-square rounded-circle bg-light text-primary me-0" href=""><i class="fab fa-linkedin-in"></i></a>
+                    <a class="btn btn-primary rounded-pill py-2 px-4 ms-3" href="{% url 'login' %}">Kirish</a>
+                </div>
+            </div>
 
-<html lang="en"
-      class="{{ style }}-style {{ navbar_type_class }} {{ header_type_class }} {{ menu_fixed_class }} {{ menu_collapsed_class }} {{ footer_fixed_class }} {{ display_customizer_class }} {{ content_layout_class }}"
-      dir="{{ text_direction_value }}" data-theme="{{ theme }}" data-assets-path="{% static '/' %}"
-      data-base-url="{{ url }}" data-framework="django"
-      data-template="{{ menu_horizontal|yesno:'horizontal,vertical' }}-menu-{{ is_front|yesno:'front,' }}-{{ theme }}-{{ style }}">
-
-<head>
-  <title>{% block title %}{% endblock title %} | {% get_theme_variables 'template_name' %}
-    - {% get_theme_variables 'template_suffix' %}</title>
-  <meta charset="utf-8" />
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
-  <meta name="description" content="{% get_theme_variables 'template_description' %}" />
-  <meta name="keywords" content="{% get_theme_variables 'template_keyword' %}" />
-
-  <!-- Canonical SEO -->
-  <link rel="canonical" href="{% get_theme_variables 'product_page' %}">
-  <!-- Favicon -->
-  <link rel="shortcut icon" type="image/x-icon" href="{% static 'img/favicon/favicon.ico' %}" />
-
-  <!-- Include the styles partial -->
-  {% load static %}
-
-      <!--Fonts-->
-      <link rel="preconnect" href="https://fonts.googleapis.com">
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&ampdisplay=swap" rel="stylesheet">
-
-      <!-- Icons -->
-      <link rel="stylesheet" href="{% static 'vendor/fonts/tabler-icons.css' %}" />
-
-      <!--Core CSS -->
-      {% if rtl_support %}
-      <link rel="stylesheet" href="{% static 'vendor/css/rtl/core.css' %}" class="{{ has_customizer|yesno:'template-customizer-core-css,' }}" />
-      <link rel="stylesheet" href="{% static 'vendor/css/rtl/theme-default.css' %}" class="{{ has_customizer|yesno:'template-customizer-theme-css,' }}" />
-      {% else %}
-      <link rel="stylesheet" href="{% static 'vendor/css/core.css' %}" class="{{ has_customizer|yesno:'template-customizer-core-css,' }}" />
-      <link rel="stylesheet" href="{% static 'vendor/css/theme-default.css' %}" class="{{ has_customizer|yesno:'template-customizer-theme-css,' }}" />
-      {% endif %}
-
-      <link rel="stylesheet" href="{% static 'css/demo.css' %}" />
-      <link rel="stylesheet" href="{% static 'vendor/css/pages/front-page.css' %}" />
-      <link rel="stylesheet" href="{% static 'vendor/libs/node-waves/node-waves.css' %}" />
-
-      <!--Vendor CSS-->
-
-
-  {% block vendor_css %}
-
-  {% endblock vendor_css %}
-
-  <!--Page CSS-->
-  {% block page_css %}
-
-  {% endblock page_css %}
-
-  <!-- Helpers -->
-  <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
-  <script src="{% static 'vendor/js/helpers.js' %}"></script>
-  <!--? Template customizer: To hide customizer set display_customizer value false in config.js.  -->
-  {% if has_customizer %}
-  <script src="{% static 'vendor/js/template-customizer.js' %}"></script>
-  {% endif %}
-  <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
-  <script src="{% static 'js/config.js' %}"></script>
-  <!-- beautify ignore:start -->
-  {% if has_customizer %}
-  <script>
-  if (typeof TemplateCustomizer !== 'undefined') {
-    window.templateCustomizer = new TemplateCustomizer({
-      cssPath: '',
-      themesPath: '',
-      defaultStyle: "{{style}}", // Required as system style can't decided without JS
-      lang: '{{LANGUAGE_CODE}}',
-      pathResolver: function(path) {
-        var resolvedPaths = {
-          // Core stylesheets
-          'core.css': "{% static 'vendor/css' %}{{rtl_support|yesno:'/rtl,'}}/core.css",
-          'core-dark.css': "{% static 'vendor/css' %}{{rtl_support|yesno:'/rtl,'}}/core-dark.css",
-
-          'theme-default.css': "{% static 'vendor/css' %}{{rtl_support|yesno:'/rtl,'}}/theme-default.css",
-          'theme-default-dark.css': "{% static 'vendor/css' %}{{rtl_support|yesno:'/rtl,'}}/theme-default-dark.css",
-
-          'theme-bordered.css': "{% static 'vendor/css' %}{{rtl_support|yesno:'/rtl,'}}/theme-bordered.css",
-          'theme-bordered-dark.css': "{% static 'vendor/css' %}{{rtl_support|yesno:'/rtl,'}}/theme-bordered-dark.css",
-
-          'theme-semi-dark.css': "{% static 'vendor/css' %}{{rtl_support|yesno:'/rtl,'}}/theme-semi-dark.css",
-          'theme-semi-dark-dark.css': "{% static 'vendor/css' %}{{rtl_support|yesno:'/rtl,'}}/theme-semi-dark-dark.css"
-        }
-        return resolvedPaths[path] || path;
-      },
-      controls: ['rtl', 'style'],
-    });
-  }
-
-  </script>
-  {% endif %}
-
-
-</head>
-
-<body>
-
-
-<!-- beautify ignore:end -->
-
-{% block layout %}
-{% endblock layout %}
-
-<!--Core Javascript-->
-<script src="{% static 'vendor/libs/jquery/jquery.js' %}"></script>
-<script src="{% static 'vendor/libs/popper/popper.js' %}"></script>
-<script src="{% static 'vendor/js/bootstrap.js' %}"></script>
-<script src="{% static 'vendor/libs/perfect-scrollbar/perfect-scrollbar.js' %}"></script>
-<script src="{% static 'vendor/libs/node-waves/node-waves.js' %}"></script>
-<script src="{% static 'vendor/libs/hammer/hammer.js' %}"></script>
-<script src="{% static 'vendor/libs/typeahead-js/typeahead.js' %}"></script>
-<script src="{% static 'vendor/js/menu.js' %}"></script>
-<script src="{% static 'js/main.js' %}"></script>
-
-
-<!--Vendors Javascript-->
-{% block vendor_js %} {% endblock vendor_js %}
-
-<!--Page Javascript-->
-{% block page_js %} {% endblock page_js %}
-
-</body>
-
+        </nav>
+        <!-- Navbar End -->
+        <!-- Header Start -->
+        <div class="container-fluid hero-header bg-light py-5 mb-5">
+            <div class="container py-5">
+                <div class="row g-5 align-items-center">
+                    <div class="col-lg-6">
+                        <h1 class="display-4 mb-3 animated slideInDown">Ishonchli Hamkorlik Bilan Yaxshi Hayot Yarating</h1>
+                        <p class="animated slideInDown">
+                            Bizning platformamiz orqali hamkorlikda ta'lim imkoniyatlarini kengaytiring. Sizning muvaffaqiyatingiz uchun maxsus bonus tizimi va sifatli xizmatlar.
+                        </p>
+                        <a href="" class="btn btn-primary py-3 px-4 animated slideInDown">Batafsil o'rganish</a>
+                    </div>
+                    <div class="col-lg-6 animated fadeIn">
+                        <img class="img-fluid animated pulse infinite" style="animation-duration: 3s;" src="{% static 'landing/img/hamkorlik.png' %}" alt="Qahramon tasviri">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Header End -->
+        <!-- About Start -->
+        <div class="container-xxl py-5">
+            <div class="container">
+                <div class="row g-5 align-items-center">
+                    <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s">
+                        <img class="img-fluid" src="{% static 'landing/img/about_us.png' %}" alt="Biz haqimizda tasvir">
+                    </div>
+                    <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.5s">
+                        <div class="h-100">
+                            <h1 class="display-6">Biz haqimizda</h1>
+                            <p class="text-primary fs-5 mb-4">Ta'lim va Hamkorlikning Eng Yaxshi Platformasi</p>
+                            <p>HAMKOR | EDUMY platformasi — ta'lim sohasida yangi imkoniyatlarni taqdim etuvchi innovatsion tizim. Biz maktab o'qituvchilari, direktorlar va boshqa hamkorlarga o'z o'quvchilarini bizning markazimizga jalb qilish orqali maxsus bonuslarni taqdim etamiz.</p>
+                            <p class="mb-4">Har bir taklif qilingan o'quvchi uchun siz ballar yig'ishingiz va ularni rag'batlantiruvchi mukofotlar yoki pulga aylantirishingiz mumkin. Bu tizim orqali ta'limni rivojlantirish va hamkorlikni mustahkamlashga yordam beramiz.</p>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fa fa-check bg-light text-primary btn-sm-square rounded-circle me-3 fw-bold"></i>
+                                <span>Hamkorlar uchun maxsus bonus tizimi</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fa fa-check bg-light text-primary btn-sm-square rounded-circle me-3 fw-bold"></i>
+                                <span>O'qituvchilar va direktorlar uchun rag'batlantirish</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-4">
+                                <i class="fa fa-check bg-light text-primary btn-sm-square rounded-circle me-3 fw-bold"></i>
+                                <span>Bonuslarni pulga aylantirish imkoniyati</span>
+                            </div>
+                            <a class="btn btn-primary py-3 px-4" href="">Batafsil ma'lumot</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- About End -->
+        <!-- Facts Start -->
+        <div class="container-xxl bg-light py-5 my-5">
+            <div class="container py-5">
+                <div class="row g-5">
+                    <div class="col-lg-4 col-md-6 text-center wow fadeIn" data-wow-delay="0.1s">
+                        <img class="img-fluid mb-4" src="{% static 'landing/img/icon-9.png' %}" alt="Bugungi tranzaksiyalar">
+                        <h1 class="display-4" data-toggle="counter-up">123456</h1>
+                        <p class="fs-5 text-primary mb-0">Bugungi Tranzaksiyalar</p>
+                    </div>
+                    <div class="col-lg-4 col-md-6 text-center wow fadeIn" data-wow-delay="0.3s">
+                        <img class="img-fluid mb-4" src="{% static 'landing/img/icon-10.png' %}" alt="Oylik tranzaksiyalar">
+                        <h1 class="display-4" data-toggle="counter-up">123456</h1>
+                        <p class="fs-5 text-primary mb-0">Oylik Tranzaksiyalar</p>
+                    </div>
+                    <div class="col-lg-4 col-md-6 text-center wow fadeIn" data-wow-delay="0.5s">
+                        <img class="img-fluid mb-4" src="{% static 'landing/img/icon-2.png' %}" alt="Umumiy tranzaksiyalar">
+                        <h1 class="display-4" data-toggle="counter-up">123456</h1>
+                        <p class="fs-5 text-primary mb-0">Umumiy Tranzaksiyalar</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Facts End -->
+        <!-- Features Start -->
+        <div class="container-xxl py-5">
+            <div class="container">
+                <div class="text-center mx-auto wow fadeInUp" data-wow-delay="0.1s" style="max-width: 500px;">
+                    <h1 class="display-6">Nega Aynan Biz?</h1>
+                    <p class="text-primary fs-5 mb-5">Ta'lim va Hamkorlikning Eng Yaxshi Platformasi</p>
+                </div>
+                <div class="row g-5">
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                        <div class="d-flex align-items-start">
+                            <img class="img-fluid flex-shrink-0" src="{% static 'landing/img/icon-7.png' %}" alt="Oson Boshlash">
+                            <div class="ps-4">
+                                <h5 class="mb-3">Boshlash Oson</h5>
+                                <span>Platformamiz orqali hamkorlik qilish va bonus tizimidan foydalanish juda oson. Faqat ro'yxatdan o'ting va takliflarni boshlang!</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                        <div class="d-flex align-items-start">
+                            <img class="img-fluid flex-shrink-0" src="{% static 'landing/img/icon-6.png' %}" alt="Xavfsiz va Ishonchli">
+                            <div class="ps-4">
+                                <h5 class="mb-3">Xavfsiz va Ishonchli</h5>
+                                <span>O'qituvchilar va hamkorlar uchun maxsus xavfsiz tizim. Ma'lumotlaringiz to'liq himoyalangan.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+                        <div class="d-flex align-items-start">
+                            <img class="img-fluid flex-shrink-0" src="{% static 'landing/img/icon-5.png' %}" alt="Qulay Tariflar">
+                            <div class="ps-4">
+                                <h5 class="mb-3">Qulay Tariflar</h5>
+                                <span>Bizning xizmatlarimiz hamyonbop narxlarda taqdim etiladi. Hamkorlik qilishda qo'shimcha afzalliklar kutilmoqda.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                        <div class="d-flex align-items-start">
+                            <img class="img-fluid flex-shrink-0" src="{% static 'landing/img/icon-4.png' %}" alt="Xavfsiz Saqlash">
+                            <div class="ps-4">
+                                <h5 class="mb-3">Xavfsiz Saqlash</h5>
+                                <span>Ma'lumotlar va tranzaksiyalar xavfsizligini ta'minlash uchun zamonaviy texnologiyalardan foydalanamiz.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                        <div class="d-flex align-items-start">
+                            <img class="img-fluid flex-shrink-0" src="{% static 'landing/img/icon-3.png' %}" alt="Sug'urta Himoyasi">
+                            <div class="ps-4">
+                                <h5 class="mb-3">Sug'urta Himoyasi</h5>
+                                <span>Bizning tizimimiz sizning hamkorligingizni himoya qilish uchun maxsus sug'urta bilan ta'minlangan.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+                        <div class="d-flex align-items-start">
+                            <img class="img-fluid flex-shrink-0" src="{% static 'landing/img/icon-8.png' %}" alt="24/7 Qo'llab-quvvatlash">
+                            <div class="ps-4">
+                                <h5 class="mb-3">24/7 Qo'llab-quvvatlash</h5>
+                                <span>Bizning jamoamiz har doim sizning savollaringizga javob berishga va yordam berishga tayyor.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Features End -->
+        <!-- Service Start -->
+        <div class="container-xxl bg-light py-5 my-5">
+            <div class="container py-5">
+                <div class="text-center mx-auto wow fadeInUp" data-wow-delay="0.1s" style="max-width: 500px;">
+                    <h1 class="display-6">Xizmatlarimiz</h1>
+                    <p class="text-primary fs-5 mb-5">O'quv markazingizni rivojlantirish uchun xizmatlar</p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                        <div class="service-item bg-white p-5">
+                            <img class="img-fluid mb-4" src="{% static 'landing/img/icon-7.png' %}" alt="Bonus Tizimi">
+                            <h5 class="mb-3">Bonus Tizimi</h5>
+                            <p>Hamkorlarimiz uchun maxsus ballar tizimi. Taklif qilingan o‘quvchilaringiz uchun mukofotlar oling.</p>
+                            <a href="">Batafsil <i class="fa fa-arrow-right ms-2"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                        <div class="service-item bg-white p-5">
+                            <img class="img-fluid mb-4" src="{% static 'landing/img/icon-3.png' %}" alt="O'quvchilar Ro'yxati">
+                            <h5 class="mb-3">O'quvchilar Ro'yxati</h5>
+                            <p>Taklif qilingan o‘quvchilaringizni kuzatib boring va ularning muvaffaqiyatlarini baholang.</p>
+                            <a href="">Batafsil <i class="fa fa-arrow-right ms-2"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+                        <div class="service-item bg-white p-5">
+                            <img class="img-fluid mb-4" src="{% static 'landing/img/icon-9.png' %}" alt="Hamkorlik Dasturi">
+                            <h5 class="mb-3">Hamkorlik Dasturi</h5>
+                            <p>Maktablar va ta'lim markazlari bilan hamkorlikni rivojlantirish uchun maxsus imkoniyatlar.</p>
+                            <a href="">Batafsil <i class="fa fa-arrow-right ms-2"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                        <div class="service-item bg-white p-5">
+                            <img class="img-fluid mb-4" src="{% static 'landing/img/icon-5.png' %}" alt="Pul O'tkazish">
+                            <h5 class="mb-3">Mukofotlarni Pulga Aylantirish</h5>
+                            <p>Toplangan bonus ballaringizni real pulga aylantirish imkoniyati.</p>
+                            <a href="">Batafsil <i class="fa fa-arrow-right ms-2"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                        <div class="service-item bg-white p-5">
+                            <img class="img-fluid mb-4" src="{% static 'landing/img/icon-2.png' %}" alt="Ta'lim Yordam">
+                            <h5 class="mb-3">Ta'lim Yordam</h5>
+                            <p>Ta'lim sifatini oshirish uchun foydali resurslar va xizmatlar.</p>
+                            <a href="">Batafsil <i class="fa fa-arrow-right ms-2"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+                        <div class="service-item bg-white p-5">
+                            <img class="img-fluid mb-4" src="{% static 'landing/img/icon-8.png' %}" alt="Doimiy Qo'llab-quvvatlash">
+                            <h5 class="mb-3">Doimiy Qo'llab-quvvatlash</h5>
+                            <p>24/7 yordam jamoasi har doim savollaringizga javob berishga tayyor.</p>
+                            <a href="">Batafsil <i class="fa fa-arrow-right ms-2"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Service End -->
+        <!-- Roadmap Start -->
+        <div class="container-xxl py-5">
+            <div class="container">
+                <div class="text-center mx-auto wow fadeInUp" data-wow-delay="0.1s" style="max-width: 500px;">
+                    <h1 class="display-6">Hamkorlik Yo‘li</h1>
+                    <p class="text-primary fs-5 mb-5">Sizning Orzularingizni Haqiqatga Aylantiramiz</p>
+                </div>
+                <div class="owl-carousel roadmap-carousel wow fadeInUp" data-wow-delay="0.1s">
+                    <div class="roadmap-item">
+                        <div class="roadmap-point"><span></span></div>
+                        <h5>Yanvar 2024</h5>
+                        <span>Platformaning ilk bosqichlari: tizimni yaratish va asosiy funksiyalarni ishga tushirish</span>
+                    </div>
+                    <div class="roadmap-item">
+                        <div class="roadmap-point"><span></span></div>
+                        <h5>Mart 2024</h5>
+                        <span>O‘quv markazlari va maktablar bilan hamkorlikni kengaytirish</span>
+                    </div>
+                    <div class="roadmap-item">
+                        <div class="roadmap-point"><span></span></div>
+                        <h5>May 2024</h5>
+                        <span>Bonus tizimi va mukofotlar tizimini ishga tushirish</span>
+                    </div>
+                    <div class="roadmap-item">
+                        <div class="roadmap-point"><span></span></div>
+                        <h5>Iyul 2024</h5>
+                        <span>Mobil ilovani ishga tushirish va foydalanuvchilar uchun qo‘shimcha qulayliklar</span>
+                    </div>
+                    <div class="roadmap-item">
+                        <div class="roadmap-point"><span></span></div>
+                        <h5>Sentyabr 2024</h5>
+                        <span>Platformaning ta'lim resurslarini kengaytirish va yangi xizmatlar qo'shish</span>
+                    </div>
+                    <div class="roadmap-item">
+                        <div class="roadmap-point"><span></span></div>
+                        <h5>Noyabr 2024</h5>
+                        <span>Platformaning global foydalanuvchilar bazasini kengaytirish</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Roadmap End -->
+        <!-- Bonus Tizimi Start -->
+        <div class="container-xxl bg-light py-5 my-5">
+            <div class="container py-5">
+                <div class="text-center mx-auto wow fadeInUp" data-wow-delay="0.1s" style="max-width: 500px;">
+                    <h1 class="display-6">Bonus Tizimi</h1>
+                    <p class="text-primary fs-5 mb-5">Bonus Yig‘ish Taymeri</p>
+                </div>
+                <div class="row g-3">
+                    <div class="col-6 col-md-3 wow fadeIn" data-wow-delay="0.1s">
+                        <div class="bg-white text-center p-3">
+                            <h1 class="mb-0">0</h1>
+                            <span class="text-primary fs-5">Kunlar</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 wow fadeIn" data-wow-delay="0.3s">
+                        <div class="bg-white text-center p-3">
+                            <h1 class="mb-0">0</h1>
+                            <span class="text-primary fs-5">Soatlar</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 wow fadeIn" data-wow-delay="0.5s">
+                        <div class="bg-white text-center p-3">
+                            <h1 class="mb-0">0</h1>
+                            <span class="text-primary fs-5">Daqiqalar</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 wow fadeIn" data-wow-delay="0.7s">
+                        <div class="bg-white text-center p-3">
+                            <h1 class="mb-0">0</h1>
+                            <span class="text-primary fs-5">Soniyalar</span>
+                        </div>
+                    </div>
+                    <div class="col-12 text-center py-4">
+                        <a class="btn btn-primary py-3 px-4" href="">Mukofotlarni Yig‘ish</a>
+                    </div>
+                    <div class="col-12 text-center">
+                        <img class="img-fluid m-1" src="{% static 'landing/img/payment-1.png' %}" alt="To‘lov usuli 1" style="width: 50px;">
+                        <img class="img-fluid m-1" src="{% static 'landing/img/payment-2.png' %}" alt="To‘lov usuli 2" style="width: 50px;">
+                        <img class="img-fluid m-1" src="{% static 'landing/img/payment-3.png' %}" alt="To‘lov usuli 3" style="width: 50px;">
+                        <img class="img-fluid m-1" src="{% static 'landing/img/payment-4.png' %}" alt="To‘lov usuli 4" style="width: 50px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Bonus Tizimi End -->
+        <!-- FAQs Start -->
+        <div class="container-xxl py-5">
+            <div class="container">
+                <div class="text-center mx-auto wow fadeInUp" data-wow-delay="0.1s" style="max-width: 500px;">
+                    <h1 class="display-6">Savol va Javoblar</h1>
+                    <p class="text-primary fs-5 mb-5">Tez-tez beriladigan savollar</p>
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-lg-10">
+                        <div class="accordion" id="accordionExample">
+                            <div class="accordion-item wow fadeInUp" data-wow-delay="0.1s">
+                                <h2 class="accordion-header" id="headingOne">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                    Platforma orqali qanday qilib bonus olish mumkin?
+                                    </button>
+                                </h2>
+                                <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+                                    data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        Platformaga o‘zingizni ro‘yxatdan o‘tkazing, o‘quvchilarni taklif qiling va ulardan
+                                        mukofot ballarini oling. Ushbu ballarni pulga aylantirish imkoniyatidan foydalaning.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item wow fadeInUp" data-wow-delay="0.2s">
+                                <h2 class="accordion-header" id="headingTwo">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                    Bonus ballar qanday hisoblanadi?
+                                    </button>
+                                </h2>
+                                <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                                    data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        Har bir taklif qilingan o‘quvchi uchun bonus ballar avtomatik tarzda hisoblanadi. Ballar
+                                        miqdori platformaning shartlariga qarab belgilanadi.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item wow fadeInUp" data-wow-delay="0.3s">
+                                <h2 class="accordion-header" id="headingThree">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                    Bonuslarni qanday qilib pulga aylantirish mumkin?
+                                    </button>
+                                </h2>
+                                <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree"
+                                    data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        Yig‘ilgan bonus ballaringiz yetarli bo‘lsa, "Mukofotlarni Pulga Aylantirish" bo‘limiga
+                                        kiring va to‘lovni amalga oshiring.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item wow fadeInUp" data-wow-delay="0.4s">
+                                <h2 class="accordion-header" id="headingFour">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                    Platformada ishlash xavfsizmi?
+                                    </button>
+                                </h2>
+                                <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour"
+                                    data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        Ha, platformamiz zamonaviy xavfsizlik texnologiyalaridan foydalangan holda ishlaydi.
+                                        Ma'lumotlaringiz xavfsizligi biz uchun muhim.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item wow fadeInUp" data-wow-delay="0.5s">
+                                <h2 class="accordion-header" id="headingFive">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                                    O‘quvchilarni qanday taklif qilish mumkin?
+                                    </button>
+                                </h2>
+                                <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive"
+                                    data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        Platformamizdagi maxsus havolani ulashing yoki o‘quvchilarni qo‘lda qo‘shish
+                                        imkoniyatidan foydalaning.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item wow fadeInUp" data-wow-delay="0.6s">
+                                <h2 class="accordion-header" id="headingSix">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+                                    Hamkorlik dasturiga qanday qo‘shilish mumkin?
+                                    </button>
+                                </h2>
+                                <div id="collapseSix" class="accordion-collapse collapse" aria-labelledby="headingSix"
+                                    data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        Platformamizda ro‘yxatdan o‘ting va hamkorlik shartlarini qabul qilib, faoliyatni
+                                        boshlang.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- FAQs End -->
+        <!-- Footer Start -->
+        <div class="container-fluid bg-light footer mt-5 pt-5 wow fadeIn" data-wow-delay="0.1s">
+            <div class="container py-5">
+                <div class="row g-5">
+                    <div class="col-md-6">
+                        <h1 class="text-primary mb-4"><img class="img-fluid me-2" src="{% static 'landing/img/learning.png' %}" alt=""
+                            style="width: 45px;">HAMKOR | EDUMY</h1>
+                        <span>HAMKOR | EDUMY — maktablar va o‘quv markazlari uchun ta'limni rivojlantirishga qaratilgan innovatsion platforma. O‘quvchilarni jalb qilish va bonus tizimi orqali hamkorlikni rag‘batlantiramiz.</span>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="mb-4">Yangiliklardan xabardor bo‘ling</h5>
+                        <p>Platformamizdagi eng so‘nggi yangiliklar va imkoniyatlarni kuzatib boring.</p>
+                        <div class="position-relative">
+                            <input class="form-control bg-transparent w-100 py-3 ps-4 pe-5" type="text"
+                                placeholder="Emailingizni kiriting">
+                            <button type="button"
+                                class="btn btn-primary py-2 px-3 position-absolute top-0 end-0 mt-2 me-2">Obuna bo‘lish</button>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <h5 class="mb-4">Biz bilan bog‘laning</h5>
+                        <p><i class="fa fa-map-marker-alt me-3"></i>123 Ko‘cha, Toshkent, O‘zbekiston</p>
+                        <p><i class="fa fa-phone-alt me-3"></i>+998 90 123 45 67</p>
+                        <p><i class="fa fa-envelope me-3"></i>info@hamkoredumy.uz</p>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <h5 class="mb-4">Xizmatlarimiz</h5>
+                        <a class="btn btn-link" href="">Bonus Tizimi</a>
+                        <a class="btn btn-link" href="">O‘quvchilar Ro‘yxati</a>
+                        <a class="btn btn-link" href="">Hamkorlik Dasturi</a>
+                        <a class="btn btn-link" href="">Mukofotlarni Pulga Aylantirish</a>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <h5 class="mb-4">Tezkor Havolalar</h5>
+                        <a class="btn btn-link" href="">Biz haqimizda</a>
+                        <a class="btn btn-link" href="">Bog‘lanish</a>
+                        <a class="btn btn-link" href="">Xizmatlarimiz</a>
+                        <a class="btn btn-link" href="">Shartlar va Qoidalar</a>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <h5 class="mb-4">Ijtimoiy Tarmoqlar</h5>
+                        <div class="d-flex">
+                            <a class="btn btn-square rounded-circle me-1" href=""><i class="fab fa-twitter"></i></a>
+                            <a class="btn btn-square rounded-circle me-1" href=""><i class="fab fa-facebook-f"></i></a>
+                            <a class="btn btn-square rounded-circle me-1" href=""><i class="fab fa-youtube"></i></a>
+                            <a class="btn btn-square rounded-circle me-1" href=""><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid copyright">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                            &copy; <a href="#">HAMKOR | EDUMY</a>, Barcha huquqlar himoyalangan.
+                        </div>
+                        <div class="col-md-6 text-center text-md-end">
+                            Dizayn <a href="https://htmlcodex.com">HTML Codex</a> tomonidan. Tarqatildi <a
+                                href="https://themewagon.com">ThemeWagon</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Footer End -->
+        <!-- Back to Top -->
+        <a href="#" class="btn btn-lg btn-primary btn-lg-square rounded-circle back-to-top"><i
+            class="bi bi-arrow-up"></i></a>
+        <!-- JavaScript Libraries -->
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="{% static 'landing/lib/wow/wow.min.js' %}"></script>
+        <script src="{% static 'landing/lib/easing/easing.min.js' %}"></script>
+        <script src="{% static 'landing/lib/waypoints/waypoints.min.js' %}"></script>
+        <script src="{% static 'landing/lib/owlcarousel/owl.carousel.min.js' %}"></script>
+        <script src="{% static 'landing/lib/counterup/counterup.min.js' %}"></script>
+        <!-- Template Javascript -->
+        <script src="{% static 'landing/js/main.js' %}"></script>
+    </body>
 </html>

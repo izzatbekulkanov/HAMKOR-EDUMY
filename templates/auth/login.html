@@ -7,7 +7,7 @@
   <title>Login - HAMKOR | EDUMY</title>
 
   <!-- Vue.js CDN -->
-  <script src="{% static 'vendor/js/vue.global.min.js' %}"></script>
+  <script src="{% static 'vendor/js/vue.global.prod.js' %}"></script>
 
   <!-- TailwindCSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -85,11 +85,34 @@
       font-size: 0.85rem;
       color: #9ca3af;
     }
+
+    .back-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      border-radius: 8px;
+      color: #2563eb;
+      text-decoration: none;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      transition: background-color 0.3s, box-shadow 0.3s;
+    }
+
+    .back-button:hover {
+      background: rgba(37, 99, 235, 0.2);
+      box-shadow: 0 6px 15px rgba(37, 99, 235, 0.4);
+    }
   </style>
 </head>
 <body>
   <!-- Background -->
   <div id="background"></div>
+
+  <!-- Back to Homepage Button -->
+  <a href="{% url 'index' %}" class="back-button">Sahifaga qaytish</a>
 
   <!-- Vue.js App -->
   <div id="app" class="login-container">

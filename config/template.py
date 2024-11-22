@@ -7,7 +7,7 @@
 # ? Shablon sozlamalarini bu yerdan osongina o'zgartiring
 # ? Shablon sozlamalarini demo konfiguratsiyalar bilan o'zgartirish uchun ushbu ob'ektni template-config/demo-*.py faylidagi TEMPLATE_CONFIG bilan almashtiring
 TEMPLATE_CONFIG = {
-    "layout": "horizontal",             # Variantlar[String]: vertical(standart), horizontal
+    "layout": "vertical",             # Variantlar[String]: vertical(standart), horizontal
     "theme": "theme-default",         # Variantlar[String]: theme-default(standart), theme-bordered, theme-semi-dark
     "style": "light",                 # Variantlar[String]: light(standart), dark, tizim rejimi
     "rtl_support": True,              # Variantlar[Boolean]: True(standart), False # O'ngdan chapga (RTL) qo'llab-quvvatlash berilishi yoki berilmasligi
