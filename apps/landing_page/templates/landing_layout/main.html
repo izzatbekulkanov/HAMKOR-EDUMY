@@ -1,0 +1,403 @@
+{% extends 'index.html' %}
+{% load static %}
+      {% block style %}
+      {% endblock style %}
+
+{% block content %}
+          <!-- Header Start -->
+        <div class="container-fluid hero-header bg-light py-5 mb-5">
+            <div class="container py-5">
+                <div class="row g-5 align-items-center">
+                    <div class="col-lg-6">
+                        <h1 class="display-4 mb-3 animated slideInDown">Ishonchli Hamkorlik Bilan Yaxshi Hayot Yarating</h1>
+                        <p class="animated slideInDown">
+                            Bizning platformamiz orqali hamkorlikda ta'lim imkoniyatlarini kengaytiring. Sizning muvaffaqiyatingiz uchun maxsus bonus tizimi va sifatli xizmatlar.
+                        </p>
+                        <a href="" class="btn btn-primary py-3 px-4 animated slideInDown">Batafsil o'rganish</a>
+                    </div>
+                    <div class="col-lg-6 animated fadeIn">
+                        <img class="img-fluid animated pulse infinite" style="animation-duration: 3s;" src="{% static 'landing/img/hamkorlik.png' %}" alt="Qahramon tasviri">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Header End -->
+        <!-- About Start -->
+        <div class="container-xxl py-5">
+            <div class="container">
+                <div class="row g-5 align-items-center">
+                    <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s">
+                        <img class="img-fluid" src="{% static 'landing/img/about_us.png' %}" alt="Biz haqimizda tasvir">
+                    </div>
+                    <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.5s">
+                        <div class="h-100">
+                            <h1 class="display-6">Biz haqimizda</h1>
+                            <p class="text-primary fs-5 mb-4">Ta'lim va Hamkorlikning Eng Yaxshi Platformasi</p>
+                            <p>HAMKOR | EDUMY platformasi — ta'lim sohasida yangi imkoniyatlarni taqdim etuvchi innovatsion tizim. Biz maktab o'qituvchilari, direktorlar va boshqa hamkorlarga o'z o'quvchilarini bizning markazimizga jalb qilish orqali maxsus bonuslarni taqdim etamiz.</p>
+                            <p class="mb-4">Har bir taklif qilingan o'quvchi uchun siz ballar yig'ishingiz va ularni rag'batlantiruvchi mukofotlar yoki pulga aylantirishingiz mumkin. Bu tizim orqali ta'limni rivojlantirish va hamkorlikni mustahkamlashga yordam beramiz.</p>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fa fa-check bg-light text-primary btn-sm-square rounded-circle me-3 fw-bold"></i>
+                                <span>Hamkorlar uchun maxsus bonus tizimi</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fa fa-check bg-light text-primary btn-sm-square rounded-circle me-3 fw-bold"></i>
+                                <span>O'qituvchilar va direktorlar uchun rag'batlantirish</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-4">
+                                <i class="fa fa-check bg-light text-primary btn-sm-square rounded-circle me-3 fw-bold"></i>
+                                <span>Bonuslarni pulga aylantirish imkoniyati</span>
+                            </div>
+                            <a class="btn btn-primary py-3 px-4" href="">Batafsil ma'lumot</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- About End -->
+        <!-- Facts Start -->
+        <div class="container-xxl bg-light py-5 my-5">
+            <div class="container py-5">
+                <div class="row g-5">
+                    <div class="col-lg-4 col-md-6 text-center wow fadeIn" data-wow-delay="0.1s">
+                        <img class="img-fluid mb-4" src="{% static 'landing/img/icon-9.png' %}" alt="Bugungi tranzaksiyalar">
+                        <h1 class="display-4" data-toggle="counter-up">123456</h1>
+                        <p class="fs-5 text-primary mb-0">Bugungi Tranzaksiyalar</p>
+                    </div>
+                    <div class="col-lg-4 col-md-6 text-center wow fadeIn" data-wow-delay="0.3s">
+                        <img class="img-fluid mb-4" src="{% static 'landing/img/icon-10.png' %}" alt="Oylik tranzaksiyalar">
+                        <h1 class="display-4" data-toggle="counter-up">123456</h1>
+                        <p class="fs-5 text-primary mb-0">Oylik Tranzaksiyalar</p>
+                    </div>
+                    <div class="col-lg-4 col-md-6 text-center wow fadeIn" data-wow-delay="0.5s">
+                        <img class="img-fluid mb-4" src="{% static 'landing/img/icon-2.png' %}" alt="Umumiy tranzaksiyalar">
+                        <h1 class="display-4" data-toggle="counter-up">123456</h1>
+                        <p class="fs-5 text-primary mb-0">Umumiy Tranzaksiyalar</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Facts End -->
+        <!-- Features Start -->
+        <div class="container-xxl py-5">
+            <div class="container">
+                <div class="text-center mx-auto wow fadeInUp" data-wow-delay="0.1s" style="max-width: 500px;">
+                    <h1 class="display-6">Nega Aynan Biz?</h1>
+                    <p class="text-primary fs-5 mb-5">Ta'lim va Hamkorlikning Eng Yaxshi Platformasi</p>
+                </div>
+                <div class="row g-5">
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                        <div class="d-flex align-items-start">
+                            <img class="img-fluid flex-shrink-0" src="{% static 'landing/img/icon-7.png' %}" alt="Oson Boshlash">
+                            <div class="ps-4">
+                                <h5 class="mb-3">Boshlash Oson</h5>
+                                <span>Platformamiz orqali hamkorlik qilish va bonus tizimidan foydalanish juda oson. Faqat ro'yxatdan o'ting va takliflarni boshlang!</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                        <div class="d-flex align-items-start">
+                            <img class="img-fluid flex-shrink-0" src="{% static 'landing/img/icon-6.png' %}" alt="Xavfsiz va Ishonchli">
+                            <div class="ps-4">
+                                <h5 class="mb-3">Xavfsiz va Ishonchli</h5>
+                                <span>O'qituvchilar va hamkorlar uchun maxsus xavfsiz tizim. Ma'lumotlaringiz to'liq himoyalangan.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+                        <div class="d-flex align-items-start">
+                            <img class="img-fluid flex-shrink-0" src="{% static 'landing/img/icon-5.png' %}" alt="Qulay Tariflar">
+                            <div class="ps-4">
+                                <h5 class="mb-3">Qulay Tariflar</h5>
+                                <span>Bizning xizmatlarimiz hamyonbop narxlarda taqdim etiladi. Hamkorlik qilishda qo'shimcha afzalliklar kutilmoqda.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                        <div class="d-flex align-items-start">
+                            <img class="img-fluid flex-shrink-0" src="{% static 'landing/img/icon-4.png' %}" alt="Xavfsiz Saqlash">
+                            <div class="ps-4">
+                                <h5 class="mb-3">Xavfsiz Saqlash</h5>
+                                <span>Ma'lumotlar va tranzaksiyalar xavfsizligini ta'minlash uchun zamonaviy texnologiyalardan foydalanamiz.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                        <div class="d-flex align-items-start">
+                            <img class="img-fluid flex-shrink-0" src="{% static 'landing/img/icon-3.png' %}" alt="Sug'urta Himoyasi">
+                            <div class="ps-4">
+                                <h5 class="mb-3">Sug'urta Himoyasi</h5>
+                                <span>Bizning tizimimiz sizning hamkorligingizni himoya qilish uchun maxsus sug'urta bilan ta'minlangan.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+                        <div class="d-flex align-items-start">
+                            <img class="img-fluid flex-shrink-0" src="{% static 'landing/img/icon-8.png' %}" alt="24/7 Qo'llab-quvvatlash">
+                            <div class="ps-4">
+                                <h5 class="mb-3">24/7 Qo'llab-quvvatlash</h5>
+                                <span>Bizning jamoamiz har doim sizning savollaringizga javob berishga va yordam berishga tayyor.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Features End -->
+        <!-- Service Start -->
+        <div class="container-xxl bg-light py-5 my-5">
+            <div class="container py-5">
+                <div class="text-center mx-auto wow fadeInUp" data-wow-delay="0.1s" style="max-width: 500px;">
+                    <h1 class="display-6">Xizmatlarimiz</h1>
+                    <p class="text-primary fs-5 mb-5">O'quv markazingizni rivojlantirish uchun xizmatlar</p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                        <div class="service-item bg-white p-5">
+                            <img class="img-fluid mb-4" src="{% static 'landing/img/icon-7.png' %}" alt="Bonus Tizimi">
+                            <h5 class="mb-3">Bonus Tizimi</h5>
+                            <p>Hamkorlarimiz uchun maxsus ballar tizimi. Taklif qilingan o‘quvchilaringiz uchun mukofotlar oling.</p>
+                            <a href="">Batafsil <i class="fa fa-arrow-right ms-2"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                        <div class="service-item bg-white p-5">
+                            <img class="img-fluid mb-4" src="{% static 'landing/img/icon-3.png' %}" alt="O'quvchilar Ro'yxati">
+                            <h5 class="mb-3">O'quvchilar Ro'yxati</h5>
+                            <p>Taklif qilingan o‘quvchilaringizni kuzatib boring va ularning muvaffaqiyatlarini baholang.</p>
+                            <a href="">Batafsil <i class="fa fa-arrow-right ms-2"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+                        <div class="service-item bg-white p-5">
+                            <img class="img-fluid mb-4" src="{% static 'landing/img/icon-9.png' %}" alt="Hamkorlik Dasturi">
+                            <h5 class="mb-3">Hamkorlik Dasturi</h5>
+                            <p>Maktablar va ta'lim markazlari bilan hamkorlikni rivojlantirish uchun maxsus imkoniyatlar.</p>
+                            <a href="">Batafsil <i class="fa fa-arrow-right ms-2"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                        <div class="service-item bg-white p-5">
+                            <img class="img-fluid mb-4" src="{% static 'landing/img/icon-5.png' %}" alt="Pul O'tkazish">
+                            <h5 class="mb-3">Mukofotlarni Pulga Aylantirish</h5>
+                            <p>Toplangan bonus ballaringizni real pulga aylantirish imkoniyati.</p>
+                            <a href="">Batafsil <i class="fa fa-arrow-right ms-2"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                        <div class="service-item bg-white p-5">
+                            <img class="img-fluid mb-4" src="{% static 'landing/img/icon-2.png' %}" alt="Ta'lim Yordam">
+                            <h5 class="mb-3">Ta'lim Yordam</h5>
+                            <p>Ta'lim sifatini oshirish uchun foydali resurslar va xizmatlar.</p>
+                            <a href="">Batafsil <i class="fa fa-arrow-right ms-2"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+                        <div class="service-item bg-white p-5">
+                            <img class="img-fluid mb-4" src="{% static 'landing/img/icon-8.png' %}" alt="Doimiy Qo'llab-quvvatlash">
+                            <h5 class="mb-3">Doimiy Qo'llab-quvvatlash</h5>
+                            <p>24/7 yordam jamoasi har doim savollaringizga javob berishga tayyor.</p>
+                            <a href="">Batafsil <i class="fa fa-arrow-right ms-2"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Service End -->
+        <!-- Roadmap Start -->
+        <div class="container-xxl py-5">
+            <div class="container">
+                <div class="text-center mx-auto wow fadeInUp" data-wow-delay="0.1s" style="max-width: 500px;">
+                    <h1 class="display-6">Hamkorlik Yo‘li</h1>
+                    <p class="text-primary fs-5 mb-5">Sizning Orzularingizni Haqiqatga Aylantiramiz</p>
+                </div>
+                <div class="owl-carousel roadmap-carousel wow fadeInUp" data-wow-delay="0.1s">
+                    <div class="roadmap-item">
+                        <div class="roadmap-point"><span></span></div>
+                        <h5>Yanvar 2024</h5>
+                        <span>Platformaning ilk bosqichlari: tizimni yaratish va asosiy funksiyalarni ishga tushirish</span>
+                    </div>
+                    <div class="roadmap-item">
+                        <div class="roadmap-point"><span></span></div>
+                        <h5>Mart 2024</h5>
+                        <span>O‘quv markazlari va maktablar bilan hamkorlikni kengaytirish</span>
+                    </div>
+                    <div class="roadmap-item">
+                        <div class="roadmap-point"><span></span></div>
+                        <h5>May 2024</h5>
+                        <span>Bonus tizimi va mukofotlar tizimini ishga tushirish</span>
+                    </div>
+                    <div class="roadmap-item">
+                        <div class="roadmap-point"><span></span></div>
+                        <h5>Iyul 2024</h5>
+                        <span>Mobil ilovani ishga tushirish va foydalanuvchilar uchun qo‘shimcha qulayliklar</span>
+                    </div>
+                    <div class="roadmap-item">
+                        <div class="roadmap-point"><span></span></div>
+                        <h5>Sentyabr 2024</h5>
+                        <span>Platformaning ta'lim resurslarini kengaytirish va yangi xizmatlar qo'shish</span>
+                    </div>
+                    <div class="roadmap-item">
+                        <div class="roadmap-point"><span></span></div>
+                        <h5>Noyabr 2024</h5>
+                        <span>Platformaning global foydalanuvchilar bazasini kengaytirish</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Roadmap End -->
+        <!-- Bonus Tizimi Start -->
+        <div class="container-xxl bg-light py-5 my-5">
+            <div class="container py-5">
+                <div class="text-center mx-auto wow fadeInUp" data-wow-delay="0.1s" style="max-width: 500px;">
+                    <h1 class="display-6">Bonus Tizimi</h1>
+                    <p class="text-primary fs-5 mb-5">Bonus Yig‘ish Taymeri</p>
+                </div>
+                <div class="row g-3">
+                    <div class="col-6 col-md-3 wow fadeIn" data-wow-delay="0.1s">
+                        <div class="bg-white text-center p-3">
+                            <h1 class="mb-0">0</h1>
+                            <span class="text-primary fs-5">Kunlar</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 wow fadeIn" data-wow-delay="0.3s">
+                        <div class="bg-white text-center p-3">
+                            <h1 class="mb-0">0</h1>
+                            <span class="text-primary fs-5">Soatlar</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 wow fadeIn" data-wow-delay="0.5s">
+                        <div class="bg-white text-center p-3">
+                            <h1 class="mb-0">0</h1>
+                            <span class="text-primary fs-5">Daqiqalar</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 wow fadeIn" data-wow-delay="0.7s">
+                        <div class="bg-white text-center p-3">
+                            <h1 class="mb-0">0</h1>
+                            <span class="text-primary fs-5">Soniyalar</span>
+                        </div>
+                    </div>
+                    <div class="col-12 text-center py-4">
+                        <a class="btn btn-primary py-3 px-4" href="">Mukofotlarni Yig‘ish</a>
+                    </div>
+                    <div class="col-12 text-center">
+                        <img class="img-fluid m-1" src="{% static 'landing/img/payment-1.png' %}" alt="To‘lov usuli 1" style="width: 50px;">
+                        <img class="img-fluid m-1" src="{% static 'landing/img/payment-2.png' %}" alt="To‘lov usuli 2" style="width: 50px;">
+                        <img class="img-fluid m-1" src="{% static 'landing/img/payment-3.png' %}" alt="To‘lov usuli 3" style="width: 50px;">
+                        <img class="img-fluid m-1" src="{% static 'landing/img/payment-4.png' %}" alt="To‘lov usuli 4" style="width: 50px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Bonus Tizimi End -->
+        <!-- FAQs Start -->
+        <div class="container-xxl py-5">
+            <div class="container">
+                <div class="text-center mx-auto wow fadeInUp" data-wow-delay="0.1s" style="max-width: 500px;">
+                    <h1 class="display-6">Savol va Javoblar</h1>
+                    <p class="text-primary fs-5 mb-5">Tez-tez beriladigan savollar</p>
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-lg-10">
+                        <div class="accordion" id="accordionExample">
+                            <div class="accordion-item wow fadeInUp" data-wow-delay="0.1s">
+                                <h2 class="accordion-header" id="headingOne">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                    Platforma orqali qanday qilib bonus olish mumkin?
+                                    </button>
+                                </h2>
+                                <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+                                    data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        Platformaga o‘zingizni ro‘yxatdan o‘tkazing, o‘quvchilarni taklif qiling va ulardan
+                                        mukofot ballarini oling. Ushbu ballarni pulga aylantirish imkoniyatidan foydalaning.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item wow fadeInUp" data-wow-delay="0.2s">
+                                <h2 class="accordion-header" id="headingTwo">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                    Bonus ballar qanday hisoblanadi?
+                                    </button>
+                                </h2>
+                                <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                                    data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        Har bir taklif qilingan o‘quvchi uchun bonus ballar avtomatik tarzda hisoblanadi. Ballar
+                                        miqdori platformaning shartlariga qarab belgilanadi.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item wow fadeInUp" data-wow-delay="0.3s">
+                                <h2 class="accordion-header" id="headingThree">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                    Bonuslarni qanday qilib pulga aylantirish mumkin?
+                                    </button>
+                                </h2>
+                                <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree"
+                                    data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        Yig‘ilgan bonus ballaringiz yetarli bo‘lsa, "Mukofotlarni Pulga Aylantirish" bo‘limiga
+                                        kiring va to‘lovni amalga oshiring.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item wow fadeInUp" data-wow-delay="0.4s">
+                                <h2 class="accordion-header" id="headingFour">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                    Platformada ishlash xavfsizmi?
+                                    </button>
+                                </h2>
+                                <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour"
+                                    data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        Ha, platformamiz zamonaviy xavfsizlik texnologiyalaridan foydalangan holda ishlaydi.
+                                        Ma'lumotlaringiz xavfsizligi biz uchun muhim.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item wow fadeInUp" data-wow-delay="0.5s">
+                                <h2 class="accordion-header" id="headingFive">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                                    O‘quvchilarni qanday taklif qilish mumkin?
+                                    </button>
+                                </h2>
+                                <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive"
+                                    data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        Platformamizdagi maxsus havolani ulashing yoki o‘quvchilarni qo‘lda qo‘shish
+                                        imkoniyatidan foydalaning.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item wow fadeInUp" data-wow-delay="0.6s">
+                                <h2 class="accordion-header" id="headingSix">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+                                    Hamkorlik dasturiga qanday qo‘shilish mumkin?
+                                    </button>
+                                </h2>
+                                <div id="collapseSix" class="accordion-collapse collapse" aria-labelledby="headingSix"
+                                    data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        Platformamizda ro‘yxatdan o‘ting va hamkorlik shartlarini qabul qilib, faoliyatni
+                                        boshlang.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- FAQs End -->
+{% endblock content %}
+
+
+    {% block script %}
+    {% endblock script %}

@@ -1,0 +1,112 @@
+{% extends 'index.html' %}
+{% load static %}
+      {% block style %}
+      {% endblock style %}
+
+{% block content %}
+    <!-- Header Start -->
+<div class="container-fluid hero-header bg-light py-5 mb-5">
+    <div class="container py-5">
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 mb-3 animated slideInDown">Biz bilan bog‘laning</h1>
+                <nav aria-label="breadcrumb animated slideInDown">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{% url 'index' %}">Bosh sahifa</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Bog‘lanish</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="col-lg-6 animated fadeIn">
+                <img class="img-fluid animated pulse infinite" style="animation-duration: 3s;" src="{% static 'landing/img/contact_me.png' %}" alt="Bog‘lanish sahifasi">
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Header End -->
+
+
+<!-- Contact Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row g-5 mb-5 wow fadeInUp" data-wow-delay="0.1s">
+            <div class="col-lg-6">
+                <h1 class="display-6">Biz bilan bog‘laning</h1>
+                <p class="text-primary fs-5 mb-0">Agar savollaringiz bo‘lsa, biz bilan bog‘laning</p>
+            </div>
+            <div class="col-lg-6 text-lg-end">
+                <a class="btn btn-primary py-3 px-4" href="">Aloqaga chiqish</a>
+            </div>
+        </div>
+        <div class="row g-5">
+            <div class="col-lg-5 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                <p class="mb-2">Bizning ofis:</p>
+                <h4>123 Ko‘cha, Toshkent, O‘zbekiston</h4>
+                <hr class="w-100">
+                <p class="mb-2">Bizga qo‘ng‘iroq qiling:</p>
+                <h4>+998 90 123 45 67</h4>
+                <hr class="w-100">
+                <p class="mb-2">Bizga yozing:</p>
+                <h4>info@hamkoredumy.uz</h4>
+                <hr class="w-100">
+                <p class="mb-2">Ijtimoiy tarmoqlar:</p>
+                <div class="d-flex pt-2">
+                    <a class="btn btn-square btn-primary rounded-circle me-2" href=""><i class="fab fa-twitter"></i></a>
+                    <a class="btn btn-square btn-primary rounded-circle me-2" href=""><i class="fab fa-facebook-f"></i></a>
+                    <a class="btn btn-square btn-primary rounded-circle me-2" href=""><i class="fab fa-youtube"></i></a>
+                    <a class="btn btn-square btn-primary rounded-circle me-2" href=""><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-7 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+                <p class="mb-4">Bog‘lanish shakli orqali bizga murojaat qiling va savollaringizni yuboring.</p>
+                <form>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="name" placeholder="Ismingiz">
+                                <label for="name">Ismingiz</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="email" class="form-control" id="email" placeholder="Emailingiz">
+                                <label for="email">Emailingiz</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="subject" placeholder="Mavzu">
+                                <label for="subject">Mavzu</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-floating">
+                                <textarea class="form-control" placeholder="Xabarni yozing" id="message" style="height: 100px"></textarea>
+                                <label for="message">Xabar</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <button class="btn btn-primary py-3 px-4" type="submit">Xabar yuborish</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Contact End -->
+
+
+<!-- Google Map Start -->
+<div class="container-xxl py-5 px-0 wow fadeInUp" data-wow-delay="0.1s">
+    <iframe class="w-100 mb-n2" style="height: 450px;"
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d188335.3583799772!2d71.52970226392849!3d40.99818940837182!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38bb8bded46a4767%3A0x9ed4d3d15c1ad71f!2sNamangan%2C%20Uzbekistan!5e0!3m2!1sen!2suz!4v1603794290143!5m2!1sen!2suz"
+        frameborder="0" allowfullscreen="" aria-hidden="false" tabindex="0"></iframe>
+</div>
+<!-- Google Map End -->
+
+{% endblock content %}
+
+
+    {% block script %}
+    {% endblock script %}
