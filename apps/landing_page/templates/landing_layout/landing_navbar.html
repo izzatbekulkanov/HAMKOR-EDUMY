@@ -1,0 +1,25 @@
+        <nav class="navbar navbar-expand-lg bg-white navbar-light sticky-top p-0 px-4 px-lg-5">
+            <a href="{% url 'index' %}" class="navbar-brand d-flex align-items-center">
+                <h2 class="m-0 text-primary"><img class="img-fluid me-2" src="{% static 'landing/img/learning.png' %}" alt=""
+                    style="width: 45px;">HAMKOR | EDUMY</h2>
+            </a>
+            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+            <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <div class="navbar-nav ms-auto py-4 py-lg-0">
+                    <a href="{% url 'index' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}">Bosh sahifa</a>
+                    <a href="{% url 'partner_schools' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'partner_schools' %}active{% endif %}">Hamkor maktablar</a>
+                    <a href="teachers.html" class="nav-item nav-link {% if request.path == '/teachers.html' %}active{% endif %}">O'qituvchilar</a>
+                    <a href="" class="nav-item nav-link ">Kurslar</a>
+                    <a href="{% url 'contact_me' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'contact_me' %}active{% endif %}">Biz bilan bog‘lanish</a>
+                </div>
+                <div class="h-100 d-lg-inline-flex align-items-center d-none">
+                    <a class="btn btn-square rounded-circle bg-light text-primary me-2" href=""><i class="fab fa-facebook-f"></i></a>
+                    <a class="btn btn-square rounded-circle bg-light text-primary me-2" href=""><i class="fab fa-twitter"></i></a>
+                    <a class="btn btn-square rounded-circle bg-light text-primary me-0" href=""><i class="fab fa-linkedin-in"></i></a>
+                    <a class="btn btn-primary rounded-pill py-2 px-4 ms-3" href="{% url 'login' %}">Kirish</a>
+                </div>
+            </div>
+
+        </nav>
