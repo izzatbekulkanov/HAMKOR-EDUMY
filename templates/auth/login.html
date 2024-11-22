@@ -1,149 +1,227 @@
-{% extends layout_path %}
-
+<!DOCTYPE html>
 {% load static %}
-{% load i18n %}
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - HAMKOR | EDUMY</title>
 
-{% block title %}Login Asosiy - Sahifalar{% endblock %}
+  <!-- Vue.js CDN -->
+  <script src="{% static 'vendor/js/vue.global.min.js' %}"></script>
 
-{% block vendor_css %}
-  {{ block.super }}
+  <!-- TailwindCSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-  <link rel="stylesheet" href="{% static 'vendor/libs/@form-validation/form-validation.css' %}" />
-{% endblock vendor_css %}
+  <!-- Three.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.153.0/build/three.min.js"></script>
 
-{% block vendor_js %}
-  {{ block.super }}
-  <script src="{% static 'vendor/libs/@form-validation/popular.js' %}"></script>
-  <script src="{% static 'vendor/libs/@form-validation/bootstrap5.js' %}"></script>
-  <script src="{% static 'vendor/libs/@form-validation/auto-focus.js' %}"></script>
-{% endblock vendor_js %}
+  <!-- GSAP CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
-{% block page_css %}
-  {{ block.super }}
-  <link rel="stylesheet" href="{% static 'vendor/css/pages/page-auth.css' %}" />
   <style>
-    /* Chapdan o‘ngga qarab harakatlanadigan animatsiya */
-    @keyframes slideIn {
-      0% {
-        transform: translateX(-100%);
-      }
-      100% {
-        transform: translateX(100%);
-      }
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Roboto', sans-serif;
+      overflow: hidden;
     }
 
-    .moving-alert {
-      display: inline-block; /* Inline-block qilish, animatsiya uchun kerak */
-      animation: slideIn 20s linear infinite;
+    canvas {
+      display: block;
+    }
+
+    .login-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      max-width: 400px;
+      background: rgba(255, 255, 255, 0.31);
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .form-control {
+      width: 100%;
+      margin-bottom: 20px;
+      padding: 10px 15px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #000000;
+      background: rgba(255, 255, 255, 0.45);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .form-control:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 8px rgba(37, 99, 235, 0.5);
+      outline: none;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 8px;
+      color: whitesmoke;
+      background: linear-gradient(90deg, #1d4ed8, #2563eb);
+      border: none;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 20px rgba(37, 99, 235, 0.5);
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.85rem;
+      color: #9ca3af;
     }
   </style>
-{% endblock page_css %}
+</head>
+<body>
+  <!-- Background -->
+  <div id="background"></div>
 
-{% block page_js %}
-  {{ block.super }}
+  <!-- Vue.js App -->
+  <div id="app" class="login-container">
+    <h1 class="text-2xl font-bold mb-4 text-center">HAMKOR | EDUMY</h1>
+    <p class="text-gray-500 mb-6 text-center">Kirish uchun ma'lumotlarni kiriting</p>
 
-  <!-- jQuery kutubxonasini yuklash -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="{% static 'js/pages-auth.js' %}"></script>
-
-  <script>
-    // CSRF token olish funksiyasi
-    function getCookie(name) {
-      let cookieValue = null;
-      if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-          const cookie = cookies[i].trim();
-          if (cookie.substring(0, name.length + 1) === (name + '=')) {
-            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-            break;
-          }
-        }
-      }
-      return cookieValue;
-    }
-
-    function loginUser() {
-      const email = $('#email').val();
-      const password = $('#password').val();
-
-      $.ajax({
-        url: "{% url 'jwt_login' %}",
-        method: 'POST',
-        data: JSON.stringify({
-          email: email,
-          password: password
-        }),
-        contentType: 'application/json',
-        success: function(response) {
-          window.location.href = '{% url "index" %}';  // Tizimga kiritilgan foydalanuvchini asosiy sahifaga yo'naltirish
-        },
-        error: function(xhr) {
-          $('#loginAlert').removeClass('d-none').text(xhr.responseJSON.error || "Login yoki parol noto'g'ri.");
-        }
-      });
-    }
-
-    // Enter tugmasi bosilganda loginUser() funksiyasini chaqirish
-    $(document).on('keydown', function(event) {
-      if (event.key === "Enter") {
-        event.preventDefault();  // Standart submitni oldini olish
-        loginUser();
-      }
-    });
-  </script>
-{% endblock page_js %}
-
-
-{% block content %}
-  <!-- Test rejimi xabari -->
-  <div class="alert alert-primary alert-dismissible text-center" role="alert" style="position: fixed; top: 0; width: 100%; z-index: 1050;">
-    <strong class="moving-alert">Tizim test rejimida ishlamoqda</strong>
-  </div>
-
-  <div class="container-xxl" style="margin-top: 60px;"> <!-- Margin top qo'shib, xabar bilan to‘qnashmasligini ta'minlash -->
-    <div class="authentication-wrapper authentication-basic container-p-y">
-      <div class="authentication-inner py-6">
-        <!-- Login -->
-        <div class="card">
-          <div class="card-body">
-            <!-- Logo -->
-            <div class="app-brand justify-content-center mb-6">
-              <a href="{% url 'index' %}" class="app-brand-link">
-                <span class="app-brand-logo demo">{% include 'partials/logo.html' with height=20 bgcolor="fill: #fff;" %}</span>
-                <span class="app-brand-text demo text-heading fw-bold">{% get_theme_variables 'template_name' %}</span>
-              </a>
-            </div>
-            <!-- /Logo -->
-            <h4 class="mb-1">Xush kelibsiz {% get_theme_variables 'template_name' %}! 👋</h4>
-            <p class="mb-6">Iltimos, hisobingizga kirish uchun login parolingizni kiriting</p>
-
-            <!-- Ma'lumotlar xabarlari -->
-            <div id="loginAlert" class="alert alert-danger d-none" role="alert"></div>
-
-            <form id="formAuthentication" class="mb-4">
-              <div class="mb-6">
-                <label for="email" class="form-label">Email yoki Foydalanuvchi Nomi</label>
-                <input type="text" class="form-control" id="email" name="email-username"
-                       placeholder="Email yoki foydalanuvchi nomingizni kiriting" autofocus>
-              </div>
-              <div class="mb-6 form-password-toggle">
-                <label class="form-label" for="password">Parol</label>
-                <div class="input-group input-group-merge">
-                  <input type="password" id="password" class="form-control" name="password"
-                         placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
-                         aria-describedby="password" />
-                  <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
-                </div>
-              </div>
-              <div class="mb-6">
-                <button class="btn btn-primary d-grid w-100" type="button" onclick="loginUser()">Kirish</button>
-              </div>
-            </form>
-          </div>
-        </div>
-        <!-- /Login -->
+    <!-- Error Messages -->
+    <div v-if="messages.length" class="mb-4">
+      <div
+        v-for="(message, index) in messages"
+        :key="index"
+        class="p-3 text-sm rounded bg-red-100 text-red-800 border border-red-300 mb-2"
+      >
+        {{ message }}
       </div>
     </div>
+
+    <form @submit.prevent="loginUser">
+      <input
+        type="text"
+        v-model="email"
+        class="form-control"
+        placeholder="Email yoki foydalanuvchi nomi"
+        required
+      />
+      <input
+        type="password"
+        v-model="password"
+        class="form-control"
+        placeholder="Parol"
+        required
+      />
+      <button type="submit" class="btn-primary">Kirish</button>
+    </form>
+
+    <div class="footer">
+      <p>© HAMKOR | EDUMY - 2024</p>
+      <p>Dasturchi: <strong>Izzatbek Ulkanov</strong></p>
+    </div>
   </div>
-{% endblock content %}
+
+  <script>
+    // Vue.js Application
+    const app = Vue.createApp({
+      data() {
+        return {
+          email: '',
+          password: '',
+          messages: [],
+        };
+      },
+      methods: {
+        loginUser() {
+          const payload = {
+            email: this.email,
+            password: this.password,
+          };
+
+          fetch("{% url 'jwt_login' %}", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          })
+            .then((response) => {
+              if (!response.ok) throw new Error("Login yoki parol noto'g'ri.");
+              return response.json();
+            })
+            .then((data) => {
+              window.location.href = "{% url 'main-administrator' %}";
+            })
+            .catch((error) => {
+              this.messages = ["Login yoki parol noto'g'ri. Qayta urinib ko'ring."];
+            });
+        },
+      },
+    });
+
+    app.mount("#app");
+
+    // Three.js Background Animation
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const geometry = new THREE.BufferGeometry();
+    const particlesCount = 1000;
+    const vertices = new Float32Array(particlesCount * 3);
+
+    for (let i = 0; i < particlesCount * 3; i++) {
+      vertices[i] = (Math.random() - 0.5) * 200;
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    const material = new THREE.PointsMaterial({ color: 0x818181, size: 1 });
+    const particles = new THREE.Points(geometry, material);
+    scene.add(particles);
+
+    camera.position.z = 100;
+
+    // Mouse Interaction
+    let mouseX = 0;
+    let mouseY = 0;
+    document.addEventListener("mousemove", (event) => {
+      mouseX = (event.clientX / window.innerWidth - 0.5) * 2;
+      mouseY = -(event.clientY / window.innerHeight - 0.5) * 2;
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      particles.rotation.x += 0.001;
+      particles.rotation.y += 0.001;
+
+      gsap.to(camera.position, {
+        x: mouseX * 50,
+        y: mouseY * 50,
+        duration: 0.5,
+      });
+
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    window.addEventListener("resize", () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>

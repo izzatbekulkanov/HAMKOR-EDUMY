@@ -1,0 +1,25 @@
+{% extends 'items/index.html' %}
+
+
+{% block layout %}
+
+{% if is_navbar %}
+<!-- Navbar: Start -->
+{% include "../templates/layout/partials/navbar/navbar_front.html" %}
+<!-- Navbar: End -->
+{% endif %}
+
+<!-- Content:Start -->
+{% block content %}
+
+  asdasdasd
+{% endblock content %}
+<!-- Content: End -->
+
+{% if is_footer %}
+<!-- Footer: Start -->
+{% include "../templates/layout/partials/footer/footer_front.html" %}
+<!-- Footer: End -->
+{% endif %}
+
+{% endblock layout %}

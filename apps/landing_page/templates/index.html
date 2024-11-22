@@ -1,0 +1,134 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="en"
+      class="{{ style }}-style {{ navbar_type_class }} {{ header_type_class }} {{ menu_fixed_class }} {{ menu_collapsed_class }} {{ footer_fixed_class }} {{ display_customizer_class }} {{ content_layout_class }}"
+      dir="{{ text_direction_value }}" data-theme="{{ theme }}" data-assets-path="{% static '/' %}"
+      data-base-url="{{ url }}" data-framework="django"
+      data-template="{{ menu_horizontal|yesno:'horizontal,vertical' }}-menu-{{ is_front|yesno:'front,' }}-{{ theme }}-{{ style }}">
+
+<head>
+  <title>{% block title %}{% endblock title %} | {% get_theme_variables 'template_name' %}
+    - {% get_theme_variables 'template_suffix' %}</title>
+  <meta charset="utf-8" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+  <meta name="description" content="{% get_theme_variables 'template_description' %}" />
+  <meta name="keywords" content="{% get_theme_variables 'template_keyword' %}" />
+
+  <!-- Canonical SEO -->
+  <link rel="canonical" href="{% get_theme_variables 'product_page' %}">
+  <!-- Favicon -->
+  <link rel="shortcut icon" type="image/x-icon" href="{% static 'img/favicon/favicon.ico' %}" />
+
+  <!-- Include the styles partial -->
+  {% load static %}
+
+      <!--Fonts-->
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&ampdisplay=swap" rel="stylesheet">
+
+      <!-- Icons -->
+      <link rel="stylesheet" href="{% static 'vendor/fonts/tabler-icons.css' %}" />
+
+      <!--Core CSS -->
+      {% if rtl_support %}
+      <link rel="stylesheet" href="{% static 'vendor/css/rtl/core.css' %}" class="{{ has_customizer|yesno:'template-customizer-core-css,' }}" />
+      <link rel="stylesheet" href="{% static 'vendor/css/rtl/theme-default.css' %}" class="{{ has_customizer|yesno:'template-customizer-theme-css,' }}" />
+      {% else %}
+      <link rel="stylesheet" href="{% static 'vendor/css/core.css' %}" class="{{ has_customizer|yesno:'template-customizer-core-css,' }}" />
+      <link rel="stylesheet" href="{% static 'vendor/css/theme-default.css' %}" class="{{ has_customizer|yesno:'template-customizer-theme-css,' }}" />
+      {% endif %}
+
+      <link rel="stylesheet" href="{% static 'css/demo.css' %}" />
+      <link rel="stylesheet" href="{% static 'vendor/css/pages/front-page.css' %}" />
+      <link rel="stylesheet" href="{% static 'vendor/libs/node-waves/node-waves.css' %}" />
+
+      <!--Vendor CSS-->
+
+
+  {% block vendor_css %}
+
+  {% endblock vendor_css %}
+
+  <!--Page CSS-->
+  {% block page_css %}
+
+  {% endblock page_css %}
+
+  <!-- Helpers -->
+  <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+  <script src="{% static 'vendor/js/helpers.js' %}"></script>
+  <!--? Template customizer: To hide customizer set display_customizer value false in config.js.  -->
+  {% if has_customizer %}
+  <script src="{% static 'vendor/js/template-customizer.js' %}"></script>
+  {% endif %}
+  <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+  <script src="{% static 'js/config.js' %}"></script>
+  <!-- beautify ignore:start -->
+  {% if has_customizer %}
+  <script>
+  if (typeof TemplateCustomizer !== 'undefined') {
+    window.templateCustomizer = new TemplateCustomizer({
+      cssPath: '',
+      themesPath: '',
+      defaultStyle: "{{style}}", // Required as system style can't decided without JS
+      lang: '{{LANGUAGE_CODE}}',
+      pathResolver: function(path) {
+        var resolvedPaths = {
+          // Core stylesheets
+          'core.css': "{% static 'vendor/css' %}{{rtl_support|yesno:'/rtl,'}}/core.css",
+          'core-dark.css': "{% static 'vendor/css' %}{{rtl_support|yesno:'/rtl,'}}/core-dark.css",
+
+          'theme-default.css': "{% static 'vendor/css' %}{{rtl_support|yesno:'/rtl,'}}/theme-default.css",
+          'theme-default-dark.css': "{% static 'vendor/css' %}{{rtl_support|yesno:'/rtl,'}}/theme-default-dark.css",
+
+          'theme-bordered.css': "{% static 'vendor/css' %}{{rtl_support|yesno:'/rtl,'}}/theme-bordered.css",
+          'theme-bordered-dark.css': "{% static 'vendor/css' %}{{rtl_support|yesno:'/rtl,'}}/theme-bordered-dark.css",
+
+          'theme-semi-dark.css': "{% static 'vendor/css' %}{{rtl_support|yesno:'/rtl,'}}/theme-semi-dark.css",
+          'theme-semi-dark-dark.css': "{% static 'vendor/css' %}{{rtl_support|yesno:'/rtl,'}}/theme-semi-dark-dark.css"
+        }
+        return resolvedPaths[path] || path;
+      },
+      controls: ['rtl', 'style'],
+    });
+  }
+
+  </script>
+  {% endif %}
+
+
+</head>
+
+<body>
+
+
+<!-- beautify ignore:end -->
+
+{% block layout %}
+{% endblock layout %}
+
+<!--Core Javascript-->
+<script src="{% static 'vendor/libs/jquery/jquery.js' %}"></script>
+<script src="{% static 'vendor/libs/popper/popper.js' %}"></script>
+<script src="{% static 'vendor/js/bootstrap.js' %}"></script>
+<script src="{% static 'vendor/libs/perfect-scrollbar/perfect-scrollbar.js' %}"></script>
+<script src="{% static 'vendor/libs/node-waves/node-waves.js' %}"></script>
+<script src="{% static 'vendor/libs/hammer/hammer.js' %}"></script>
+<script src="{% static 'vendor/libs/typeahead-js/typeahead.js' %}"></script>
+<script src="{% static 'vendor/js/menu.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
+
+
+<!--Vendors Javascript-->
+{% block vendor_js %} {% endblock vendor_js %}
+
+<!--Page Javascript-->
+{% block page_js %} {% endblock page_js %}
+
+</body>
+
+</html>

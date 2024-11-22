@@ -1,10 +1,15 @@
 <!-- Footer: Start -->
 <footer class="landing-footer bg-body footer-text">
   <div class="footer-top position-relative overflow-hidden z-1">
-        <img src="{% static 'img/front-pages/backgrounds/footer-bg-' %}{{ COOKIES.style|default:style }}.png" alt="footer bg" class="footer-bg banner-bg-img z-n1" data-app-light-img="front-pages/backgrounds/footer-bg-light.png" data-app-dark-img="front-pages/backgrounds/footer-bg-dark.png" />
+    <img src="{% static 'img/front-pages/backgrounds/footer-bg-' %}{{ COOKIES.style|default:style }}.png"
+         alt="footer bg"
+         class="footer-bg banner-bg-img z-n1"
+         data-app-light-img="front-pages/backgrounds/footer-bg-light.png"
+         data-app-dark-img="front-pages/backgrounds/footer-bg-dark.png" />
 
     <div class="container">
       <div class="row gx-0 gy-6 g-lg-10">
+        <!-- Logo va Ta'rif -->
         <div class="col-lg-5">
           <a href="{% url 'landing-page' %}" class="app-brand-link mb-6">
             <span class="app-brand-logo demo">
@@ -13,90 +18,83 @@
             <span class="app-brand-text demo footer-link fw-bold ms-2 ps-1">{% get_theme_variables 'template_name' %}</span>
           </a>
           <p class="footer-text footer-logo-description mb-6">
-            Most developer friendly & highly customisable Admin Dashboard Template.
+            Bizning o'quv markazimiz maktablar bilan yaqin hamkorlikda ishlaydi. Maktab direktorlari va o'qituvchilarning takliflari bo'yicha kelgan har bir o'quvchi uchun siz maxsus bonus ballarga ega bo'lasiz. Ushbu ballarni yig'ib, pulga aylantiring!
           </p>
           <form class="footer-form">
-            <label for="footer-email" class="small">Subscribe to newsletter</label>
+            <label for="footer-email" class="small">Yangi imkoniyatlar haqida xabardor bo'ling</label>
             <div class="d-flex mt-1">
-              <input type="email" class="form-control rounded-0 rounded-start-bottom rounded-start-top" id="footer-email" placeholder="Your email" />
+              <input type="email" class="form-control rounded-0 rounded-start-bottom rounded-start-top" id="footer-email" placeholder="Emailingizni kiriting" />
               <button type="submit" class="btn btn-primary shadow-none rounded-0 rounded-end-bottom rounded-end-top">
-                Subscribe
+                Obuna bo'lish
               </button>
             </div>
           </form>
         </div>
+
+        <!-- Demo va Qo'shimcha Ma'lumotlar -->
         <div class="col-lg-2 col-md-4 col-sm-6">
-          <h6 class="footer-title mb-6">Demos</h6>
+          <h6 class="footer-title mb-6">Xizmatlar</h6>
           <ul class="list-unstyled">
             <li class="mb-4">
-              <a href="../demo-1/" target="_blank" class="footer-link">Vertical Layout</a>
+              <a href="{% url 'pricing-page' %}" class="footer-link">Narxlar</a>
             </li>
             <li class="mb-4">
-              <a href="../demo-5/" target="_blank" class="footer-link">Horizontal Layout</a>
+              <a href="{% url 'payment-page' %}" class="footer-link">To'lov tizimi <span class="badge rounded bg-primary ms-2">Yangi</span></a>
             </li>
             <li class="mb-4">
-              <a href="../demo-2/" target="_blank" class="footer-link">Bordered Layout</a>
+              <a href="{% url 'help-center-landing' %}" class="footer-link">Yordam markazi</a>
             </li>
             <li class="mb-4">
-              <a href="../demo-3/" target="_blank" class="footer-link">Semi Dark Layout</a>
-            </li>
-            <li class="mb-4">
-              <a href="../demo-4/" target="_blank" class="footer-link">Dark Layout</a>
+              <a href="{% url 'auth-login-cover' %}" target="_blank" class="footer-link">Kirish / Ro'yxatdan o'tish</a>
             </li>
           </ul>
         </div>
+
+        <!-- Bonus tizimi haqida qisqa ma'lumot -->
         <div class="col-lg-2 col-md-4 col-sm-6">
-          <h6 class="footer-title mb-6">Pages</h6>
+          <h6 class="footer-title mb-6">Bonus tizimi</h6>
           <ul class="list-unstyled">
-            <li class="mb-4">
-              <a href="{% url 'pricing-page' %}" class="footer-link">Pricing</a>
-            </li>
-            <li class="mb-4">
-              <a href="{% url 'payment-page' %}" class="footer-link">Payment<span class="badge rounded bg-primary ms-2">New</span></a>
-            </li>
-            <li class="mb-4">
-              <a href="{% url 'checkout-page' %}" class="footer-link">Checkout</a>
-            </li>
-            <li class="mb-4">
-              <a href="{% url 'help-center-landing' %}" class="footer-link">Help Center</a>
-            </li>
-            <li class="mb-4">
-              <a href="{% url 'auth-login-cover' %}" target="_blank" class="footer-link">Login/Register</a>
-            </li>
+            <li class="mb-4">Direktorlar va o'qituvchilar uchun maxsus bonuslar</li>
+            <li class="mb-4">Kelgan har bir o'quvchi uchun ballar to'plang</li>
+            <li class="mb-4">Ballarni pulga aylantirish imkoniyati</li>
+            <li class="mb-4">Maktablar bilan hamkorlikda rivojlaning</li>
           </ul>
         </div>
+
+        <!-- Mobil ilovalar uchun bo'lim -->
         <div class="col-lg-3 col-md-4">
-          <h6 class="footer-title mb-6">Download our app</h6>
-          <a href="javascript:void(0);" class="d-block mb-4"><img src="{% static 'img/front-pages/landing-page/apple-icon.png' %}" alt="apple icon" /></a>
-          <a href="javascript:void(0);" class="d-block"><img src="{% static 'img/front-pages/landing-page/google-play-icon.png' %}" alt="google play icon" /></a>
+          <h6 class="footer-title mb-6">Mobil ilovamizni yuklab oling</h6>
+          <a href="javascript:void(0);" class="d-block mb-4"><img src="{% static 'img/front-pages/landing-page/apple-icon.png' %}" alt="Apple Icon" /></a>
+          <a href="javascript:void(0);" class="d-block"><img src="{% static 'img/front-pages/landing-page/google-play-icon.png' %}" alt="Google Play Icon" /></a>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Footer Quyisi -->
   <div class="footer-bottom py-3 py-md-5">
     <div class="container d-flex flex-wrap justify-content-between flex-md-row flex-column text-center text-md-start">
       <div class="mb-2 mb-md-0">
         <span class="footer-bottom-text">©
           <script>
           document.write(new Date().getFullYear());
-
           </script>
         </span>
-        <a href="{% get_theme_variables 'creator_url' %}" target="_blank" class="fw-medium text-white text-white">{% get_theme_variables 'creator_name' %},</a>
-        <span class="footer-bottom-text"> Made with ❤️ for a better web.</span>
+        <a href="{% get_theme_variables 'creator_url' %}" target="_blank" class="fw-medium text-white">{% get_theme_variables 'creator_name' %}</a>,
+        <span class="footer-bottom-text"> Sevimli o'quv markazingiz bilan birga rivojlaning!</span>
       </div>
       <div>
         <a href="{% get_theme_variables 'github_url' %}" class="me-3" target="_blank">
-          <img src="{% static 'img/front-pages/icons/github.svg' %}" alt="github icon" />
+          <img src="{% static 'img/front-pages/icons/github.svg' %}" alt="Github Icon" />
         </a>
         <a href="{% get_theme_variables 'facebook_url' %}" class="me-3" target="_blank">
-           <img src="{% static 'img/front-pages/icons/facebook.svg' %}" alt="facebook icon" />
+           <img src="{% static 'img/front-pages/icons/facebook.svg' %}" alt="Facebook Icon" />
         </a>
         <a href="{% get_theme_variables 'twitter_url' %}" class="me-3" target="_blank">
-           <img src="{% static 'img/front-pages/icons/twitter.svg' %}" alt="twitter icon" />
+           <img src="{% static 'img/front-pages/icons/twitter.svg' %}" alt="Twitter Icon" />
         </a>
         <a href="{% get_theme_variables 'instagram_url' %}" target="_blank">
-          <img src="{% static 'img/front-pages/icons/instagram.svg' %}" alt="google icon" />
+          <img src="{% static 'img/front-pages/icons/instagram.svg' %}" alt="Instagram Icon" />
         </a>
       </div>
     </div>

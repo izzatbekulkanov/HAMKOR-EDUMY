@@ -23,6 +23,7 @@ LOCAL_APPS = [
     "center",
     "account",
     "api",
+    'auth.apps.AuthConfig',
 ]
 
 IN_APPS = [
@@ -48,40 +49,8 @@ SYSTEM_APPS = [
     "django.contrib.sites",
 ]
 
-OTHER_APPS = [
-    "other.dashboards",
-    "other.layouts",
-    "other.front_pages",
-    "other.mail",
-    "other.chat",
-    "other.my_calendar",
-    "other.kanban",
-    "other.ecommerce",
-    "other.academy",
-    "other.logistics",
-    "other.invoice",
-    "other.users",
-    "other.access",
-    "other.pages",
-    "other.authentication",
-    "other.wizard_examples",
-    "other.modal_examples",
-    "other.cards",
-    "other.ui",
-    "other.extended_ui",
-    "other.icons",
-    "other.forms",
-    "other.form_layouts",
-    "other.form_wizard",
-    "other.form_validation",
-    "other.tables",
-    "other.charts",
-    "other.maps",
-    "other.transactions",
-    'auth.apps.AuthConfig',
-]
 
-INSTALLED_APPS = SYSTEM_APPS + LOCAL_APPS + OTHER_APPS + GLOBAL_APPS + IN_APPS
+INSTALLED_APPS = SYSTEM_APPS + LOCAL_APPS + GLOBAL_APPS + IN_APPS
 
 AUTH_USER_MODEL = 'account.CustomUser'
 
@@ -232,7 +201,7 @@ EMAIL_HOST_USER = ""
 EMAIL_HOST_PASSWORD = ""
 
 LOGIN_URL = "/login/"
-LOGOUT_REDIRECT_URL = "/login/"
+LOGOUT_REDIRECT_URL = "/"
 
 
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
