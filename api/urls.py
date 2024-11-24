@@ -8,8 +8,9 @@ from api.center.groups import GroupListView, KursFilterView, YonalishFilterView,
 from api.center.occupations import KasbListView, KasbUpdateView, YonalishListView, KursListView
 from api.center.statistics import StatisticsDashboardView
 from api.location.get_location import get_districts, get_quarters
-from api.schools.classes import AddClassAPIView, StatsClassAPIView, ClassListAPIView
-from api.schools.schools import AddSchoolAPIView, SchoolListAPIView, RegionDistrictAPIView, ClassBadgeAPIView
+from api.schools.classes import StatsClassAPIView, add_class
+from api.schools.schools import list_schools, add_school, delete_school, analyze_json_file, \
+    bulk_add_schools, get_schools_by
 from api.settings.cashback import AddCashbackAPIView, CashbackListAPIView, UserTypeAPIView
 from api.settings.log import UserActivityLogView
 from api.settings.regions import LocationAPIView, GetLocationsView
@@ -65,14 +66,17 @@ center_patterns = [
 ]
 
 schools_patterns = [
-    path('schools/add/', AddSchoolAPIView.as_view(), name='add-school-api'),
-    path('schools/list/', SchoolListAPIView.as_view(), name='list-school-api'),
-    path('region-district/', RegionDistrictAPIView.as_view(), name='region-district-api'),
-    path('class-badge/', ClassBadgeAPIView.as_view(), name='class-badge-api'),
+# API endpoints
+    path("schools/", list_schools, name="list_schools"),  # Maktablar ro'yxati
+    path("schools/add/", add_school, name="add_school"),  # Yangi maktab qo'shish
+    path("schools/delete/<int:school_id>/", delete_school, name="delete_school"),  # Maktabni o'chirish
 
-    path('classes/add/', AddClassAPIView.as_view(), name='add-class-api'),
+    path("schools/analyze/", analyze_json_file, name="analyze_json_file"),
+    path("schools/bulk-add/", bulk_add_schools, name="save_json_file"),
+    path('schools/grouped/', get_schools_by, name='get_schools_by'),
+    path('classes/add/', add_class, name='add_class'),
+
     path('classes/stats/', StatsClassAPIView.as_view(), name='classes-stats-api'),
-    path('classes/list/', ClassListAPIView.as_view(), name='class-list-api'),
 ]
 
 settings_patterns = [

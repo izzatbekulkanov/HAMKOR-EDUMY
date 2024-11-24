@@ -1,0 +1,252 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Dashboard - Analytics{% endblock %}
+
+{% block vendor_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'vendor/libs/apex-charts/apex-charts.css' %}" />
+<link rel="stylesheet" href="{% static 'vendor/libs/swiper/swiper.css' %}" />
+<link rel="stylesheet" href="{% static 'vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
+<link rel="stylesheet" href="{% static 'vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css' %}" />
+<link rel="stylesheet" href="{% static 'vendor/libs/datatables-checkboxes-jquery/datatables.checkboxes.css' %}" />
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+{{ block.super }}
+<script src="{% static 'vendor/libs/apex-charts/apexcharts.js' %}"></script>
+<script src="{% static 'vendor/libs/swiper/swiper.js' %}"></script>
+<script src="{% static 'vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
+{% endblock vendor_js %}
+
+{% block page_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'vendor/css/pages/cards-advance.css' %}" />
+{% endblock page_css %}
+
+{% block page_js %}
+{{ block.super }}
+<script src="{% static 'js/dashboards-analytics.js' %}"></script>
+  <!-- FontAwesome Icons -->
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+{% endblock page_js %}
+
+{% block content %}
+<div class="row g-6">
+<!-- O'quv Markaz Statistikasi -->
+<div class="col-lg-12">
+  <div class="swiper-container swiper-container-horizontal swiper swiper-card-advance-bg" id="swiper-with-pagination-cards">
+    <div class="swiper-wrapper">
+
+      <!-- Birinchi Slayd -->
+      <div class="swiper-slide">
+        <div class="row">
+          <div class="col-12">
+            <h5 class="text-white mb-0">English House Statistikasi</h5>
+            <small>Umumiy 85% o'quvchilar muvaffaqiyat darajasi</small>
+          </div>
+          <div class="row">
+            <div class="col-lg-7 col-md-9 col-12 order-2 order-md-1 pt-md-9">
+              <h6 class="text-white mt-0 mt-md-3 mb-4">O‘quvchilar Statistikasi</h6>
+              <div class="row">
+                <div class="col-6">
+                  <ul class="list-unstyled mb-0">
+                    <li class="d-flex mb-4 align-items-center">
+                      <p class="mb-0 fw-medium me-2 website-analytics-text-bg">320</p>
+                      <p class="mb-0">Yangi Ro‘yxatdan o‘tganlar</p>
+                    </li>
+                    <li class="d-flex align-items-center">
+                      <p class="mb-0 fw-medium me-2 website-analytics-text-bg">150</p>
+                      <p class="mb-0">Darsga qatnashganlar</p>
+                    </li>
+                  </ul>
+                </div>
+                <div class="col-6">
+                  <ul class="list-unstyled mb-0">
+                    <li class="d-flex mb-4 align-items-center">
+                      <p class="mb-0 fw-medium me-2 website-analytics-text-bg">90%</p>
+                      <p class="mb-0">Darsga davomati</p>
+                    </li>
+                    <li class="d-flex align-items-center">
+                      <p class="mb-0 fw-medium me-2 website-analytics-text-bg">85%</p>
+                      <p class="mb-0">Muvaffaqiyat darajasi</p>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-5 col-md-3 col-12 order-1 order-md-2 my-4 my-md-0 text-center">
+              <img src="{% static 'img/illustrations/card-website-analytics-1.png' %}" alt="O‘quvchilar Statistikasi" height="150" class="card-website-analytics-img">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ikkinchi Slayd -->
+      <div class="swiper-slide">
+        <div class="row">
+          <div class="col-12">
+            <h5 class="text-white mb-0">English House Statistikasi</h5>
+            <small>Umumiy 85% o'quvchilar muvaffaqiyat darajasi</small>
+          </div>
+          <div class="col-lg-7 col-md-9 col-12 order-2 order-md-1 pt-md-9">
+            <h6 class="text-white mt-0 mt-md-3 mb-4">Kurslar Statistikasi</h6>
+            <div class="row">
+              <div class="col-6">
+                <ul class="list-unstyled mb-0">
+                  <li class="d-flex mb-4 align-items-center">
+                    <p class="mb-0 fw-medium me-2 website-analytics-text-bg">12</p>
+                    <p class="mb-0">Faol kurslar</p>
+                  </li>
+                  <li class="d-flex align-items-center">
+                    <p class="mb-0 fw-medium me-2 website-analytics-text-bg">85%</p>
+                    <p class="mb-0">Qoniqish darajasi</p>
+                  </li>
+                </ul>
+              </div>
+              <div class="col-6">
+                <ul class="list-unstyled mb-0">
+                  <li class="d-flex mb-4 align-items-center">
+                    <p class="mb-0 fw-medium me-2 website-analytics-text-bg">150</p>
+                    <p class="mb-0">Tugallangan kurslar</p>
+                  </li>
+                  <li class="d-flex align-items-center">
+                    <p class="mb-0 fw-medium me-2 website-analytics-text-bg">98%</p>
+                    <p class="mb-0">O‘qituvchilar reytingi</p>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-5 col-md-3 col-12 order-1 order-md-2 my-4 my-md-0 text-center">
+            <img src="{% static 'img/illustrations/card-website-analytics-2.png' %}" alt="Kurslar Statistikasi" height="150" class="card-website-analytics-img">
+          </div>
+        </div>
+      </div>
+
+      <!-- Uchinchi Slayd -->
+      <div class="swiper-slide">
+        <div class="row">
+          <div class="col-12">
+            <h5 class="text-white mb-0">English House Statistikasi</h5>
+            <small>Umumiy 85% o'quvchilar muvaffaqiyat darajasi</small>
+          </div>
+          <div class="col-lg-7 col-md-9 col-12 order-2 order-md-1 pt-md-9">
+            <h6 class="text-white mt-0 mt-md-3 mb-4">Moliyaviy Ko‘rsatkichlar</h6>
+            <div class="row">
+              <div class="col-6">
+                <ul class="list-unstyled mb-0">
+                  <li class="d-flex mb-4 align-items-center">
+                    <p class="mb-0 fw-medium me-2 website-analytics-text-bg">5 mln</p>
+                    <p class="mb-0">Umumiy daromad</p>
+                  </li>
+                  <li class="d-flex align-items-center">
+                    <p class="mb-0 fw-medium me-2 website-analytics-text-bg">1.2 mln</p>
+                    <p class="mb-0">Bonus to‘lovlari</p>
+                  </li>
+                </ul>
+              </div>
+              <div class="col-6">
+                <ul class="list-unstyled mb-0">
+                  <li class="d-flex mb-4 align-items-center">
+                    <p class="mb-0 fw-medium me-2 website-analytics-text-bg">1.8k</p>
+                    <p class="mb-0">To‘langan kurslar</p>
+                  </li>
+                  <li class="d-flex align-items-center">
+                    <p class="mb-0 fw-medium me-2 website-analytics-text-bg">700</p>
+                    <p class="mb-0">Chegirmalar</p>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-5 col-md-3 col-12 order-1 order-md-2 my-4 my-md-0 text-center">
+            <img src="{% static 'img/illustrations/card-website-analytics-3.png' %}" alt="Moliyaviy Ko‘rsatkichlar" height="150" class="card-website-analytics-img">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="swiper-pagination"></div>
+  </div>
+</div>
+<!--/ O'quv Markaz Statistikasi -->
+
+<!-- New Menu Section -->
+<div class="container-fluid mt-5">
+  <div class="row g-4">
+    <!-- O'quvchilar -->
+    <div class="col-lg-3 col-md-6 col-12">
+      <div class="card bg-light bg-opacity-50 border-0 shadow-lg h-100">
+        <div class="card-body d-flex flex-column align-items-center text-center">
+          <div class="icon-container mb-3">
+            <i class="fas fa-user-graduate fa-3x text-primary"></i>
+          </div>
+          <h5 class="card-title text-primary">O'quvchilar</h5>
+          <p class="card-text mb-4">O'quvchilarni boshqarish va ma'lumotlarini ko'rish.</p>
+          <a href="#" class="btn btn-outline-primary mt-auto w-100">Ko'rish</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hodimlar -->
+    <div class="col-lg-3 col-md-6 col-12">
+      <div class="card bg-light bg-opacity-50 border-0 shadow-lg h-100">
+        <div class="card-body d-flex flex-column align-items-center text-center">
+          <div class="icon-container mb-3">
+            <i class="fas fa-users fa-3x text-primary"></i>
+          </div>
+          <h5 class="card-title text-primary">Hodimlar</h5>
+          <p class="card-text mb-4">Hodimlar ro'yhati va ma'lumotlarini boshqarish.</p>
+          <a href="#" class="btn btn-outline-primary mt-auto w-100">Ko'rish</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistikalar -->
+    <div class="col-lg-3 col-md-6 col-12">
+      <div class="card bg-light bg-opacity-50 border-0 shadow-lg h-100">
+        <div class="card-body d-flex flex-column align-items-center text-center">
+          <div class="icon-container mb-3">
+            <i class="fas fa-chart-bar fa-3x text-primary"></i>
+          </div>
+          <h5 class="card-title text-primary">Statistikalar</h5>
+          <p class="card-text mb-4">Statistik ma'lumotlar va tahlillar.</p>
+          <a href="#" class="btn btn-outline-primary mt-auto w-100">Ko'rish</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reytinglar -->
+    <div class="col-lg-3 col-md-6 col-12">
+      <div class="card bg-light bg-opacity-50 border-0 shadow-lg h-100">
+        <div class="card-body d-flex flex-column align-items-center text-center">
+          <div class="icon-container mb-3">
+            <i class="fas fa-trophy fa-3x text-primary"></i>
+          </div>
+          <h5 class="card-title text-primary">Reytinglar</h5>
+          <p class="card-text mb-4">O'quvchilar va hodimlar reytinglari.</p>
+          <a href="#" class="btn btn-outline-primary mt-auto w-100">Ko'rish</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- O'quvchi Qo'shish -->
+    <div class="col-12">
+      <div class="card bg-light bg-opacity-50 border-0 shadow-lg h-100">
+        <div class="card-body d-flex flex-column align-items-center text-center">
+          <div class="icon-container mb-3">
+            <i class="fas fa-user-plus fa-3x text-primary"></i>
+          </div>
+          <h5 class="card-title text-primary">O'quvchi Qo'shish</h5>
+          <p class="card-text mb-4">Yangi o'quvchini tizimga qo'shish.</p>
+          <a href="#" class="btn btn-primary mt-auto w-50">Qo'shish</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!--/ New Menu Section -->
+</div>
+{% endblock %}

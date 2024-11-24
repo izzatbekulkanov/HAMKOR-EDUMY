@@ -38,7 +38,6 @@
 {% block vendor_js %}
   {{ block.super }}
   <script src="{% static 'vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
-
   <script src="{% static 'vendor/libs/select2/select2.js' %}"></script>
   <script src="{% static 'vendor/libs/toastr/toastr.js' %}"></script>
 {% endblock vendor_js %}
@@ -71,39 +70,72 @@
             <form id="addClassForm">
               {% csrf_token %}
               <div class="row">
+                <!-- Viloyat tanlash -->
+                <div class="col-md-12 mb-3">
+                  <label for="regionSelect" class="form-label">
+                    <i class="ti ti-map"></i> Viloyat
+                  </label>
+                  <select id="regionSelect" class="form-select select2" required>
+                    <option value="" disabled selected>Viloyatni tanlang</option>
+                  </select>
+                </div>
+
+                <!-- Tuman tanlash -->
+                <div class="col-md-12 mb-3">
+                  <label for="districtSelect" class="form-label">
+                    <i class="ti ti-map-pin"></i> Tuman
+                  </label>
+                  <select id="districtSelect" class="form-select select2" required disabled>
+                    <option value="" disabled selected>Tuman tanlang</option>
+                  </select>
+                </div>
+
+                <!-- Maktab tanlash -->
                 <div class="col-md-12 mb-3">
                   <label for="schoolSelect" class="form-label">
                     <i class="ti ti-building-school"></i> Maktab
                   </label>
-                  <select id="schoolSelect" name="maktab" class="form-select select2" required>
+                  <select id="schoolSelect" class="form-select select2" required disabled>
                     <option value="" disabled selected>Maktabni tanlang</option>
                   </select>
                 </div>
+
+                <!-- Sinf tanlash -->
                 <div class="col-md-6 mb-3">
                   <label for="classNumber" class="form-label">
                     <i class="ti ti-hash"></i> Sinf Raqami
                   </label>
-                  <input type="text" id="classNumber" name="sinf_raqami" class="form-control"
-                         placeholder="Sinf raqamini kiriting" required>
+                  <input
+                    type="number"
+                    id="classNumber"
+                    name="sinf_raqami"
+                    class="form-control"
+                    placeholder="Sinf raqamini kiriting"
+                    required
+                  />
                 </div>
+
+                <!-- Belgi tanlash -->
                 <div class="col-md-6 mb-3">
                   <label for="badgeName" class="form-label">
-                    <i class="ti ti-star"></i> Belgi Nomi
+                    <i class="ti ti-star"></i> Belgi
                   </label>
-                  <input type="text" id="badgeName" name="belgi" class="form-control"
-                         placeholder="Belgi nomini kiriting" required>
+                  <input
+                    type="text"
+                    id="badgeName"
+                    name="belgi"
+                    class="form-control"
+                    placeholder="Belgi nomini kiriting"
+                    required
+                  />
                 </div>
               </div>
+
               <button type="submit" class="btn btn-primary mt-3">
                 <i class="ti ti-plus"></i> Qo'shish
               </button>
             </form>
           </div>
-        </div>
-
-        <div class="container mt-5">
-          <!-- Sinflar ro'yxati -->
-          <div class="row mt-5" id="classList"></div>
         </div>
       </div>
 
@@ -122,6 +154,35 @@
             <h5 class="mt-3">Jami Maktablar</h5>
             <h3 class="text-primary"><span id="totalSchools">0</span></h3>
           </div>
+        </div>
+      </div>
+
+      <div class="container mt-5">
+        <div class="row">
+          <!-- Filters -->
+          <div class="col-md-4">
+            <label for="filterRegion" class="form-label">Viloyat</label>
+            <select id="filterRegion" class="form-select select2">
+              <option value="" selected>Barchasi</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="filterDistrict" class="form-label">Tuman</label>
+            <select id="filterDistrict" class="form-select select2" disabled>
+              <option value="" selected>Barchasi</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="filterSchool" class="form-label">Maktab</label>
+            <select id="filterSchool" class="form-select select2" disabled>
+              <option value="" selected>Barchasi</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Grouped Classes -->
+        <div class="row mt-5">
+          <div id="groupedClasses"></div>
         </div>
       </div>
     </div>

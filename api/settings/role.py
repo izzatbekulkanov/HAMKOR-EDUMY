@@ -19,7 +19,7 @@ class SaveRolesView(View):
         role_mappings = {
             "ceo_administrator": "Bosh admin",
             "administrator": "Kichik admin",
-            "teacher": "O'qituvchi",
+            "partner": "Hamkor",
             "director": "Direktor",
             "student": "O'quvchi"
         }

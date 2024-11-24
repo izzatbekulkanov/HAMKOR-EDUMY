@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="{% static 'vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
   <link rel="stylesheet" href="{% static 'vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css' %}" />
   <link rel="stylesheet" href="{% static 'vendor/libs/toastr/toastr.css' %}" />
+  <link rel="stylesheet" href="https://unpkg.com/dropzone/dist/dropzone.css" />
 {% endblock vendor_css %}
 
 {% block vendor_js %}
@@ -18,6 +19,7 @@
   <script src="{% static 'vendor/libs/select2/select2.js' %}"></script>
   <script src="{% static 'vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
   <script src="{% static 'vendor/libs/toastr/toastr.js' %}"></script>
+  <script src="https://unpkg.com/dropzone/dist/dropzone-min.js"></script>
 {% endblock vendor_js %}
 
 {% block page_js %}
@@ -28,29 +30,95 @@
 {% block content %}
 <div class="container mt-5">
   <h3 class="text-primary mb-4">Yangi Maktab Qo'shish</h3>
-  <form id="addSchoolForm">
-    {% csrf_token %}
-    <div class="row">
-      <div class="col-md-6 mb-3">
-        <label for="regionSelect" class="form-label">Viloyat</label>
-        <select id="regionSelect" name="viloyat" class="form-select select2" required>
-          <option value="" disabled selected>Viloyatni tanlang</option>
-        </select>
+
+  <!-- Forma -->
+  <form id="addSchoolForm" method="post">
+     {% csrf_token %}
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label for="viloyat" class="form-label">Viloyat</label>
+        <input
+          type="text"
+          class="form-control"
+          id="viloyat"
+          name="viloyat"
+          placeholder="Viloyat nomini kiriting"
+        />
       </div>
-      <div class="col-md-6 mb-3">
-        <label for="districtSelect" class="form-label">Tuman</label>
-        <select id="districtSelect" name="tuman" class="form-select select2" required disabled>
-          <option value="" disabled selected>Tuman tanlang</option>
-        </select>
-      </div>
-      <div class="col-md-6 mb-3">
-        <label for="schoolNumber" class="form-label">Maktab Raqami</label>
-        <input type="number" id="schoolNumber" name="maktab_raqami" class="form-control"
-               placeholder="Maktab raqamini kiriting" required>
+      <div class="col-md-6">
+        <label for="tuman" class="form-label">Tuman</label>
+        <input
+          type="text"
+          class="form-control"
+          id="tuman"
+          name="tuman"
+          placeholder="Tuman nomini kiriting"
+        />
       </div>
     </div>
-    <button type="submit" class="btn btn-primary mt-3">Qo'shish</button>
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label for="maktabRaqami" class="form-label">Maktab Raqami</label>
+        <input
+          type="number"
+          class="form-control"
+          id="maktabRaqami"
+          name="maktab_raqami"
+          placeholder="Maktab raqami"
+        />
+      </div>
+      <div class="col-md-6">
+        <label for="sharntomaRaqam" class="form-label">Sharntoma Raqami</label>
+        <input
+          type="number"
+          class="form-control"
+          id="sharntomaRaqam"
+          name="sharntoma_raqam"
+          placeholder="Sharntoma raqami"
+        />
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="nomi" class="form-label">Maktab Nomi</label>
+      <input
+        type="text"
+        class="form-control"
+        id="nomi"
+        name="nomi"
+        placeholder="Maktab nomi"
+      />
+    </div>
+    <div class="text-end">
+      <button type="submit" class="btn btn-primary">Qo'shish</button>
+    </div>
   </form>
+
+  <div class="container mt-5">
+  <h3 class="text-primary mb-4">JSON Faylni Yuklash va Tahlil qilish</h3>
+
+  <!-- JSON fayl yuklash -->
+  <div class="mb-3">
+    <label for="jsonFileInput" class="form-label">JSON Fayl</label>
+    <input type="file" id="jsonFileInput" class="form-control" accept=".json" />
+  </div>
+  <button id="analyzeButton" class="btn btn-primary">Tekshirish</button>
+
+  <!-- Tekshirish natijalari -->
+  <div id="results" class="mt-4" style="display: none;">
+    <h4>Fayl Tahlili Natijalari:</h4>
+    <p><strong>Viloyatlar soni:</strong> <span id="viloyatlarCount">0</span></p>
+    <p><strong>Tumanlar soni:</strong> <span id="tumanlarCount">0</span></p>
+    <p><strong>Maktablar soni:</strong> <span id="maktablarCount">0</span></p>
+
+    <!-- Saqlash tugmasi -->
+    <button id="saveButton" class="btn btn-primary" style="display: none;">Saqlash</button>
+  </div>
+
+  <!-- Progress bar -->
+  <div class="progress mt-3" id="progressContainer" style="display: none;">
+    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" id="progressBar" style="width: 0%;">0%</div>
+  </div>
+</div>
 
   <hr class="mt-5">
 
@@ -62,11 +130,15 @@
         <th>Viloyat</th>
         <th>Tuman</th>
         <th>Maktab Raqami</th>
-        <th>Status</th>
-        <th>Yaratilgan Vaqti</th>
+        <th>Sharntoma Raqami</th>
+        <th>Nomi</th>
+        <th>Amallar</th>
       </tr>
     </thead>
-    <tbody></tbody>
+    <tbody>
+      <!-- Jadval ma'lumotlari AJAX orqali yuklanadi -->
+    </tbody>
   </table>
 </div>
 {% endblock %}
+

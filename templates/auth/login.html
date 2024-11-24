@@ -12,23 +12,12 @@
   <!-- TailwindCSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Three.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.153.0/build/three.min.js"></script>
-
-  <!-- GSAP CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-
   <style>
     body, html {
       margin: 0;
       padding: 0;
       height: 100%;
       font-family: 'Roboto', sans-serif;
-      overflow: hidden;
-    }
-
-    canvas {
-      display: block;
     }
 
     .login-container {
@@ -74,6 +63,24 @@
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
+    .btn-success {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 8px;
+      color: whitesmoke;
+      background: linear-gradient(90deg, #1a7a02, rgba(41, 149, 27, 0.62));
+      border: none;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .btn-success:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 20px rgba(103, 235, 37, 0.5);
+    }
+
     .btn-primary:hover {
       transform: scale(1.05);
       box-shadow: 0 10px 20px rgba(37, 99, 235, 0.5);
@@ -108,9 +115,6 @@
   </style>
 </head>
 <body>
-  <!-- Background -->
-  <div id="background"></div>
-
   <!-- Back to Homepage Button -->
   <a href="{% url 'index' %}" class="back-button">Sahifaga qaytish</a>
 
@@ -146,6 +150,13 @@
         required
       />
       <button type="submit" class="btn-primary">Kirish</button>
+      <button
+        @click="redirectToRegister"
+        class="btn-success mt-3"
+        type="button"
+      >
+        Ro'yhatdan o'tish
+      </button>
     </form>
 
     <div class="footer">
@@ -189,62 +200,13 @@
               this.messages = ["Login yoki parol noto'g'ri. Qayta urinib ko'ring."];
             });
         },
+        redirectToRegister() {
+          window.location.href = "{% url 'register' %}";
+        },
       },
     });
 
     app.mount("#app");
-
-    // Three.js Background Animation
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
-
-    const geometry = new THREE.BufferGeometry();
-    const particlesCount = 1000;
-    const vertices = new Float32Array(particlesCount * 3);
-
-    for (let i = 0; i < particlesCount * 3; i++) {
-      vertices[i] = (Math.random() - 0.5) * 200;
-    }
-
-    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-    const material = new THREE.PointsMaterial({ color: 0x818181, size: 1 });
-    const particles = new THREE.Points(geometry, material);
-    scene.add(particles);
-
-    camera.position.z = 100;
-
-    // Mouse Interaction
-    let mouseX = 0;
-    let mouseY = 0;
-    document.addEventListener("mousemove", (event) => {
-      mouseX = (event.clientX / window.innerWidth - 0.5) * 2;
-      mouseY = -(event.clientY / window.innerHeight - 0.5) * 2;
-    });
-
-    function animate() {
-      requestAnimationFrame(animate);
-      particles.rotation.x += 0.001;
-      particles.rotation.y += 0.001;
-
-      gsap.to(camera.position, {
-        x: mouseX * 50,
-        y: mouseY * 50,
-        duration: 0.5,
-      });
-
-      renderer.render(scene, camera);
-    }
-
-    animate();
-
-    window.addEventListener("resize", () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
   </script>
 </body>
 </html>

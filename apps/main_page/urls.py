@@ -28,5 +28,10 @@ urlpatterns = [
         "director/",
         login_required(TableView.as_view(template_name="director.html")),
         name="main-director",
+    ),
+    path(
+        "",
+        login_required(TableView.as_view(template_name="main_page.html")),
+        name="main-page-administrator",
     )
 ]

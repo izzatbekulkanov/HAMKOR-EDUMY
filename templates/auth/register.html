@@ -1,107 +1,260 @@
-{% extends layout_path %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ro'yhatdan o'tish - HAMKOR | EDUMY</title>
 
-{% load static %}
-{% load i18n %}
+  <!-- Vue.js CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 
-{% block title %}Register - Pages{% endblock %}
+  <!-- TailwindCSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-{% block vendor_css %}
-{{ block.super }}
-<link rel="stylesheet" href="{% static 'vendor/libs/@form-validation/form-validation.css' %}" />
-{% endblock vendor_css %}
+  <!-- Vue Select -->
+  <script src="https://unpkg.com/vue-select@4/dist/vue-select.global.prod.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/vue-select@4/dist/vue-select.css">
 
-{% block vendor_js %}
-{{ block.super }}
-<script src="{% static 'vendor/libs/@form-validation/popular.js' %}"></script>
-<script src="{% static 'vendor/libs/@form-validation/bootstrap5.js' %}"></script>
-<script src="{% static 'vendor/libs/@form-validation/auto-focus.js' %}"></script>
-{% endblock vendor_js %}
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Roboto', sans-serif;
+      background: #f4f5f7;
+    }
 
-{% block page_css %}
-{{ block.super }}
-<link rel="stylesheet" href="{% static 'vendor/css/pages/page-auth.css' %}" />
-{% endblock page_css %}
+    .register-container {
+      max-width: 480px;
+      margin: 50px auto;
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
 
-{% block page_js %}
-{{ block.super }}
-<script src="{% static 'js/pages-auth.js' %}"></script>
-{% endblock page_js %}
+    .form-title {
+      font-size: 1.75rem;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 20px;
+      color: #2563eb;
+    }
 
-{% block content %}
-<div class="authentication-wrapper authentication-cover">
-  <!-- Logo -->
-  <a href="{% url 'index' %}" class="app-brand auth-cover-brand">
-    <span class="app-brand-logo demo">{% include 'partials/logo.html' with height=20 bgcolor="fill: #fff;" %}</span>
-    <span class="app-brand-text demo text-heading fw-bold">{% get_theme_variables 'template_name' %}</span>
-  </a>
-  <!-- /Logo -->
-  <div class="authentication-inner row m-0">
+    .form-control {
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 12px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
 
-    <!-- /Left Text -->
-    <div class="d-none d-lg-flex col-lg-8 p-0">
-      <div class="auth-cover-bg auth-cover-bg-color d-flex justify-content-center align-items-center">
-        <img src="{% static 'img/illustrations/auth-register-illustration-' %}{{ COOKIES.style|default:style }}.png" alt="auth-register-cover" class="my-5 auth-illustration" data-app-light-img="illustrations/auth-register-illustration-light.png" data-app-dark-img="illustrations/auth-register-illustration-dark.png">
+    .form-control:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 8px rgba(37, 99, 235, 0.2);
+      outline: none;
+    }
 
-        <img src="{% static 'img/illustrations/bg-shape-image-' %}{{ COOKIES.style|default:style }}.png" alt="auth-register-cover" class="platform-bg" data-app-light-img="illustrations/bg-shape-image-light.png" data-app-dark-img="illustrations/bg-shape-image-dark.png">
+    .btn-primary {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 8px;
+      color: white;
+      background: linear-gradient(90deg, #1d4ed8, #2563eb);
+      border: none;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: all 0.3s;
+    }
+
+    .btn-primary:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    .btn-primary:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.85rem;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="register-container">
+    <h1 class="form-title">HAMKOR | EDUMY</h1>
+
+    <form @submit.prevent="registerUser">
+      <!-- Name and Surname -->
+      <div class="flex space-x-4 mb-4">
+        <input
+          type="text"
+          v-model="firstName"
+          class="form-control"
+          placeholder="Ismi"
+          required
+        />
+        <input
+          type="text"
+          v-model="lastName"
+          class="form-control"
+          placeholder="Familiyasi"
+          required
+        />
       </div>
-    </div>
-    <!-- /Left Text -->
 
-    <!-- Register -->
-    <div class="d-flex col-12 col-lg-4 align-items-center authentication-bg p-sm-12 p-6">
-      <div class="w-px-400 mx-auto mt-12 pt-5">
-        <h4 class="mb-1">Adventure starts here 🚀</h4>
-        <p class="mb-6">Make your app management easy and fun!</p>
-        {% if messages %}
-        {% for message in messages %}
-        <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% else %}alert-warning{% endif %}" role="alert">
-          {{ message }}
-        </div>
-        {% endfor %}
-        {% endif %}
-
-        <form id="formAuthentication" class="mb-6" action="{% url 'register' %}" method="post">
-          {% csrf_token %}
-          <div class="mb-6">
-            <label for="username" class="form-label">Username</label>
-            <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" autofocus>
-          </div>
-          <div class="mb-6">
-            <label for="email" class="form-label">Email</label>
-            <input type="text" class="form-control" id="email" name="email" placeholder="Enter your email">
-          </div>
-          <div class="mb-6 form-password-toggle">
-            <label class="form-label" for="password">Password</label>
-            <div class="input-group input-group-merge">
-              <input type="password" id="password" class="form-control" name="password" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" aria-describedby="password" />
-              <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
-            </div>
-          </div>
-
-          <div class="mb-6 mt-8">
-            <div class="form-check mb-8 ms-2">
-              <input class="form-check-input" type="checkbox" id="terms-conditions" name="terms">
-              <label class="form-check-label" for="terms-conditions">
-                I agree to
-                <a href="javascript:void(0);">privacy policy & terms</a>
-              </label>
-            </div>
-          </div>
-          <button id="btnSubmit" class="btn btn-primary w-100" type="submit">
-            <span id="btnText" class="me-1">Sign up</span>
-            <span id="btnLoader" class="spinner-border spinner-border-sm visually-hidden" role="status" aria-hidden="true"></span>
-          </button>
-        </form>
-
-        <p class="text-center">
-          <span>Already have an account?</span>
-          <a href="{% url 'login' %}">
-            <span>Sign in instead</span>
-          </a>
-        </p>
+      <!-- Phone Number -->
+      <div class="form-section">
+        <input
+          type="text"
+          v-model="phoneNumber"
+          class="form-control"
+          placeholder="+998 99 123 45 67"
+          @input="formatPhoneNumber"
+          required
+        />
       </div>
+
+      <!-- Password -->
+      <div class="form-section">
+        <input
+          type="password"
+          v-model="password"
+          class="form-control"
+          placeholder="Parol"
+          autocomplete="off"
+          required
+        />
+        <input
+          type="password"
+          v-model="confirmPassword"
+          class="form-control"
+          placeholder="Parolni tasdiqlang"
+          autocomplete="off"
+          required
+        />
+      </div>
+
+      <!-- Role Selection -->
+      <div class="form-section">
+        <label for="role" class="block text-gray-700 mb-2">Rolni tanlang</label>
+        <select
+          id="role"
+          v-model="role"
+          class="form-control"
+          required
+        >
+          <option value="" disabled>Rolni tanlang</option>
+          <option value="teacher">O'qituvchi</option>
+          <option value="partner">Hamkor</option>
+        </select>
+      </div>
+
+      <!-- School Dropdown -->
+      <div class="form-section">
+        <label for="school" class="block text-gray-700 mb-2">Maktabni tanlang</label>
+        <v-select
+          v-model="selectedSchool"
+          :options="schools"
+          placeholder="Maktabni qidirish yoki tanlang..."
+        ></v-select>
+      </div>
+
+      <!-- Agreement -->
+      <div class="form-section flex items-center">
+        <input type="checkbox" id="agree" v-model="agree" class="mr-2" required />
+        <label for="agree" class="text-gray-700">Roziman</label>
+      </div>
+
+      <!-- Buttons -->
+      <button type="submit" class="btn-primary" :disabled="!agree">Ro'yhatdan o'tish</button>
+      <button type="button" class="btn-primary mt-3" @click="redirectToLogin">Kirish sahifasiga qaytish</button>
+    </form>
+
+    <div class="footer">
+      <p>© HAMKOR | EDUMY - 2024</p>
+      <p>Dasturchi: <strong>Izzatbek Ulkanov</strong></p>
     </div>
-    <!-- /Register -->
   </div>
-</div>
-{% endblock content %}
+
+  <script>
+    const app = Vue.createApp({
+      components: {
+        'v-select': window["vue-select"],
+      },
+      data() {
+        return {
+          firstName: "",
+          lastName: "",
+          phoneNumber: "+998 ",
+          password: "",
+          confirmPassword: "",
+          role: "",
+          selectedSchool: "",
+          agree: false,
+          schools: ["1-maktab", "2-maktab", "3-maktab", "4-maktab", "5-maktab"], // Example schools
+        };
+      },
+      methods: {
+        formatPhoneNumber(event) {
+          let value = event.target.value.replace(/\D/g, ""); // Remove non-numeric characters
+          if (!value.startsWith("998")) {
+            value = "998" + value;
+          }
+          value = "+998 " + value.slice(3).replace(/(\d{2})(\d{3})(\d{2})(\d{2})/, "$1 $2 $3 $4");
+          if (value.length > 17) {
+            value = value.slice(0, 17);
+          }
+          this.phoneNumber = value;
+        },
+        registerUser() {
+          if (this.password !== this.confirmPassword) {
+            alert("Parollar mos emas.");
+            return;
+          }
+          const payload = {
+            first_name: this.firstName,
+            last_name: this.lastName,
+            phone_number: this.phoneNumber,
+            password: this.password,
+            role: this.role,
+            school: this.selectedSchool,
+          };
+
+          fetch("/api/register", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          })
+            .then((response) => {
+              if (!response.ok) throw new Error("Xatolik yuz berdi.");
+              alert("Ro'yhatdan o'tish muvaffaqiyatli yakunlandi!");
+              window.location.href = "/login";
+            })
+            .catch((error) => {
+              alert("Xatolik yuz berdi. Qayta urinib ko'ring.");
+            });
+        },
+        redirectToLogin() {
+          window.location.href = "/login";
+        },
+      },
+    });
+
+    app.mount("#app");
+  </script>
+</body>
+</html>

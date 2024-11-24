@@ -1,197 +1,222 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const apiEndpoint = {
-    addClass: '/api/classes/add/',
-    schools: '/api/schools/list/',
-    stats: '/api/classes/stats/', // Sinflar va maktablar statistikasi uchun API
-    classes: '/api/classes/list/' // Sinflar ro'yxati uchun API
+document.addEventListener("DOMContentLoaded", () => {
+  const regionSelect = document.getElementById("regionSelect");
+  const districtSelect = document.getElementById("districtSelect");
+  const schoolSelect = document.getElementById("schoolSelect");
+  const addClassForm = document.getElementById("addClassForm");
+  const groupedClassesDiv = document.getElementById("groupedClasses");
+  const totalClassesElem = document.getElementById("totalClasses");
+  const totalSchoolsElem = document.getElementById("totalSchools");
+
+  const resetDropdown = (dropdown, placeholder) => {
+    dropdown.innerHTML = `<option value="" disabled selected>${placeholder}</option>`;
+    dropdown.disabled = true;
   };
 
-  const addClassForm = document.getElementById('addClassForm');
-  const schoolSelect = document.getElementById('schoolSelect');
-  const totalClasses = document.getElementById('totalClasses');
-  const totalSchools = document.getElementById('totalSchools');
-  const classListContainer = document.getElementById('classList');
-
-  // CSRF tokenni olish
-  const getCSRFToken = () => {
-    const cookieValue = document.cookie
-      .split('; ')
-      .find((row) => row.startsWith('csrftoken='))
-      ?.split('=')[1];
-    return cookieValue || '';
-  };
-
-  // Maktablarni yuklash
-  const fetchSchools = async () => {
+  // Load statistics and update the UI
+  const loadStatistics = async () => {
     try {
-      const response = await fetch(apiEndpoint.schools);
+      const response = await fetch("/api/classes/stats/");
       const data = await response.json();
 
       if (data.success) {
-        populateSchools(data.schools);
+        totalClassesElem.textContent = data.stats.total_classes || 0;
+        totalSchoolsElem.textContent = data.stats.total_schools || 0;
       } else {
-        toastr.error('Maktablar ro\'yxatini olishda xatolik yuz berdi.', 'Xatolik');
+        toastr.error("Statistikani yuklashda xatolik yuz berdi.");
       }
     } catch (error) {
-      toastr.error('Server bilan bog\'lanishda xatolik yuz berdi.', 'Xatolik');
+      toastr.error("Server bilan bog'lanishda xatolik yuz berdi.");
+      console.error("Error loading statistics:", error);
     }
   };
 
-  const populateSchools = (schools) => {
-    schoolSelect.innerHTML = '<option value="" disabled selected>Maktabni tanlang</option>';
-    schools.forEach((school) => {
-      schoolSelect.innerHTML += `<option value="${school.id}">${school.maktab_raqami}</option>`;
-    });
-  };
-
-  // Statistikani yuklash
-  const fetchStats = async () => {
+  // Load grouped classes from API
+  const loadGroupedClasses = async () => {
     try {
-      const response = await fetch(apiEndpoint.stats);
+      const response = await fetch("/api/classes/stats/");
       const data = await response.json();
 
       if (data.success) {
-        totalClasses.textContent = data.stats.total_classes || 0;
-        totalSchools.textContent = data.stats.total_schools || 0;
+        displayGroupedClasses(data.grouped_classes);
       } else {
-        toastr.error('Statistik ma\'lumotlarni olishda xatolik yuz berdi.', 'Xatolik');
+        toastr.error("Ma'lumotlarni yuklashda xatolik yuz berdi.");
       }
     } catch (error) {
-      toastr.error('Server bilan bog\'lanishda xatolik yuz berdi.', 'Xatolik');
+      toastr.error("Server bilan bog'lanishda xatolik yuz berdi.");
+      console.error("Error loading grouped classes:", error);
     }
   };
 
-  // Sinflar ro'yxatini yuklash va guruhlash
-  const fetchClasses = async () => {
+  // Display grouped classes
+  const displayGroupedClasses = (groupedData) => {
+    groupedClassesDiv.innerHTML = "";
+
+    for (const [viloyat, tumans] of Object.entries(groupedData)) {
+      const regionDiv = document.createElement("div");
+      regionDiv.className = "mt-4";
+      regionDiv.innerHTML = `<h5 class="text-primary">${viloyat}</h5>`;
+
+      for (const [tuman, schools] of Object.entries(tumans)) {
+        const districtDiv = document.createElement("div");
+        districtDiv.className = "mt-2";
+        districtDiv.innerHTML = `<h6>${tuman}</h6>`;
+
+        const schoolList = document.createElement("ul");
+        schoolList.className = "list-group";
+
+        schools.forEach((school) => {
+          const schoolItem = document.createElement("li");
+          schoolItem.className = "list-group-item";
+          schoolItem.textContent = `${school.nomi} (${school.class_count} sinf)`;
+          schoolList.appendChild(schoolItem);
+        });
+
+        districtDiv.appendChild(schoolList);
+        regionDiv.appendChild(districtDiv);
+      }
+
+      groupedClassesDiv.appendChild(regionDiv);
+    }
+  };
+
+  // Load regions (viloyatlar)
+  const loadRegions = async () => {
     try {
-      const response = await fetch(apiEndpoint.classes);
+      const response = await fetch("/api/schools/grouped/");
       const data = await response.json();
 
-      if (data.success) {
-        groupClassesBySchool(data.classes);
+      if (data.data) {
+        for (const viloyat in data.data) {
+          const option = document.createElement("option");
+          option.value = viloyat;
+          option.textContent = viloyat;
+          regionSelect.appendChild(option);
+        }
+        regionSelect.disabled = false;
       } else {
-        toastr.error('Sinflar ro\'yxatini olishda xatolik yuz berdi.', 'Xatolik');
+        toastr.error("Viloyatlar ma'lumotini yuklashda xatolik yuz berdi.");
       }
     } catch (error) {
-      toastr.error('Server bilan bog\'lanishda xatolik yuz berdi.', 'Xatolik');
+      console.error("Error loading regions:", error);
+      toastr.error("Server bilan bog'lanishda xatolik yuz berdi.");
     }
   };
 
-// Maktab bo‘yicha guruhlash
-  const groupClassesBySchool = (classes) => {
-    classListContainer.innerHTML = '';
+  // Load districts (tumanlar) based on selected region
+  regionSelect.addEventListener("change", () => {
+    const selectedRegion = regionSelect.value;
+    resetDropdown(districtSelect, "Tuman tanlang");
+    resetDropdown(schoolSelect, "Maktabni tanlang");
 
-    // Maktablarni guruhlash
-    const groupedSchools = classes.reduce((group, cls) => {
-      if (!group[cls.maktab.raqami]) {
-        group[cls.maktab.raqami] = {
-          maktab: cls.maktab,
-          sinflar: []
-        };
-      }
-      group[cls.maktab.raqami].sinflar.push(cls);
-      return group;
-    }, {});
-
-    // Har bir maktab uchun kartani yaratish
-    Object.values(groupedSchools).forEach((school) => {
-      const schoolCard = `
-      <div class="col-md-12 mb-4">
-        <div class="card shadow-sm">
-          <div class="card-header bg-primary text-white">
-            <h5 class="card-title">${school.maktab.raqami} - ${school.maktab.viloyat}, ${school.maktab.tuman}</h5>
-          </div>
-          <div class="card-body">
-            <div class="row">
-              ${school.sinflar
-        .map(
-          (cls) => `
-                <div class="col-md-4 mb-3">
-                  <div class="card">
-                    <div class="card-body">
-                      <h6 class="card-title text-primary">${cls.sinf_raqami}</h6>
-                      <p class="card-text">
-                        <strong>Belgi:</strong> ${cls.belgi || 'Noma\'lum'} <br>
-                        <strong>Status:</strong> ${cls.is_active ? 'Faol' : 'Nofaol'} <br>
-                        <strong>Yaratilgan:</strong> ${cls.created_at}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              `
-        )
-        .join('')}
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-      classListContainer.insertAdjacentHTML('beforeend', schoolCard);
-    });
-  };
-
-  fetchClasses();
-
-  const populateClasses = (classes) => {
-    classListContainer.innerHTML = '';
-    classes.forEach((cls) => {
-      const card = `
-        <div class="col-md-4 mb-4">
-          <div class="card shadow-sm">
-            <div class="card-body">
-              <h5 class="card-title text-primary">${cls.sinf_raqami}</h5>
-              <p class="card-text">
-                <strong>Belgi:</strong> ${cls.belgi} <br>
-                <strong>Maktab:</strong> ${cls.maktab.raqami} <br>
-                <strong>Viloyat:</strong> ${cls.maktab.viloyat} <br>
-                <strong>Tuman:</strong> ${cls.maktab.tuman} <br>
-                <strong>Status:</strong> ${cls.is_active ? 'Faol' : 'Nofaol'} <br>
-                <strong>Yaratilgan:</strong> ${cls.created_at}
-              </p>
-            </div>
-          </div>
-        </div>
-      `;
-      classListContainer.insertAdjacentHTML('beforeend', card);
-    });
-  };
-
-  // Sinfni qo'shish
-  addClassForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const formData = {
-      maktab: schoolSelect.value,
-      sinf_raqami: document.getElementById('classNumber').value,
-      belgi: document.getElementById('badgeName').value.toUpperCase() // Belgini katta harfga aylantirish
-    };
+    if (!selectedRegion) return;
 
     try {
-      const response = await fetch(apiEndpoint.addClass, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': getCSRFToken() // CSRF tokenni yuborish
-        },
-        body: JSON.stringify(formData)
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        toastr.success(result.message, 'Success');
-        addClassForm.reset();
-        fetchStats();
-        fetchClasses(); // Sinflar ro'yxatini yangilash
-      } else {
-        toastr.error(result.message || 'Xatolik yuz berdi.', 'Xatolik');
-      }
+      fetch("/api/schools/grouped/")
+        .then((response) => response.json())
+        .then((data) => {
+          const districts = data.data[selectedRegion];
+          if (districts) {
+            for (const tuman in districts) {
+              const option = document.createElement("option");
+              option.value = tuman;
+              option.textContent = tuman;
+              districtSelect.appendChild(option);
+            }
+            districtSelect.disabled = false;
+          } else {
+            toastr.warning("Tanlangan viloyatda tumanlar topilmadi.");
+          }
+        });
     } catch (error) {
-      toastr.error('Sinfni qo\'shishda xatolik yuz berdi.', 'Xatolik');
+      console.error("Error loading districts:", error);
+      toastr.error("Server bilan bog'lanishda xatolik yuz berdi.");
     }
   });
 
-  fetchSchools();
-  fetchStats();
-  fetchClasses();
+  // Load schools (maktablar) based on selected district
+  districtSelect.addEventListener("change", () => {
+    const selectedRegion = regionSelect.value;
+    const selectedDistrict = districtSelect.value;
+    resetDropdown(schoolSelect, "Maktabni tanlang");
+
+    if (!selectedRegion || !selectedDistrict) return;
+
+    try {
+      fetch("/api/schools/grouped/")
+        .then((response) => response.json())
+        .then((data) => {
+          const schools = data.data[selectedRegion][selectedDistrict]?.maktablar;
+          if (schools) {
+            schools.forEach((school) => {
+              const option = document.createElement("option");
+              option.value = school.id;
+              option.textContent = `${school.maktab_raqami || "No Number"} | ${school.nomi}`;
+              schoolSelect.appendChild(option);
+            });
+            schoolSelect.disabled = false;
+          } else {
+            toastr.warning("Tanlangan tumanda maktablar topilmadi.");
+          }
+        });
+    } catch (error) {
+      console.error("Error loading schools:", error);
+      toastr.error("Server bilan bog'lanishda xatolik yuz berdi.");
+    }
+  });
+
+  // Submit the add class form
+  addClassForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const maktabId = schoolSelect.value;
+    const sinfRaqami = document.getElementById("classNumber").value;
+    const belgisi = document.getElementById("badgeName").value;
+
+    if (!maktabId || !sinfRaqami) {
+      toastr.error("Maktab va sinf raqami majburiy.");
+      return;
+    }
+
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    try {
+      const response = await fetch("/api/classes/add/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken,
+        },
+        body: JSON.stringify({
+          maktab_id: maktabId,
+          sinf_raqami: sinfRaqami,
+          belgisi: belgisi || null,
+        }),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        toastr.success(result.message || "Sinf muvaffaqiyatli qo'shildi.");
+        addClassForm.reset();
+        resetDropdown(districtSelect, "Tuman tanlang");
+        resetDropdown(schoolSelect, "Maktabni tanlang");
+        loadStatistics(); // Reload statistics after adding a new class
+        loadGroupedClasses(); // Reload grouped classes after adding a new class
+      } else {
+        toastr.error(result.error || "Xatolik yuz berdi.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      toastr.error("Server bilan bog'lanishda xatolik yuz berdi.");
+    }
+  });
+
+  // Initialize dropdowns on page load
+  resetDropdown(regionSelect, "Viloyatni tanlang");
+  resetDropdown(districtSelect, "Tuman tanlang");
+  resetDropdown(schoolSelect, "Maktabni tanlang");
+
+  // Load initial data
+  loadRegions();
+  loadStatistics();
+  loadGroupedClasses();
 });

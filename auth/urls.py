@@ -7,6 +7,8 @@ from .login.views import LoginView, JWTAuthView
 urlpatterns = [
     path("login/", LoginView.as_view(template_name="auth/login.html"), name="login"),
 
+    path("register/", LoginView.as_view(template_name="auth/register.html"), name="register"),
+
     ##REST API
     path("api/login/", JWTAuthView.as_view(), name="jwt_login"),
 
