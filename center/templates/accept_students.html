@@ -1,0 +1,146 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}O'quvchilarni qabul qilish{% endblock %}
+
+{% block vendor_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/select2/select2.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/toastr/toastr.css' %}" />
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+  {{ block.super }}
+  <script src="{% static 'vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
+  <script src="{% static 'vendor/libs/select2/select2.js' %}"></script>
+  <script src="{% static 'vendor/libs/toastr/toastr.js' %}"></script>
+{% endblock vendor_js %}
+
+{% block page_css %}
+  {{ block.super }}
+{% endblock page_css %}
+
+{% block page_js %}
+  {{ block.super }}
+  <script src="{% static 'customJs/center/groups.js' %}"></script>
+
+{% endblock page_js %}
+
+{% block content %}
+<div class="container py-4">
+  <h4 class="mb-4">O‘qituvchilar yuborgan o‘quvchilar ro‘yxati</h4>
+
+  <!-- Filters -->
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="O‘quvchi ismini qidirish"
+        disabled
+      />
+    </div>
+    <div class="col-md-6">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Maktab nomini qidirish"
+        disabled
+      />
+    </div>
+  </div>
+
+  <!-- Static Table -->
+  <div class="table-responsive">
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>O‘qituvchi</th>
+          <th>O‘quvchi</th>
+          <th>Maktab</th>
+          <th>Sinf</th>
+          <th>Kasb</th>
+          <th>Yo‘nalish</th>
+          <th>Holati</th>
+          <th>Amallar</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Aliyev Bekzod</td>
+          <td>Ismoilov Javlon</td>
+          <td>1-Maktab</td>
+          <td>8-A</td>
+          <td>Dasturlash</td>
+          <td>Frontend</td>
+          <td>Kutilmoqda</td>
+          <td>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#acceptModal">
+              Qabul qilish
+            </button>
+          </td>
+        </tr>
+        <tr>
+          <td>Usmonova Sevinch</td>
+          <td>Karimov Aziz</td>
+          <td>2-Maktab</td>
+          <td>9-B</td>
+          <td>Grafik Dizayn</td>
+          <td>Asoslar</td>
+          <td>Kutilmoqda</td>
+          <td>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#acceptModal">
+              Qabul qilish
+            </button>
+          </td>
+        </tr>
+        <tr>
+          <td>Aliyev Bekzod</td>
+          <td>Ismoilov Javlon</td>
+          <td>1-Maktab</td>
+          <td>8-A</td>
+          <td>Dasturlash</td>
+          <td>Backend</td>
+          <td>Rad etilgan</td>
+          <td>
+            <button class="btn btn-secondary btn-sm" disabled>Qabul qilingan</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Accept Modal -->
+<div class="modal fade" id="acceptModal" tabindex="-1" aria-labelledby="acceptModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="acceptModalLabel">O‘quvchini Qabul Qilish</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>O‘quvchi:</strong> Ismoilov Javlon</p>
+        <div class="mb-3">
+          <label for="cashbackType" class="form-label">Cashback turi</label>
+          <select class="form-select" id="cashbackType" required>
+            <option value="" selected disabled>Cashback turini tanlang</option>
+            <option value="1">5%</option>
+            <option value="2">10%</option>
+            <option value="3">15%</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bekor qilish</button>
+        <button type="button" class="btn btn-primary">Qabul qilish</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

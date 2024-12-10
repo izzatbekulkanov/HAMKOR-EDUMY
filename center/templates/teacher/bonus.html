@@ -1,0 +1,94 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Academy - Mukofotlash{% endblock %}
+
+{% block vendor_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
+<link rel="stylesheet" href="{% static 'vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css' %}" />
+<link rel="stylesheet" href="{% static 'vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css' %}" />
+<style>
+  .celebration-container {
+    text-align: center;
+    padding: 50px;
+    position: relative;
+  }
+  .celebration-container h1 {
+    font-size: 3rem;
+    color: #ff9800;
+    font-weight: bold;
+    animation: bounce 1s infinite alternate;
+  }
+  .celebration-container p {
+    font-size: 1.2rem;
+    color: #4caf50;
+    margin-top: 20px;
+  }
+  #confetti-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1; /* to prevent covering content */
+  }
+  /* Animation for the celebration message */
+  @keyframes bounce {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-20px); }
+  }
+</style>
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+{{ block.super }}
+<script src="{% static 'vendor/libs/moment/moment.js' %}"></script>
+<script src="{% static 'vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+{% endblock vendor_js %}
+
+{% block page_js %}
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Confetti animation with optimized performance
+  const duration = 5 * 1000; // 5 seconds
+  const end = Date.now() + duration;
+
+  const frame = function () {
+    confetti({
+      particleCount: 50, // Reduced particle count to improve performance
+      startVelocity: 25,
+      spread: 90,  // Smaller spread for more concentrated effect
+      angle: 90,
+      origin: { x: Math.random(), y: Math.random() - 0.2 },
+      gravity: 0.8  // Slower falling confetti
+    });
+
+    if (Date.now() < end) {
+      requestAnimationFrame(frame);
+    }
+  };
+
+  // Start the confetti animation
+  frame();
+
+  // Redirect after 5 seconds
+  setTimeout(() => {
+    window.location.href = "{% url 'teacher-send-student' %}";
+  }, duration);
+});
+</script>
+{% endblock page_js %}
+
+{% block content %}
+<div class="celebration-container">
+  <h1>Mukofotlash marosimi!</h1>
+  <p>Tabriklaymiz! Bu muvaffaqiyatni barcha uchun bayram sifatida qabul qilamiz.</p>
+  <canvas id="confetti-canvas"></canvas>
+</div>
+{% endblock %}

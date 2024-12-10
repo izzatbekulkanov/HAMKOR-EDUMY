@@ -1,5 +1,4 @@
 from django.db import models
-from account.models import Regions, District
 
 
 class Belgisi(models.Model):

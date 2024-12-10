@@ -1,133 +1,196 @@
 {
   "menu": [
     {
-      "menu_header": "Asosiy sahifa"
-    },
-    {
-      "url": "main-administrator",
-      "name": "Administrator",
-      "icon": "menu-icon tf-icons ti ti-shield-half",
-      "slug": "main-administrator"
-    },
-    {
-      "url": "main-manager",
-      "name": "Menejer",
-      "icon": "menu-icon tf-icons ti ti-user-cog",
-      "slug": "main-manager"
-    },
-    {
-      "url": "main-director",
-      "name": "Direktor",
-      "icon": "menu-icon tf-icons ti ti-user-up",
-      "slug": "main-director"
-    },
-    {
-      "url": "main-teacher",
-      "name": "O'qituvchi",
-      "icon": "menu-icon tf-icons ti ti-user-screen",
-      "slug": "main-teacher"
-    },
-    {
-      "url": "main-student",
-      "name": "O'quvchi",
-      "icon": "menu-icon tf-icons ti ti-user",
-      "slug": "main-student"
-    },
-    {
-      "menu_header": "Foydalanuvchilar"
-    },
-    {
-      "url": "user-directors",
-      "name": "Direktorlar",
-      "icon": "menu-icon tf-icons ti ti-microscope",
-      "slug": "user-directors"
-    },
-    {
-      "url": "user-teachers",
-      "name": "O'qituvchilar",
-      "icon": "menu-icon tf-icons ti ti-ballpen",
-      "slug": "user-teachers"
-    },
-    {
-      "url": "user-students",
-      "name": "O'quvchilar",
-      "icon": "menu-icon tf-icons ti ti-users",
-      "slug": "user-students"
+      "menu_header": "Foydalanuvchilar",
+      "allowed_roles": [
+        "6",
+        "4",
+        "5"
+      ]
     },
     {
       "url": "user-administrator",
-      "name": "Adminlar",
+      "name": "Foydalanuvchilar",
       "icon": "menu-icon tf-icons ti ti-user-circle",
-      "slug": "user-administrator"
+      "slug": "user-administrator",
+      "allowed_roles": [
+        "6",
+        "4",
+        "5"
+      ]
     },
     {
-      "menu_header": "O'quv markaz"
+      "menu_header": "O'quv markaz",
+      "allowed_roles": [
+        "6",
+        "4",
+        "5"
+      ]
     },
     {
       "url": "learning-center",
       "name": "O'quv markaz",
       "icon": "menu-icon tf-icons ti ti-building",
-      "slug": "learning-center"
+      "slug": "learning-center",
+      "allowed_roles": [
+        "5",
+        "6"
+      ]
     },
     {
       "url": "occupations",
       "name": "Kasblar",
       "icon": "menu-icon tf-icons ti ti-certificate-2",
-      "slug": "occupations"
+      "slug": "occupations",
+      "allowed_roles": [
+        "6",
+        "5"
+      ]
     },
     {
       "url": "learning-groups",
       "name": "Guruhlar",
       "icon": "menu-icon tf-icons ti ti-users-group",
-      "slug": "learning-groups"
+      "slug": "learning-groups",
+      "allowed_roles": [
+        "6",
+        "5"
+      ]
     },
     {
       "url": "learning-statistics",
       "name": "Hisobotlar",
       "icon": "menu-icon tf-icons ti ti-chart-infographic",
-      "slug": "learning-statistics"
+      "slug": "learning-statistics",
+      "allowed_roles": [
+        "6",
+        "5"
+      ]
     },
     {
-      "menu_header": "Maktab"
+      "url": "accept-students",
+      "name": "Qabul qilish",
+      "icon": "menu-icon tf-icons ti ti-user-down",
+      "slug": "accept-students",
+      "allowed_roles": [
+        "6",
+        "4"
+      ]
+    },
+    {
+      "menu_header": "Maktab",
+      "allowed_roles": [
+        "6",
+        "5"
+      ]
     },
     {
       "url": "schools",
       "name": "Maktablar",
       "icon": "menu-icon tf-icons ti ti-building-arch",
-      "slug": "schools"
+      "slug": "schools",
+      "allowed_roles": [
+        "6"
+      ]
     },
     {
       "url": "classes",
       "name": "Sinflar",
       "icon": "menu-icon tf-icons ti ti-school",
-      "slug": "classes"
+      "slug": "classes",
+      "allowed_roles": [
+        "6",
+        "5"
+      ]
     },
     {
-      "menu_header": "Sozlamalar"
+      "menu_header": "Sozlamalar",
+      "allowed_roles": [
+        "6"
+      ]
     },
     {
       "url": "setting-regions",
       "name": "Manzillar",
       "icon": "menu-icon tf-icons ti ti-location",
-      "slug": "setting-regions"
+      "slug": "setting-regions",
+      "allowed_roles": [
+        "5",
+        "6"
+      ]
     },
     {
       "url": "setting-cashback",
       "name": "Cashback",
       "icon": "menu-icon tf-icons ti ti-moneybag",
-      "slug": "setting-cashback"
+      "slug": "setting-cashback",
+      "allowed_roles": [
+        "5",
+        "6"
+      ]
     },
     {
       "url": "setting-log",
       "name": "Loglar",
       "icon": "menu-icon tf-icons ti ti-blockquote",
-      "slug": "setting-log"
+      "slug": "setting-log",
+      "allowed_roles": [
+        "5",
+        "6"
+      ]
     },
     {
       "url": "setting-role",
       "name": "Rollar",
       "icon": "menu-icon tf-icons ti ti-shield-half",
-      "slug": "setting-role"
+      "slug": "setting-role",
+      "allowed_roles": [
+        "6"
+      ]
+    },
+    {
+      "url": "teacher-cashback",
+      "name": "Keshbek",
+      "icon": "menu-icon tf-icons ti ti-brand-cashapp",
+      "slug": "teacher-cashback",
+      "allowed_roles": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "url": "teacher-send-student",
+      "name": "O'quvchi yuborish",
+      "icon": "menu-icon tf-icons ti ti-user-circle",
+      "slug": "teacher-send-student",
+      "allowed_roles": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "url": "user-administrator",
+      "name": "Maktab",
+      "icon": "menu-icon tf-icons ti ti-backpack",
+      "slug": "user-administrator",
+      "allowed_roles": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "url": "user-administrator",
+      "name": "Hisobot",
+      "icon": "menu-icon tf-icons ti ti-chart-infographic",
+      "slug": "user-administrator",
+      "allowed_roles": [
+        "1",
+        "2",
+        "3"
+      ]
     }
   ]
 }

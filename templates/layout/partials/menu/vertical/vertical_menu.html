@@ -1,5 +1,5 @@
+{% load menu_filters %}
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-  <!-- ! Hide app brand if navbar-full -->
   {% if not navbar_full %}
   <div class="app-brand demo">
     <a href="{% url 'index' %}" class="app-brand-link">
@@ -16,22 +16,15 @@
   </div>
   {% endif %}
 
-
   <div class="menu-inner-shadow"></div>
 
   <ul class="menu-inner py-1">
-    {% for item in menu_data.menu %}
-
-    {% comment %} Menu Header {% endcomment %}
+    {% for item in menu_data.menu|filter_menu_by_role:request.user.now_role %}
     {% if "menu_header" in item %}
       {% include './partials/menu_header_template.html' with header_text=item.menu_header %}
     {% else %}
-
-      {% comment %} Menu Item {% endcomment %}
       {% include './partials/menu_item_template.html' with item=item %}
     {% endif %}
     {% endfor %}
   </ul>
-
-
 </aside>

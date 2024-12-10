@@ -1,90 +1,91 @@
+import json
+import re
 from django.shortcuts import redirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from rest_framework.exceptions import AuthenticationFailed
-from rest_framework.permissions import AllowAny
-from rest_framework_simplejwt.authentication import JWTAuthentication
-
+from django.views import View
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from account.models import UserActivity
 from auth.views import AuthView
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from django.conf import settings
-from rest_framework import status
-from rest_framework_simplejwt.tokens import RefreshToken
+from django.http import JsonResponse
+
+CustomUser = get_user_model()  # CustomUser modelini olish
 
 
 class LoginView(AuthView):
     def get(self, request):
         if request.user.is_authenticated:
-            # If the user is already logged in, redirect them to the home page or another appropriate page.
-            return redirect("main-page-administrator")  # Replace 'index' with the actual URL name for the home page
+            # Agar foydalanuvchi tizimga kirgan bo'lsa, ularni asosiy sahifaga yo'naltirish
+            return redirect("main-page-administrator")
 
-        # Render the login page for users who are not logged in.
+        # Login sahifasini ko'rsatish
         return super().get(request)
 
-
-CustomUser = get_user_model()  # CustomUser modelini olish
-
-
-class JWTAuthView(APIView):
-    permission_classes = [AllowAny]  # Kirish vaqtida autentifikatsiya talab qilinmaydi
-
+@method_decorator(csrf_exempt, name='dispatch')
+class DjangoAuthLoginView(View):
     def post(self, request):
-        username = request.data.get("email")  # Kirish uchun email yoki username maydonini olamiz
-        password = request.data.get("password")
-
-        # Foydalanuvchini autentifikatsiya qilish
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            # Django sessiyasi bilan tizimga kirish
-            login(request, user)
-
-            # UserActivity modelida log yaratish
-            UserActivity.objects.create(
-                user=user,
-                login_time=timezone.now()  # Kirish vaqtini hozirgi vaqt bilan belgilash
-            )
-
-            # JWT tokenlarni yaratish
-            refresh = RefreshToken.for_user(user)
-            access_token = refresh.access_token
-
-            # JWT tokenni va sessiya cookie'sini o'rnatish
-            response = Response({"message": "Successfully logged in"}, status=status.HTTP_200_OK)
-            response.set_cookie(
-                key="access_token",
-                value=str(access_token),
-                httponly=True,
-                secure=settings.DEBUG is False,  # Xavfsizlik uchun prodaksiyada True qilib qo'yish
-                samesite="Lax",
-                max_age=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds()
-            )
-
-            # Refresh tokenni ham alohida cookie’da saqlash
-            response.set_cookie(
-                key="refresh_token",
-                value=str(refresh),
-                httponly=True,
-                secure=settings.DEBUG is False,
-                samesite="Lax",
-                max_age=settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].total_seconds()
-            )
-            return response
-        else:
-            return Response({"error": "Login yoki parol noto'g'ri"}, status=status.HTTP_401_UNAUTHORIZED)
-
-
-class CookieJWTAuthentication(JWTAuthentication):
-    def authenticate(self, request):
-        # Cookie'dan access tokenni olish
-        access_token = request.COOKIES.get('access_token')
-        if not access_token:
-            return None  # Token yo'q bo'lsa, autentifikatsiya qilinmaydi
         try:
-            validated_token = self.get_validated_token(access_token)
-            user = self.get_user(validated_token)
-            return (user, validated_token)
-        except AuthenticationFailed:
-            return None  # Token noto'g'ri bo'lsa, autentifikatsiya qilinmaydi
+            data = json.loads(request.body)
+            login_input = data.get("login_input")
+            password = data.get("password")
+
+            print(f"Kelgan ma'lumotlar: login_input={login_input}, password=****")
+
+            if not login_input or not password:
+                print("Xatolik: Login yoki parol kiritilmagan.")
+                return JsonResponse({"error": "Login yoki parol kiritilishi shart."}, status=400)
+
+            # Telefon raqamni formatlash
+            if login_input.startswith("+998"):
+                login_input = login_input.replace("+998", "998").replace(" ", "")
+                print(f"Telefon raqam formatlandi: {login_input}")
+            elif login_input.startswith("998"):
+                login_input = login_input.replace(" ", "")
+                print(f"Telefon raqam formatlandi: {login_input}")
+
+            # Login turini aniqlash: email yoki username
+            email_regex = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
+            login_field = 'email' if re.match(email_regex, login_input) else 'username'
+            print(f"Aniqlangan login turi: {login_field}")
+
+            # Foydalanuvchini olish
+            user = None
+            if login_field == 'email':
+                user = CustomUser.objects.filter(email=login_input).first()
+            else:
+                user = CustomUser.objects.filter(username=login_input).first()
+
+            if not user:
+                print(f"Xatolik: Foydalanuvchi topilmadi: {login_input}")
+                return JsonResponse({"error": "Login yoki parol noto'g'ri."}, status=401)
+
+            print(f"Foydalanuvchi topildi: {user}")
+
+            # Foydalanuvchini autentifikatsiya qilish
+            authenticated_user = authenticate(request, username=user.username, password=password)
+            if authenticated_user:
+                print(f"Autentifikatsiya muvaffaqiyatli: {authenticated_user}")
+
+                # Login qilish
+                login(request, authenticated_user)
+
+                # Foydalanuvchi faoliyatini logga yozish
+                # UserActivity modeliga yangi yozuv qo'shish
+                UserActivity.objects.create(user=authenticated_user, login_time=timezone.now())
+
+                print("Foydalanuvchi tizimga kiritildi.")
+
+                return JsonResponse({"message": "Muvaffaqiyatli tizimga kirdingiz."}, status=200)
+
+            print("Xatolik: Login yoki parol noto'g'ri.")
+            return JsonResponse({"error": "Login yoki parol noto'g'ri."}, status=401)
+
+        except json.JSONDecodeError:
+            print("Xatolik: JSON ma'lumotlari noto'g'ri.")
+            return JsonResponse({"error": "Noto'g'ri so'rov ma'lumotlari."}, status=400)
+
+        except Exception as e:
+            print(f"Ichki xatolik yuz berdi: {str(e)}")
+            return JsonResponse({"error": f"Ichki xatolik yuz berdi: {str(e)}"}, status=500)

@@ -3,6 +3,8 @@ from django.urls import include, path
 from web_project.views import SystemView
 from django.conf import settings
 from django.conf.urls.static import static
+from pathlib import Path
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 main_urlpatterns = [
     path("admin/", admin.site.urls),
@@ -26,6 +28,11 @@ page_urlpatterns = [
 urlpatterns = main_urlpatterns + page_urlpatterns
 
 if settings.DEBUG:
+    # Static files
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=BASE_DIR / "src" / "assets")
+
+    # Media files
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 handler404 = SystemView.as_view(template_name="pages_misc_error.html", status=404)

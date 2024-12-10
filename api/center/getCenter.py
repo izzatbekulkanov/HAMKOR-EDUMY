@@ -10,16 +10,41 @@ class GetCentersWithFilialsView(View):
 
     def get(self, request, *args, **kwargs):
         try:
-            centers = Center.objects.all()
+            user = request.user  # Get the logged-in user
             data = []
 
+            # Check if the user has now_role equal to 6
+            if user.now_role == '6' or user.now_role == '2':
+
+                # If user has role 6, return all centers
+                centers = Center.objects.all()
+            else:
+                # Otherwise, return only centers related to the user
+                centers = Center.objects.filter(rahbari=user)
+
+            # Loop through the centers
             for center in centers:
                 filials_count = Filial.objects.filter(center=center).count()
+
+                # Check if the admin exists and get the first_name, second_name
+                if center.rahbari:
+                    admin_first_name = center.rahbari.first_name
+                    admin_second_name = center.rahbari.second_name
+                    admin_full_name = center.rahbari.get_full_name()
+                    admin_phone = center.rahbari.phone_number if center.rahbari.phone_number else "Noma'lum"
+                else:
+                    admin_first_name = "Belgilanmagan"
+                    admin_second_name = "Belgilanmagan"
+                    admin_full_name = "Belgilanmagan"
+                    admin_phone = "Noma'lum"
+
                 data.append({
                     "center_id": center.id,
                     "center_name": center.nomi,
-                    "admin_name": center.rahbari.get_full_name() if center.rahbari else "Belgilanmagan",
-                    "admin_phone": center.rahbari.phone_number if center.rahbari and center.rahbari.phone_number else "Noma'lum",
+                    "admin_first_name": admin_first_name,
+                    "admin_last_name": admin_second_name,
+                    "admin_full_name": admin_full_name,
+                    "admin_phone": admin_phone,
                     "filials_count": filials_count,
                 })
 

@@ -1,0 +1,159 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Administratorlar ro'yhati{% endblock %}
+
+{% block vendor_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/select2/select2.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/toastr/toastr.css' %}" />
+
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+  {{ block.super }}
+  <script src="{% static 'vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
+  <script src="{% static 'vendor/libs/select2/select2.js' %}"></script>
+  <script src="{% static 'vendor/libs/toastr/toastr.js' %}"></script>
+
+{% endblock vendor_js %}
+
+{% block page_js %}
+  {{ block.super }}
+  <script src="{% static 'customJs/user/addAdministrator.js' %}"></script>
+{% endblock page_js %}
+
+{% block content %}
+  <!-- Administrator statistikasi -->
+  <div class="card mb-6">
+    <div class="card-widget-separator-wrapper">
+      <div class="card-body card-widget-separator">
+        <div class="row gy-4 gy-sm-1">
+          <!-- Barcha adminlar -->
+          <div class="col-sm-6 col-lg-3">
+            <div class="d-flex justify-content-between align-items-start card-widget-1 border-end pb-4 pb-sm-0">
+              <div>
+                <p class="mb-1">Barcha adminlar</p>
+                <h4 class="mb-1">222</h4>
+                <p class="mb-0"><span class="badge bg-label-success">Umumiy soni</span></p>
+              </div>
+              <span class="avatar me-sm-6">
+              <span class="avatar-initial rounded"><i class="ti-28px ti ti-users text-heading"></i></span>
+            </span>
+            </div>
+            <hr class="d-none d-sm-block d-lg-none me-6">
+          </div>
+
+          <!-- Kichik adminlar -->
+          <div class="col-sm-6 col-lg-3">
+            <div class="d-flex justify-content-between align-items-start card-widget-2 border-end pb-4 pb-sm-0">
+              <div>
+                <p class="mb-1">Kichik adminlar</p>
+                <h4 class="mb-1">222</h4>
+                <p class="mb-0"><span class="badge bg-label-success">Faol kichik adminlar</span></p>
+              </div>
+              <span class="avatar p-2 me-lg-6">
+              <span class="avatar-initial rounded"><i class="ti-28px ti ti-user-circle text-heading"></i></span>
+            </span>
+            </div>
+            <hr class="d-none d-sm-block d-lg-none">
+          </div>
+
+          <!-- Nofaol adminlar -->
+          <div class="col-sm-6 col-lg-3">
+            <div class="d-flex justify-content-between align-items-start border-end pb-4 pb-sm-0 card-widget-3">
+              <div>
+                <p class="mb-1">Nofaol adminlar</p>
+                <h4 class="mb-1">222</h4>
+                <p class="mb-0"><span class="badge bg-label-danger">Hozircha faol emas</span></p>
+              </div>
+              <span class="avatar p-2 me-sm-6">
+              <span class="avatar-initial rounded"><i class="ti-28px ti ti-user-off text-heading"></i></span>
+            </span>
+            </div>
+          </div>
+
+          <!-- Jami foydalanuvchilar -->
+          <div class="col-sm-6 col-lg-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <p class="mb-1">Jami foydalanuvchilar</p>
+                <h4 class="mb-1">222</h4>
+                <p class="mb-0"><span class="badge bg-label-info">Umumiy tizim foydalanuvchilari</span></p>
+              </div>
+              <span class="avatar p-2">
+              <span class="avatar-initial rounded"><i class="ti-28px ti ti-users-group text-heading"></i></span>
+            </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="card">
+    <div class="card-header">
+      <h5 class="card-title">Administratorlar ro'yhati</h5>
+      <div class="d-flex justify-content-between align-items-center row pt-4 gap-6 gap-md-0">
+        <div class="col-md-3">
+          <input type="text" class="form-control" id="search-name" placeholder="Ismni qidirish">
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" id="filter-role">
+            <option value="">Tizimdagi rolli</option>
+            <option value="5">CEO_Administrator</option>
+            <option value="4">Administrator</option>
+            <option value="3">Direktor</option>
+            <option value="2">O'qituvchi</option>
+            <option value="1">O'quvchi</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" id="filter-gender">
+            <option value="">Jinsi</option>
+            <option value="male">Erkak</option>
+            <option value="female">Ayol</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" id="filter-status">
+            <option value="">Faollik holati</option>
+            <option value="active">Faol</option>
+            <option value="inactive">Nofaol</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="card-datatable table-responsive">
+      <table class="datatables-administrators table">
+        <thead class="border-top">
+        <tr>
+          <th>#</th>
+          <th>Foydalanuvchi</th>
+          <th>Telefon raqami</th>
+          <th>Tug‘ilgan sanasi</th>
+          <th>Jinsi</th>
+          <th>Faollik holati</th>
+          <th>Hozirgi roli</th>
+          <th>Oxirgi kirish</th>
+          <th>Amallar</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Jadval ma'lumotlari AJAX orqali yuklanadi -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+  </form>
+
+{% endblock %}

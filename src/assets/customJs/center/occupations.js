@@ -105,6 +105,9 @@ $(document).ready(function() {
         if (response.success) {
           toastr.success('Kasb muvaffaqiyatli qo\'shildi!', 'Muvaffaqiyat');
           $('#addKasbForm')[0].reset();
+          loadYonalishlar();
+          loadYonalishOptions(); // Yo'nalishlarni yuklash
+          loadKurslar();
           loadKasblar();
         } else {
           toastr.error(response.message || 'Kasb qo\'shishda xatolik yuz berdi.', 'Xatolik');

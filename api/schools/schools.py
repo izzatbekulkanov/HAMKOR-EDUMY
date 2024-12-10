@@ -148,18 +148,20 @@ def bulk_add_schools(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
-            schools = []
             for item in data:
                 maktab_raqami, nomi = extract_maktab_raqami_and_nom(item["maktab"])
-                schools.append(
-                    Maktab(
-                        viloyat=item["viloyat"],
-                        tuman=item["tuman"],
-                        maktab_raqami=maktab_raqami,
-                        nomi=nomi
-                    )
+
+                # Update if exists, otherwise create
+                Maktab.objects.update_or_create(
+                    viloyat=item["viloyat"],
+                    tuman=item["tuman"],
+                    maktab_raqami=maktab_raqami,
+                    defaults={
+                        "nomi": nomi,
+                        "sharntoma_raqam": item.get("sharntoma_raqam"),
+                    }
                 )
-            Maktab.objects.bulk_create(schools)
+
             return JsonResponse({"message": "Maktablar muvaffaqiyatli saqlandi."}, status=201)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)

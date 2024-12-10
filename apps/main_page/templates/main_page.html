@@ -7,11 +7,13 @@
 
 {% block vendor_css %}
 {{ block.super }}
-<link rel="stylesheet" href="{% static 'vendor/libs/apex-charts/apex-charts.css' %}" />
+<link rel="stylesheet" href="{% static '/libs/apex-charts/apex-charts.css' %}" />
 <link rel="stylesheet" href="{% static 'vendor/libs/swiper/swiper.css' %}" />
 <link rel="stylesheet" href="{% static 'vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
 <link rel="stylesheet" href="{% static 'vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css' %}" />
 <link rel="stylesheet" href="{% static 'vendor/libs/datatables-checkboxes-jquery/datatables.checkboxes.css' %}" />
+<link rel="stylesheet" href="{% static 'vendor/libs/toastr/toastr.css' %}" />
+
 {% endblock vendor_css %}
 
 {% block vendor_js %}
@@ -19,6 +21,8 @@
 <script src="{% static 'vendor/libs/apex-charts/apexcharts.js' %}"></script>
 <script src="{% static 'vendor/libs/swiper/swiper.js' %}"></script>
 <script src="{% static 'vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
+<script src="{% static 'vendor/libs/toastr/toastr.js' %}"></script>
+
 {% endblock vendor_js %}
 
 {% block page_css %}
@@ -28,7 +32,41 @@
 
 {% block page_js %}
 {{ block.super }}
-<script src="{% static 'js/dashboards-analytics.js' %}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const showToastr = "{{ request.session.show_login_toastr|default:False|escapejs }}";
+        const lastLogin = "{{ request.session.last_login|escapejs }}";
+
+        if (showToastr === "True" && lastLogin) {
+            toastr.options = {
+                "closeButton": true,
+                "debug": false,
+                "newestOnTop": false,
+                "progressBar": true,
+                "positionClass": "toast-bottom-right",
+                "preventDuplicates": true,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            };
+
+            toastr.success(`Oxirgi marta tizimga kirish vaqti: ${lastLogin}`, "Tizimga kirish ma'lumotlari");
+
+            // Toastr flagini tozalash uchun serverga so‘rov yuboring
+            fetch("{% url 'clear_toastr_session' %}", {
+                method: "POST",
+                headers: { "X-CSRFToken": "{{ csrf_token }}" },
+            });
+        }
+    });
+</script>
+
   <!-- FontAwesome Icons -->
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 {% endblock page_js %}

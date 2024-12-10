@@ -36,6 +36,7 @@ $(document).ready(function() {
           d.searchName = $('#search-name').val(); // Ism bo‘yicha qidirish
           d.filterGender = $('#filter-gender').val(); // Jinsi bo‘yicha filtr
           d.filterStatus = $('#filter-status').val(); // Faollik holati bo‘yicha filtr
+          d.filterRole = $('#filter-role').val(); // Roll holati bo‘yicha filtr
         }
       },
       columns: [
@@ -68,7 +69,7 @@ $(document).ready(function() {
           }
         },
         {
-          data: 'is_active',
+          data: 'is_verified',
           title: 'Faollik holati',
           render: function(data, type, full) {
             return `
@@ -110,7 +111,7 @@ $(document).ready(function() {
       dom: '<"d-flex justify-content-between align-items-center mb-4"B>t', // Faqat jadval va tugmalar
       buttons: [
         {
-          text: '<i class="ti ti-plus me-0 me-sm-1 ti-xs"></i><span class="d-none d-sm-inline-block">Yangi Admin Qo‘shish</span>',
+          text: '<i class="ti ti-plus me-0 me-sm-1 ti-xs"></i><span class="d-none d-sm-inline-block">Yangi Foydalanuvchi Qo‘shish</span>',
           className: 'btn btn-primary ms-2 ms-sm-0 waves-effect waves-light',
           action: function() {
             window.location.href = '/user/addAdministrators/'; // Yangi administrator qo'shish sahifasiga yo'naltirish
@@ -123,11 +124,14 @@ $(document).ready(function() {
     $('#filter-gender, #filter-status').on('change', function() {
       dt_administrators.draw();
     });
+$('#filter-role').on('change', function() {
+    dt_administrators.draw();
+});
 
     // Ko‘rish tugmachasi
     dt_admins_table.on('click', '.view-details', function() {
       var adminId = $(this).data('id');
-      alert('Administrator ID: ' + adminId);
+      window.location.href = "/user/user-details/" + adminId + "/";
     });
 
     // O‘chirish tugmachasi
@@ -150,21 +154,23 @@ $(document).ready(function() {
 
     // Faollik holatini o'zgartirish
     dt_admins_table.on('change', '.is-active-toggle', function() {
-      var adminId = $(this).data('id');
-      var isActive = $(this).is(':checked');
-      $.ajax({
+    var adminId = $(this).data('id');
+    var isVerified = $(this).is(':checked');
+    var csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+
+    $.ajax({
         url: `/api/update-activity/${adminId}/`,
         type: 'POST',
-        headers: { 'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val() }, // CSRF tokenni yuborish
-        contentType: 'application/json', // JSON formatda ma'lumot yuboriladi
-        data: JSON.stringify({ is_active: isActive }), // JSON ma'lumotni yuborish
-        success: function () {
-          toastr.success('Faollik holati muvaffaqiyatli o‘zgartirildi!', 'Yangilandi');
+        headers: { 'X-CSRFToken': csrfToken },
+        contentType: 'application/json', // JSON format
+        data: JSON.stringify({ is_verified: isVerified }),
+        success: function(response) {
+            toastr.success(response.message, 'Muvaffaqiyatli');
         },
-        error: function () {
-          toastr.error('Xatolik yuz berdi.', 'Yangilashda xatolik');
+        error: function(response) {
+            toastr.error(response.responseJSON.message || 'Xatolik yuz berdi.', 'Xato');
         }
-      });
     });
+});
   }
 });

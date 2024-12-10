@@ -1,260 +1,338 @@
-<!DOCTYPE html>
-<html lang="uz">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ro'yhatdan o'tish - HAMKOR | EDUMY</title>
+{% extends layout_path %}
 
-  <!-- Vue.js CDN -->
-  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+{% load static %}
+{% load i18n %}
 
-  <!-- TailwindCSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+{% block title %}Ro'yhatdan o'tish - HAMKOR | EDUMY{% endblock %}
 
-  <!-- Vue Select -->
-  <script src="https://unpkg.com/vue-select@4/dist/vue-select.global.prod.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/vue-select@4/dist/vue-select.css">
+{% block vendor_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/libs/@form-validation/form-validation.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/bootstrap-maxlength/bootstrap-maxlength.css' %}" />
+  <!-- intl-tel-input CSS -->
+{% endblock vendor_css %}
 
+{% block vendor_js %}
+  {{ block.super }}
+  <script src="{% static 'vendor/libs/@form-validation/popular.js' %}"></script>
+  <script src="{% static 'vendor/libs/@form-validation/bootstrap5.js' %}"></script>
+{% endblock vendor_js %}
+
+{% block page_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/css/pages/page-auth.css' %}" />
   <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      font-family: 'Roboto', sans-serif;
-      background: #f4f5f7;
-    }
-
-    .register-container {
-      max-width: 480px;
-      margin: 50px auto;
-      background: #ffffff;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .form-title {
-      font-size: 1.75rem;
-      font-weight: bold;
+    .form-control.text-center {
+      max-width: 70px; /* Har bir input kengligini cheklash */
       text-align: center;
-      margin-bottom: 20px;
-      color: #2563eb;
     }
 
-    .form-control {
-      width: 100%;
-      margin-bottom: 15px;
-      padding: 12px;
-      font-size: 1rem;
-      border-radius: 8px;
-      border: 1px solid #e5e7eb;
-      background: #f9fafb;
-      transition: border-color 0.3s, box-shadow 0.3s;
+    .input-group .input-group-text {
+      font-size: 0.9rem;
+      padding: 0.5rem 1rem;
     }
 
-    .form-control:focus {
-      border-color: #2563eb;
-      box-shadow: 0 0 8px rgba(37, 99, 235, 0.2);
-      outline: none;
+    .input-group .form-control {
+      border-radius: 0 !important; /* Maydonlar orasidagi radiusni olib tashlash */
     }
 
-    .btn-primary {
-      display: block;
-      width: 100%;
-      padding: 12px;
-      font-size: 1rem;
+    .input-group-text.bg-light {
       font-weight: bold;
-      border-radius: 8px;
-      color: white;
-      background: linear-gradient(90deg, #1d4ed8, #2563eb);
-      border: none;
-      cursor: pointer;
-      margin-top: 12px;
-      transition: all 0.3s;
     }
 
-    .btn-primary:disabled {
-      background: #9ca3af;
-      cursor: not-allowed;
-    }
-
-    .btn-primary:hover {
-      transform: scale(1.03);
-      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
-    }
-
-    .footer {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 0.85rem;
-      color: #6b7280;
+    .text-danger {
+      font-weight: 500;
     }
   </style>
-</head>
-<body>
-  <div id="app" class="register-container">
-    <h1 class="form-title">HAMKOR | EDUMY</h1>
+{% endblock page_css %}
 
-    <form @submit.prevent="registerUser">
-      <!-- Name and Surname -->
-      <div class="flex space-x-4 mb-4">
-        <input
-          type="text"
-          v-model="firstName"
-          class="form-control"
-          placeholder="Ismi"
-          required
-        />
-        <input
-          type="text"
-          v-model="lastName"
-          class="form-control"
-          placeholder="Familiyasi"
-          required
-        />
+{% block content %}
+  <div class="authentication-wrapper authentication-cover">
+    <!-- Logo -->
+    <a href="{% url 'index' %}" class="app-brand auth-cover-brand">
+      <span class="app-brand-logo demo">{% include 'partials/logo.html' with height=20 bgcolor="fill: #fff;" %}</span>
+      <span class="app-brand-text demo text-heading fw-bold">{% get_theme_variables 'template_name' %}</span>
+    </a>
+    <!-- /Logo -->
+
+    <div class="authentication-inner row m-0">
+      <div class="d-none d-lg-flex col-lg-8 p-0">
+        <div class="auth-cover-bg auth-cover-bg-color d-flex justify-content-center align-items-center">
+          <img src="{% static 'img/illustrations/auth-register-illustration-' %}{{ COOKIES.style|default:style }}.png"
+               alt="auth-register-cover" class="my-5 auth-illustration">
+          <img src="{% static 'img/illustrations/bg-shape-image-' %}{{ COOKIES.style|default:style }}.png"
+               alt="auth-register-cover" class="platform-bg">
+        </div>
       </div>
 
-      <!-- Phone Number -->
-      <div class="form-section">
-        <input
-          type="text"
-          v-model="phoneNumber"
-          class="form-control"
-          placeholder="+998 99 123 45 67"
-          @input="formatPhoneNumber"
-          required
-        />
+      <div class="d-flex col-12 col-lg-4 align-items-center authentication-bg p-sm-12 p-6">
+        <div class="w-px-400 mx-auto mt-12 pt-5">
+          <h4 class="text-center mb-4">HAMKOR | EDUMY</h4>
+          <p class="text-muted text-center mb-6">Ro'yhatdan o'tish orqali barcha imkoniyatlardan foydalaning!</p>
+
+          <form id="register-form" class="needs-validation" novalidate>
+            {% csrf_token %}
+            <div class="mb-4">
+              <div class="row g-3">
+                <div class="col">
+                  <label for="first-name" class="form-label">Ismi</label>
+                  <input type="text" id="first-name" class="form-control" placeholder="Ismi" required>
+                </div>
+                <div class="col">
+                  <label for="last-name" class="form-label">Familiyasi</label>
+                  <input type="text" id="last-name" class="form-control" placeholder="Familiyasi" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label for="phone-number" class="form-label">Telefon raqami</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light fw-bold">+998</span>
+                <input type="text" id="phone-part-1" class="form-control text-center" placeholder="XX" maxlength="2" required />
+                <span class="input-group-text">-</span>
+                <input type="text" id="phone-part-2" class="form-control text-center" placeholder="XXX" maxlength="3" required />
+                <span class="input-group-text">-</span>
+                <input type="text" id="phone-part-3" class="form-control text-center" placeholder="XX" maxlength="2" required />
+                <span class="input-group-text">-</span>
+                <input type="text" id="phone-part-4" class="form-control text-center" placeholder="XX" maxlength="2" required />
+              </div>
+              <span id="phone-error" class="text-danger mt-1 d-block" style="font-size: 0.9rem;"></span>
+            </div>
+
+            <div class="mb-4">
+              <label for="region-select" class="form-label">Viloyatni tanlang</label>
+              <select id="region-select" class="form-select" required>
+                <option value="" disabled selected>Viloyatni tanlang</option>
+              </select>
+            </div>
+
+            <div class="mb-4">
+              <label for="district-select" class="form-label">Tumanni tanlang</label>
+              <select id="district-select" class="form-select" required disabled>
+                <option value="" disabled selected>Tumanni tanlang</option>
+              </select>
+            </div>
+
+            <div class="mb-4">
+              <label for="school-select" class="form-label">Maktabni tanlang</label>
+              <select id="school-select" class="form-select" required disabled>
+                <option value="" disabled selected>Maktabni tanlang</option>
+              </select>
+            </div>
+
+            <div class="mb-4">
+              <div class="row g-3">
+                <div class="col">
+                  <label for="password" class="form-label">Parol</label>
+                  <input type="password" id="password" class="form-control" placeholder="Parol" required>
+                </div>
+                <div class="col">
+                  <label for="confirm-password" class="form-label">Parolni tasdiqlang</label>
+                  <input type="password" id="confirm-password" class="form-control" placeholder="Parolni tasdiqlang" required>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Ro'yhatdan o'tish</button>
+
+          </form>
+          <button id="redirect_to_logins" class="btn btn-success w-100 mt-4">Kirish sahifasi</button>
+        </div>
       </div>
-
-      <!-- Password -->
-      <div class="form-section">
-        <input
-          type="password"
-          v-model="password"
-          class="form-control"
-          placeholder="Parol"
-          autocomplete="off"
-          required
-        />
-        <input
-          type="password"
-          v-model="confirmPassword"
-          class="form-control"
-          placeholder="Parolni tasdiqlang"
-          autocomplete="off"
-          required
-        />
-      </div>
-
-      <!-- Role Selection -->
-      <div class="form-section">
-        <label for="role" class="block text-gray-700 mb-2">Rolni tanlang</label>
-        <select
-          id="role"
-          v-model="role"
-          class="form-control"
-          required
-        >
-          <option value="" disabled>Rolni tanlang</option>
-          <option value="teacher">O'qituvchi</option>
-          <option value="partner">Hamkor</option>
-        </select>
-      </div>
-
-      <!-- School Dropdown -->
-      <div class="form-section">
-        <label for="school" class="block text-gray-700 mb-2">Maktabni tanlang</label>
-        <v-select
-          v-model="selectedSchool"
-          :options="schools"
-          placeholder="Maktabni qidirish yoki tanlang..."
-        ></v-select>
-      </div>
-
-      <!-- Agreement -->
-      <div class="form-section flex items-center">
-        <input type="checkbox" id="agree" v-model="agree" class="mr-2" required />
-        <label for="agree" class="text-gray-700">Roziman</label>
-      </div>
-
-      <!-- Buttons -->
-      <button type="submit" class="btn-primary" :disabled="!agree">Ro'yhatdan o'tish</button>
-      <button type="button" class="btn-primary mt-3" @click="redirectToLogin">Kirish sahifasiga qaytish</button>
-    </form>
-
-    <div class="footer">
-      <p>© HAMKOR | EDUMY - 2024</p>
-      <p>Dasturchi: <strong>Izzatbek Ulkanov</strong></p>
     </div>
   </div>
 
-  <script>
-    const app = Vue.createApp({
-      components: {
-        'v-select': window["vue-select"],
-      },
-      data() {
-        return {
-          firstName: "",
-          lastName: "",
-          phoneNumber: "+998 ",
-          password: "",
-          confirmPassword: "",
-          role: "",
-          selectedSchool: "",
-          agree: false,
-          schools: ["1-maktab", "2-maktab", "3-maktab", "4-maktab", "5-maktab"], // Example schools
-        };
-      },
-      methods: {
-        formatPhoneNumber(event) {
-          let value = event.target.value.replace(/\D/g, ""); // Remove non-numeric characters
-          if (!value.startsWith("998")) {
-            value = "998" + value;
-          }
-          value = "+998 " + value.slice(3).replace(/(\d{2})(\d{3})(\d{2})(\d{2})/, "$1 $2 $3 $4");
-          if (value.length > 17) {
-            value = value.slice(0, 17);
-          }
-          this.phoneNumber = value;
-        },
-        registerUser() {
-          if (this.password !== this.confirmPassword) {
-            alert("Parollar mos emas.");
-            return;
-          }
-          const payload = {
-            first_name: this.firstName,
-            last_name: this.lastName,
-            phone_number: this.phoneNumber,
-            password: this.password,
-            role: this.role,
-            school: this.selectedSchool,
-          };
 
-          fetch("/api/register", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(payload),
-          })
-            .then((response) => {
-              if (!response.ok) throw new Error("Xatolik yuz berdi.");
-              alert("Ro'yhatdan o'tish muvaffaqiyatli yakunlandi!");
-              window.location.href = "/login";
-            })
-            .catch((error) => {
-              alert("Xatolik yuz berdi. Qayta urinib ko'ring.");
-            });
-        },
-        redirectToLogin() {
-          window.location.href = "/login";
-        },
-      },
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const phoneInputs = [
+      document.querySelector('#phone-part-1'),
+      document.querySelector('#phone-part-2'),
+      document.querySelector('#phone-part-3'),
+      document.querySelector('#phone-part-4')
+    ];
+
+    const regionSelect = document.getElementById('region-select');
+    const districtSelect = document.getElementById('district-select');
+    const schoolSelect = document.getElementById('school-select');
+    const registerForm = document.querySelector('#register-form');
+
+    const firstNameInput = document.querySelector('#first-name');
+    const lastNameInput = document.querySelector('#last-name');
+    const passwordInput = document.querySelector('#password');
+    const confirmPasswordInput = document.querySelector('#confirm-password');
+
+    // Viloyatlar, tumanlar va maktablar API'dan yuklash
+    fetch('/api/schools/grouped/')
+      .then(res => res.json())
+      .then(data => populateRegions(data.data))
+      .catch(err => console.error('API xatosi:', err));
+
+    function populateRegions(data) {
+      Object.keys(data).forEach(region => {
+        const option = new Option(region, region);
+        regionSelect.add(option);
+      });
+
+      regionSelect.addEventListener('change', function () {
+        const selectedRegion = this.value;
+        populateDistricts(data[selectedRegion]);
+      });
+    }
+
+    function populateDistricts(regionData) {
+      districtSelect.innerHTML = '<option value="" disabled selected>Tumanni tanlang</option>';
+      Object.keys(regionData).forEach(district => {
+        const option = new Option(district, district);
+        districtSelect.add(option);
+      });
+
+      districtSelect.disabled = false;
+
+      districtSelect.addEventListener('change', function () {
+        const selectedDistrict = this.value;
+        populateSchools(regionData[selectedDistrict]?.maktablar || []);
+      });
+    }
+
+    function populateSchools(schools) {
+      schoolSelect.innerHTML = '<option value="" disabled selected>Maktabni tanlang</option>';
+      schools.forEach(school => {
+        const option = new Option(`${school.maktab_raqami} - ${school.nomi}`, school.id);
+        schoolSelect.add(option);
+      });
+      schoolSelect.disabled = false;
+    }
+
+    // Telefon raqam inputlarini boshqarish
+    phoneInputs.forEach((input, index) => {
+      input.addEventListener('input', function () {
+        input.value = input.value.replace(/\D/g, ''); // Faqat raqamlarni qoldirish
+        if (input.value.length === input.maxLength && index < phoneInputs.length - 1) {
+          phoneInputs[index + 1].focus(); // Keyingi inputga fokus
+        }
+        validateInput(input, 'Bu maydonni to‘ldirish shart.');
+      });
     });
 
-    app.mount("#app");
-  </script>
-</body>
-</html>
+    // Inputni tekshirish funksiyasi
+    function validateInput(input, message) {
+      if (!input.value.trim()) {
+        showError(input, message);
+      } else {
+        clearError(input);
+      }
+    }
+
+    function validatePasswordMatch() {
+      if (passwordInput.value !== confirmPasswordInput.value) {
+        showError(confirmPasswordInput, 'Parol mos emas.');
+      } else {
+        clearError(confirmPasswordInput);
+      }
+    }
+
+    function showError(input, message) {
+      clearError(input); // Oldingi xatoni tozalash
+      const error = document.createElement('span');
+      error.className = 'text-danger mt-1 d-block';
+      error.style.fontSize = '0.9rem';
+      error.textContent = message;
+      input.parentNode.appendChild(error);
+    }
+
+    function clearError(input) {
+      const error = input.parentNode.querySelector('.text-danger');
+      if (error) {
+        error.remove();
+      }
+    }
+
+      // Formani yuborish
+      registerForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        let hasError = false;
+
+        // Telefon raqamlarni tekshirish
+        phoneInputs.forEach(input => {
+          if (!input.value.trim()) {
+            showError(input, 'Bu maydonni to‘ldirish shart.');
+            hasError = true;
+          } else {
+            clearError(input);
+          }
+        });
+
+        // Foydalanuvchi ma'lumotlarini tekshirish
+        validateInput(firstNameInput, 'Ismni kiriting.');
+        validateInput(lastNameInput, 'Familiyani kiriting.');
+        validateInput(passwordInput, 'Parolni kiriting.');
+        validateInput(confirmPasswordInput, 'Parolni tasdiqlang.');
+        validatePasswordMatch();
+
+        // Viloyat, tuman va maktabni tekshirish
+        if (!regionSelect.value) {
+          showError(regionSelect, 'Viloyatni tanlang.');
+          hasError = true;
+        }
+        if (!districtSelect.value) {
+          showError(districtSelect, 'Tumanni tanlang.');
+          hasError = true;
+        }
+        if (!schoolSelect.value) {
+          showError(schoolSelect, 'Maktabni tanlang.');
+          hasError = true;
+        }
+
+        // Agar xato bo'lsa, formani yubormaymiz
+        if (hasError) {
+          return;
+        }
+
+        const phoneNumber = `+998${phoneInputs.map(input => input.value).join('')}`;
+        const data = {
+          first_name: firstNameInput.value,
+          last_name: lastNameInput.value,
+          phone_number: phoneNumber,
+          password: passwordInput.value,
+          region: regionSelect.value,
+          district: districtSelect.value,
+          school: schoolSelect.value
+        };
+
+        // Ma'lumotlarni serverga yuborish
+        fetch('/api/register/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: JSON.stringify(data)
+        })
+          .then(res => res.json())
+          .then(result => {
+              window.location.href = {% url 'main-page-administrator' %};
+          })
+          .catch(err => alert('Serverda xatolik yuz berdi.'));
+      });
+
+    // Parol tasdiqlashni kuzatish
+    confirmPasswordInput.addEventListener('input', validatePasswordMatch);
+    passwordInput.addEventListener('input', validatePasswordMatch);
+
+    const loginRedirectButton = document.getElementById("redirect_to_logins");
+
+    loginRedirectButton.addEventListener("click", function () {
+      // Django'dagi 'login' URL'ni o'rnatish
+      window.location.href = "{% url 'login' %}";
+    });
+
+  });
+</script>
+
+
+
+{% endblock content %}

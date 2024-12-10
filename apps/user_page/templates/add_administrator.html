@@ -25,181 +25,188 @@
   {{ block.super }}
 <script>
     $(document).ready(function () {
-        // Configure Toastr
-        toastr.options = {
-            closeButton: true,
-            progressBar: true,
-            positionClass: 'toast-top-right',
-            showDuration: 300,
-            hideDuration: 1000,
-            timeOut: 5000,
-            extendedTimeOut: 1000
-        };
+    // Configure Toastr (if needed elsewhere)
+    toastr.options = {
+        closeButton: true,
+        progressBar: true,
+        positionClass: 'toast-top-right',
+        showDuration: 300,
+        hideDuration: 1000,
+        timeOut: 5000,
+        extendedTimeOut: 1000
+    };
 
-        // Phone input auto-formatting
-        const phoneInput = document.getElementById('id_phone_number');
-        phoneInput.addEventListener('input', function (e) {
-            let input = e.target.value.replace(/\D/g, ''); // Remove non-digit characters
-            let formatted = '+998';
+    // Phone input auto-formatting
+    const phoneInput = document.getElementById('id_phone_number');
+    phoneInput.addEventListener('input', function (e) {
+        let input = e.target.value.replace(/\D/g, ''); // Remove non-digit characters
+        let formatted = '+998';
 
-            if (input.length > 3) formatted += `-${input.slice(3, 5)}`;
-            if (input.length > 5) formatted += `-${input.slice(5, 8)}`;
-            if (input.length > 8) formatted += `-${input.slice(8, 10)}`;
-            if (input.length > 10) formatted += `-${input.slice(10, 12)}`;
+        if (input.length > 3) formatted += `-${input.slice(3, 5)}`;
+        if (input.length > 5) formatted += `-${input.slice(5, 8)}`;
+        if (input.length > 8) formatted += `-${input.slice(8, 10)}`;
+        if (input.length > 10) formatted += `-${input.slice(10, 12)}`;
 
-            phoneInput.value = formatted;
-        });
+        phoneInput.value = formatted;
+    });
 
-        // Password confirmation validation
-        $('#id_password_confirm').on('input', function () {
-            const password = $('#id_password').val();
-            const confirmPassword = $(this).val();
+    // Password confirmation validation
+    const passwordInput = $('#id_password');
+    const confirmPasswordInput = $('#id_password_confirm');
+    const confirmPasswordError = $('<small class="text-danger d-none">Parol va parolni tasdiqlash bir xil emas!</small>');
+    confirmPasswordInput.after(confirmPasswordError);
 
-            if (password !== confirmPassword) {
-                $(this).addClass('is-invalid');
-                toastr.error("Parol va parolni tasdiqlash bir xil emas!");
-            } else {
-                $(this).removeClass('is-invalid');
-            }
-        });
+    confirmPasswordInput.on('input', function () {
+        const password = passwordInput.val();
+        const confirmPassword = $(this).val();
 
-        // Form validation
-        const validateForm = () => {
-            let isValid = true;
+        if (password !== confirmPassword) {
+            $(this).addClass('is-invalid');
+            confirmPasswordError.removeClass('d-none');
+        } else {
+            $(this).removeClass('is-invalid');
+            confirmPasswordError.addClass('d-none');
+        }
+    });
 
-            // Check required fields
-            $('[required]').each(function () {
-                const field = $(this);
-                if (!field.val().trim()) {
-                    isValid = false;
-                    field.addClass('is-invalid');
-                    toastr.error(`${field.attr('placeholder')} majburiy to‘ldirilishi kerak!`);
-                } else {
-                    field.removeClass('is-invalid');
-                }
-            });
+    // Form validation
+    const validateForm = () => {
+        let isValid = true;
 
-            // Validate phone number
-            const phoneNumber = $('#id_phone_number').val();
-            const phoneRegex = /^\+998-\d{2}-\d{3}-\d{2}-\d{2}$/;
-            if (!phoneRegex.test(phoneNumber)) {
-                isValid = false;
-                toastr.error("Telefon raqam noto‘g‘ri formatda! (+998-XX-XXX-XX-XX shaklida kiriting)");
-                $('#id_phone_number').addClass('is-invalid');
-            } else {
-                $('#id_phone_number').removeClass('is-invalid');
-            }
-
-            // Check password confirmation
-            const password = $('#id_password').val();
-            const confirmPassword = $('#id_password_confirm').val();
-            if (password !== confirmPassword) {
-                isValid = false;
-                toastr.error("Parol va parolni tasdiqlash bir xil emas!");
-                $('#id_password_confirm').addClass('is-invalid');
-            } else {
-                $('#id_password_confirm').removeClass('is-invalid');
-            }
-
-            return isValid;
-        };
-
-        // Form submit handler
-        $('form').on('submit', function (e) {
-            e.preventDefault();
-
-            if (validateForm()) {
-                const formData = new FormData(this);
-
-                $.ajax({
-                    url: this.action,
-                    type: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function (response) {
-                        if (response.success) {
-                            toastr.success(response.message);
-                            $('form')[0].reset();
-                        } else {
-                            toastr.error(response.message);
-                        }
-                    },
-                    error: function () {
-                        toastr.error('Xatolik yuz berdi. Iltimos, keyinroq urinib ko‘ring.');
-                    }
-                });
-            }
-        });
-
-        // Real-time validation feedback
-        $('[required]').on('input', function () {
+        // Check required fields
+        $('[required]').each(function () {
             const field = $(this);
-            if (field.val().trim()) {
+            if (!field.val().trim()) {
+                isValid = false;
+                field.addClass('is-invalid');
+                toastr.error(`${field.attr('placeholder')} majburiy to‘ldirilishi kerak!`);
+            } else {
                 field.removeClass('is-invalid');
             }
         });
 
-        // Select2 initialization
-        $('#id_regions, #id_district, #id_quarters, #id_roles').select2({
-            placeholder: 'Tanlang',
-            allowClear: true
-        });
+        // Validate phone number
+        const phoneNumber = $('#id_phone_number').val();
+        const phoneRegex = /^\+998-\d{2}-\d{3}-\d{2}-\d{2}$/;
+        if (!phoneRegex.test(phoneNumber)) {
+            isValid = false;
+            $('#id_phone_number').addClass('is-invalid');
+        } else {
+            $('#id_phone_number').removeClass('is-invalid');
+        }
 
-        // Handle district and quarter dropdowns
-        $('#id_district').prop('disabled', true);
-        $('#id_quarters').prop('disabled', true);
+        // Check password confirmation
+        const password = passwordInput.val();
+        const confirmPassword = confirmPasswordInput.val();
+        if (password !== confirmPassword) {
+            isValid = false;
+            confirmPasswordError.removeClass('d-none');
+            confirmPasswordInput.addClass('is-invalid');
+        } else {
+            confirmPasswordError.addClass('d-none');
+            confirmPasswordInput.removeClass('is-invalid');
+        }
 
-        // Load districts when region changes
-        $('#id_regions').change(function () {
-            const regionId = $(this).val();
-            const districtSelect = $('#id_district');
-            const quarterSelect = $('#id_quarters');
+        return isValid;
+    };
 
-            districtSelect.empty().append(new Option('Tanlanmagan', '')).prop('disabled', true);
-            quarterSelect.empty().append(new Option('Tanlanmagan', '')).prop('disabled', true);
+    // Form submit handler
+    $('form').on('submit', function (e) {
+        e.preventDefault();
 
-            if (regionId) {
-                $.ajax({
-                    url: `/api/get-districts/${regionId}/`,
-                    type: 'GET',
-                    success: function (data) {
-                        districtSelect.prop('disabled', false);
-                        data.forEach(function (district) {
-                            districtSelect.append(new Option(district.name, district.id));
-                        });
-                    },
-                    error: function () {
-                        toastr.error('Tumanlarni yuklashda xatolik yuz berdi.');
+        if (validateForm()) {
+            const formData = new FormData(this);
+
+            $.ajax({
+                url: this.action,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        $('form')[0].reset();
+                    } else {
+                        toastr.error(response.message);
                     }
-                });
-            }
-        });
-
-        // Load quarters when district changes
-        $('#id_district').change(function () {
-            const districtId = $(this).val();
-            const quarterSelect = $('#id_quarters');
-
-            quarterSelect.empty().append(new Option('Tanlanmagan', '')).prop('disabled', true);
-
-            if (districtId) {
-                $.ajax({
-                    url: `/api/get-quarters/${districtId}/`,
-                    type: 'GET',
-                    success: function (data) {
-                        quarterSelect.prop('disabled', false);
-                        data.forEach(function (quarter) {
-                            quarterSelect.append(new Option(quarter.name, quarter.id));
-                        });
-                    },
-                    error: function () {
-                        toastr.error('Mahallalarni yuklashda xatolik yuz berdi.');
-                    }
-                });
-            }
-        });
+                },
+                error: function () {
+                    toastr.error('Xatolik yuz berdi. Iltimos, keyinroq urinib ko‘ring.');
+                }
+            });
+        }
     });
+
+    // Real-time validation feedback
+    $('[required]').on('input', function () {
+        const field = $(this);
+        if (field.val().trim()) {
+            field.removeClass('is-invalid');
+        }
+    });
+
+    // Select2 initialization
+    $('#id_regions, #id_district, #id_quarters, #id_roles').select2({
+        placeholder: 'Tanlang',
+        allowClear: true
+    });
+
+    // Handle district and quarter dropdowns
+    $('#id_district').prop('disabled', true);
+    $('#id_quarters').prop('disabled', true);
+
+    // Load districts when region changes
+    $('#id_regions').change(function () {
+        const regionId = $(this).val();
+        const districtSelect = $('#id_district');
+        const quarterSelect = $('#id_quarters');
+
+        districtSelect.empty().append(new Option('Tanlanmagan', '')).prop('disabled', true);
+        quarterSelect.empty().append(new Option('Tanlanmagan', '')).prop('disabled', true);
+
+        if (regionId) {
+            $.ajax({
+                url: `/api/get-districts/${regionId}/`,
+                type: 'GET',
+                success: function (data) {
+                    districtSelect.prop('disabled', false);
+                    data.forEach(function (district) {
+                        districtSelect.append(new Option(district.name, district.id));
+                    });
+                },
+                error: function () {
+                    toastr.error('Tumanlarni yuklashda xatolik yuz berdi.');
+                }
+            });
+        }
+    });
+
+    // Load quarters when district changes
+    $('#id_district').change(function () {
+        const districtId = $(this).val();
+        const quarterSelect = $('#id_quarters');
+
+        quarterSelect.empty().append(new Option('Tanlanmagan', '')).prop('disabled', true);
+
+        if (districtId) {
+            $.ajax({
+                url: `/api/get-quarters/${districtId}/`,
+                type: 'GET',
+                success: function (data) {
+                    quarterSelect.prop('disabled', false);
+                    data.forEach(function (quarter) {
+                        quarterSelect.append(new Option(quarter.name, quarter.id));
+                    });
+                },
+                error: function () {
+                    toastr.error('Mahallalarni yuklashda xatolik yuz berdi.');
+                }
+            });
+        }
+    });
+});
+
 </script>
 
 {% endblock page_js %}
@@ -350,7 +357,7 @@
           {% for role in roles %}
             <div class="col-md-4">
               <div class="form-check">
-                <input type="checkbox" name="roles" value="{{ role.id }}" id="role_{{ role.id }}"
+                <input type="radio" name="roles" value="{{ role.code }}" id="role_{{ role.id }}"
                        class="form-check-input">
                 <label for="role_{{ role.id }}" class="form-check-label">{{ role.name }}</label>
               </div>

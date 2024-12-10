@@ -32,11 +32,13 @@
 {% block content %}
   <div class="app-academy">
     <div class="card p-0 mb-6">
+      {% if user.now_role == "6" %}
       <div class="card-header d-flex justify-content-end align-items-center bg-light">
         <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addCenterModal">
           <i class="ti ti-plus ti-xs me-1"></i> Qo'shish
         </button>
       </div>
+      {% endif %}
 
       <div class="card-body d-flex flex-column flex-md-row justify-content-between p-0 pt-4">
         <div class="card-body invoice-preview-header rounded" id="all-centers">
@@ -62,7 +64,7 @@
             <h5 class="modal-title" id="addCenterModalLabel">O'quv Markaz Qo'shish</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <form id="addCenterForm">
+          <form id="addCenterForm"  method="POST">
             {% csrf_token %}
             <div class="modal-body">
               <div class="mb-3">

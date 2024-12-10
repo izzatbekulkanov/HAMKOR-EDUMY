@@ -1,212 +1,179 @@
-<!DOCTYPE html>
+{% extends layout_path %}
+
 {% load static %}
-<html lang="uz">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - HAMKOR | EDUMY</title>
+{% load i18n %}
 
-  <!-- Vue.js CDN -->
-  <script src="{% static 'vendor/js/vue.global.prod.js' %}"></script>
+{% block title %}Kirish sahifasi{% endblock %}
 
-  <!-- TailwindCSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+{% block vendor_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'vendor/libs/@form-validation/form-validation.css' %}" />
+{% endblock vendor_css %}
 
-  <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      font-family: 'Roboto', sans-serif;
-    }
+{% block vendor_js %}
+{{ block.super }}
+<script src="{% static 'vendor/libs/@form-validation/popular.js' %}"></script>
+<script src="{% static 'vendor/libs/@form-validation/bootstrap5.js' %}"></script>
+<script src="{% static 'vendor/libs/@form-validation/auto-focus.js' %}"></script>
+{% endblock vendor_js %}
 
-    .login-container {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 100%;
-      max-width: 400px;
-      background: rgba(255, 255, 255, 0.31);
-      border-radius: 12px;
-      padding: 30px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    }
+{% block page_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'vendor/css/pages/page-auth.css' %}" />
+{% endblock page_css %}
 
-    .form-control {
-      width: 100%;
-      margin-bottom: 20px;
-      padding: 10px 15px;
-      font-size: 1rem;
-      border-radius: 8px;
-      border: 1px solid #000000;
-      background: rgba(255, 255, 255, 0.45);
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
+{% block page_js %}
+{{ block.super }}
+<script src="{% static 'js/pages-auth.js' %}"></script>
+{% endblock page_js %}
 
-    .form-control:focus {
-      border-color: #2563eb;
-      box-shadow: 0 0 8px rgba(37, 99, 235, 0.5);
-      outline: none;
-    }
+{% block content %}
+<div id="login-container">
+  <div class="authentication-wrapper authentication-cover">
+    <a href="{% url 'index' %}" class="app-brand auth-cover-brand">
+      <span class="app-brand-logo demo">{% include 'partials/logo.html' with height=20 bgcolor="fill: #fff;" %}</span>
+      <span class="app-brand-text demo text-heading fw-bold">{% get_theme_variables 'template_name' %}</span>
+    </a>
 
-    .btn-primary {
-      width: 100%;
-      padding: 12px;
-      font-size: 1rem;
-      font-weight: bold;
-      border-radius: 8px;
-      color: whitesmoke;
-      background: linear-gradient(90deg, #1d4ed8, #2563eb);
-      border: none;
-      cursor: pointer;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
+    <div class="authentication-inner row m-0">
+      <div class="d-none d-lg-flex col-lg-8 p-0">
+        <div class="auth-cover-bg auth-cover-bg-color d-flex justify-content-center align-items-center">
+          <img src="{% static 'img/illustrations/auth-login-illustration-' %}{{ COOKIES.style|default:style }}.png" alt="auth-login-cover" class="my-5 auth-illustration">
+          <img src="{% static 'img/illustrations/bg-shape-image-' %}{{ COOKIES.style|default:style }}.png" alt="auth-login-cover" class="platform-bg">
+        </div>
+      </div>
 
-    .btn-success {
-      width: 100%;
-      padding: 12px;
-      font-size: 1rem;
-      font-weight: bold;
-      border-radius: 8px;
-      color: whitesmoke;
-      background: linear-gradient(90deg, #1a7a02, rgba(41, 149, 27, 0.62));
-      border: none;
-      cursor: pointer;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
+      <!-- Kirish formasi -->
+      <div class="d-flex col-12 col-lg-4 align-items-center authentication-bg p-sm-12 p-6">
 
-    .btn-success:hover {
-      transform: scale(1.05);
-      box-shadow: 0 10px 20px rgba(103, 235, 37, 0.5);
-    }
+        <div class="w-px-400 mx-auto mt-12 pt-5">
+          <h4 class="mb-1">Xush kelibsiz {% get_theme_variables 'template_name' %}! 👋</h4>
+          <p class="mb-6">Tizimga kirib, sarguzashtingizni boshlang</p>
+          <!-- Xabarni ko'rsatish uchun joy -->
 
-    .btn-primary:hover {
-      transform: scale(1.05);
-      box-shadow: 0 10px 20px rgba(37, 99, 235, 0.5);
-    }
 
-    .footer {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 0.85rem;
-      color: #9ca3af;
-    }
+          <form id="login-form" class="mb-6">
+            {% csrf_token %}
+            <div class="mb-6">
+              <label for="email" class="form-label">Email, Foydalanuvchi nomi, Telefon raqam</label>
+              <input type="text" id="login-input" class="form-control" placeholder="Email, foydalanuvchi nomi yoki telefon raqam" required />
+            </div>
+            <div class="mb-6 form-password-toggle">
+              <label class="form-label" for="password">Parol</label>
+              <div class="input-group input-group-merge">
+                <input type="password" id="password" class="form-control" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" aria-describedby="password" required />
+                <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+              </div>
+            </div>
 
-    .back-button {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: rgba(255, 255, 255, 0.9);
-      padding: 8px 12px;
-      font-size: 0.9rem;
-      font-weight: bold;
-      border-radius: 8px;
-      color: #2563eb;
-      text-decoration: none;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      transition: background-color 0.3s, box-shadow 0.3s;
-    }
-
-    .back-button:hover {
-      background: rgba(37, 99, 235, 0.2);
-      box-shadow: 0 6px 15px rgba(37, 99, 235, 0.4);
-    }
-  </style>
-</head>
-<body>
-  <!-- Back to Homepage Button -->
-  <a href="{% url 'index' %}" class="back-button">Sahifaga qaytish</a>
-
-  <!-- Vue.js App -->
-  <div id="app" class="login-container">
-    <h1 class="text-2xl font-bold mb-4 text-center">HAMKOR | EDUMY</h1>
-    <p class="text-gray-500 mb-6 text-center">Kirish uchun ma'lumotlarni kiriting</p>
-
-    <!-- Error Messages -->
-    <div v-if="messages.length" class="mb-4">
-      <div
-        v-for="(message, index) in messages"
-        :key="index"
-        class="p-3 text-sm rounded bg-red-100 text-red-800 border border-red-300 mb-2"
-      >
-        {{ message }}
+{#            <div class="my-8">#}
+{#              <div class="d-flex justify-content-between">#}
+{#                <div class="form-check mb-0 ms-2">#}
+{#                  <input class="form-check-input" type="checkbox" id="remember-me">#}
+{#                  <label class="form-check-label" for="remember-me">Meni eslab qoling</label>#}
+{#                </div>#}
+{#                <a href="#">#}
+{#                  <p class="mb-0">Parolni unutdingizmi?</p>#}
+{#                </a>#}
+{#              </div>#}
+{#            </div>#}
+            <button type="submit" class="btn btn-primary d-grid w-100">
+              Kirish
+            </button>
+          </form>
+          <p class="text-center">
+            <button id="register-button" class="btn btn-success d-grid w-100" type="button">Ro'yhatdan o'tish</button>
+          </p>
+          <div id="alert-container" class="alert d-none" role="alert"></div>
+        </div>
       </div>
     </div>
-
-    <form @submit.prevent="loginUser">
-      <input
-        type="text"
-        v-model="email"
-        class="form-control"
-        placeholder="Email yoki foydalanuvchi nomi"
-        required
-      />
-      <input
-        type="password"
-        v-model="password"
-        class="form-control"
-        placeholder="Parol"
-        required
-      />
-      <button type="submit" class="btn-primary">Kirish</button>
-      <button
-        @click="redirectToRegister"
-        class="btn-success mt-3"
-        type="button"
-      >
-        Ro'yhatdan o'tish
-      </button>
-    </form>
-
-    <div class="footer">
-      <p>© HAMKOR | EDUMY - 2024</p>
-      <p>Dasturchi: <strong>Izzatbek Ulkanov</strong></p>
-    </div>
   </div>
+</div>
 
-  <script>
-    // Vue.js Application
-    const app = Vue.createApp({
-      data() {
-        return {
-          email: '',
-          password: '',
-          messages: [],
-        };
-      },
-      methods: {
-        loginUser() {
-          const payload = {
-            email: this.email,
-            password: this.password,
-          };
 
-          fetch("{% url 'jwt_login' %}", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(payload),
-          })
-            .then((response) => {
-              if (!response.ok) throw new Error("Login yoki parol noto'g'ri.");
-              return response.json();
-            })
-            .then((data) => {
-              window.location.href = "{% url 'main-administrator' %}";
-            })
-            .catch((error) => {
-              this.messages = ["Login yoki parol noto'g'ri. Qayta urinib ko'ring."];
-            });
-        },
-        redirectToRegister() {
-          window.location.href = "{% url 'register' %}";
-        },
-      },
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const loginForm = document.getElementById("login-form");
+    const alertContainer = document.getElementById("alert-container");
+    const loginInput = document.getElementById("login-input");
+    const registerButton = document.getElementById("register-button");
+
+    // Telefon raqamni formatlash funksiyasi
+    function formatPhoneNumber(value) {
+      const cleanValue = value.replace(/\D/g, ""); // Faqat raqamlarni qoldirish
+      if (cleanValue.startsWith("998")) {
+        return "+998 " + cleanValue.slice(3, 5) + " " + cleanValue.slice(5, 8) + " " + cleanValue.slice(8, 10) + " " + cleanValue.slice(10, 12);
+      }
+      return cleanValue;
+    }
+
+    // Telefon raqam kiritilganda avtomatik formatlash
+    loginInput.addEventListener("input", function () {
+      const value = loginInput.value.trim();
+      if (value.startsWith("998") || value.startsWith("+998")) {
+        loginInput.value = formatPhoneNumber(value);
+      }
     });
 
-    app.mount("#app");
-  </script>
-</body>
-</html>
+    // Xabarni ko'rsatish funksiyasi
+    function showAlert(message, type) {
+      alertContainer.textContent = message;
+      alertContainer.className = `alert alert-${type} mt-3`; // alert-success yoki alert-danger
+      alertContainer.classList.remove("d-none");
+    }
+
+    // Formani yuborish
+    loginForm.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const loginValue = loginInput.value.trim();
+      const password = document.getElementById("password").value.trim();
+      const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+
+      if (!loginValue || !password) {
+        showAlert("Login yoki parol kiritilishi shart.", "danger");
+        return;
+      }
+
+      // Foydalanuvchi ma'lumotlarini serverga yuborish
+      const payload = {
+        login_input: loginValue,
+        password: password,
+      };
+
+      fetch("{% url 'DRF_login' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken,
+        },
+        body: JSON.stringify(payload),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            return response.json().then((data) => {
+              throw new Error(data.error || "Login yoki parol noto'g'ri.");
+            });
+          }
+          return response.json();
+        })
+        .then((data) => {
+          showAlert(data.message || "Muvaffaqiyatli tizimga kirildi!", "success");
+          setTimeout(() => {
+            window.location.href = "{% url 'main-page-administrator' %}";
+          }, 100);
+        })
+        .catch((error) => {
+          showAlert(error.message || "Login yoki parol noto'g'ri.", "danger");
+        });
+    });
+
+    // Ro'yhatdan o'tish tugmasi
+    registerButton.addEventListener("click", function () {
+      window.location.href = "{% url 'register' %}";
+    });
+  });
+</script>
+
+{% endblock content %}

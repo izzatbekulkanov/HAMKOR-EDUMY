@@ -17,11 +17,12 @@ class SaveRolesView(View):
 
         # Rol kodlarini odam tushunarli nomlarga mapping qilish
         role_mappings = {
-            "ceo_administrator": "Bosh admin",
-            "administrator": "Kichik admin",
-            "partner": "Hamkor",
-            "director": "Direktor",
-            "student": "O'quvchi"
+            "5": "Administrator | CEO",
+            "4": "Menejer",
+            "2": "Hamkor",
+            "3": "Direktor",
+            "1": "O'quvchi",
+            "6": "Superadmin"  # Yangi Superadmin roli qo'shilmoqda
         }
 
         # Saqlangan rollar ro'yxatini kuzatish uchun
@@ -33,9 +34,16 @@ class SaveRolesView(View):
             role_name = role_mappings.get(role_code, role_code)  # Agar mapping mavjud bo'lmasa, code'dan foydalanish
 
             # Mavjudligini tekshirish va agar yo'q bo'lsa yaratish
-            role, created = Roles.objects.get_or_create(code=role_code, defaults={'name': role_name})
+            role, created = Roles.objects.update_or_create(code=role_code, defaults={'name': role_name})
             if created:
                 created_roles.append(f"{role_name} (ID: {role.id})")  # Rol nomi va ID ni qo'shish
+
+        # Superadmin rolini avtomatik ravishda yaratish
+        superadmin_role, superadmin_created = Roles.objects.update_or_create(
+            code="6", defaults={'name': "Superadmin"}
+        )
+        if superadmin_created:
+            created_roles.append(f"Superadmin (ID: {superadmin_role.id})")
 
         # Javobni qaytarish
         return JsonResponse({
