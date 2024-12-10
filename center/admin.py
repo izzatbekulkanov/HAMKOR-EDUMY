@@ -1,13 +1,37 @@
 from django.contrib import admin
 from django import forms
 from django.forms.widgets import CheckboxSelectMultiple
+from django.utils.html import format_html
+
 from .models import Center, Images, Filial, Kasb, Yonalish, Kurs, E_groups, GroupMembership, SubmittedStudent
 
 @admin.register(Center)
 class CenterAdmin(admin.ModelAdmin):
-    list_display = ('nomi', 'rahbari')
-    search_fields = ('nomi', 'rahbari__username')
-    list_filter = ('nomi',)
+    list_display = ('nomi', 'rahbari', 'get_schools', 'is_active', 'is_verified', 'all_views', 'created_at')
+    search_fields = ('nomi', 'rahbari__username', 'rahbari__first_name', 'rahbari__last_name', 'maktab__nomi')
+    list_filter = ('is_active', 'is_verified', 'all_views', 'maktab')  # Filterlarda `all_views` ni qo'shish
+    filter_horizontal = ('maktab',)  # ManyToManyField uchun
+    list_editable = ('is_active', 'is_verified', 'all_views')  # `all_views` maydonini tahrirlashga qo'shish
+    readonly_fields = ('created_at', 'updated_at')  # Faqat o'qish uchun maydonlar
+
+    def get_schools(self, obj):
+        """
+        Maktablar ro'yxatini qaytaradi.
+        """
+        schools = obj.maktab.all()
+        if schools:
+            return format_html("<br>".join([school.nomi for school in schools]))
+        return "Maktablar yo'q"
+
+    get_schools.short_description = "Maktablar"
+
+    def save_model(self, request, obj, form, change):
+        """
+        Modelni saqlash vaqtida foydalanuvchi faoliyatini kuzatish.
+        """
+        if not obj.rahbari:
+            obj.rahbari = request.user  # Agar rahbar belgilanmagan bo'lsa, joriy foydalanuvchini rahbar qilib belgilang
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(Images)

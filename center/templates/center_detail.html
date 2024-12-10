@@ -1,0 +1,524 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}O'quvchilarni qabul qilish{% endblock %}
+
+{% block vendor_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/select2/select2.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/toastr/toastr.css' %}" />
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+  {{ block.super }}
+  <script src="{% static 'vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
+  <script src="{% static 'vendor/libs/select2/select2.js' %}"></script>
+  <script src="{% static 'vendor/libs/toastr/toastr.js' %}"></script>
+{% endblock vendor_js %}
+
+{% block page_css %}
+  {{ block.super }}
+{% endblock page_css %}
+
+{% block page_js %}
+  {{ block.super }}
+
+
+{% endblock page_js %}
+
+{% block content %}
+<div class="container mt-4">
+
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb bg-light p-3 rounded">
+      <li class="breadcrumb-item">
+        <a href="{% url 'main-page-administrator' %}" class="text-decoration-none text-primary">
+          <i class="ti ti-home"></i> Bosh sahifa
+        </a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'learning-center' %}" class="text-decoration-none text-primary">
+          O'quv markaz
+        </a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">O'quv markaz ma'lumotlari</li>
+    </ol>
+  </nav>
+
+  <!-- Go Back Button -->
+  <div class="mb-4">
+    <a href="{% url 'learning-center' %}" class="btn btn-outline-secondary">
+      <i class="ti ti-arrow-back"></i> Orqaga
+    </a>
+  </div>
+
+<!-- Center Details -->
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <h2 class="text-primary">{{ center.nomi }}</h2>
+    <p><strong>Markaz rahbari:</strong> {{ center.rahbari.get_full_name }}</p>
+    <p><strong>Telefon:</strong> {{ center.rahbari.phone_number }}</p>
+    <p>
+      <strong>Tasdiqlangan:</strong>
+      <span class="badge {{ center.is_verified|yesno:'bg-success,bg-danger' }}">
+        {{ center.is_verified|yesno:"Ha,Yo'q" }}
+      </span>
+    </p>
+    {% if request.user.is_superuser %}
+    <div class="form-check form-switch">
+      <input
+        class="form-check-input"
+        type="checkbox"
+        id="centerIsActiveSwitch"
+        {% if center.is_verified %}checked{% endif %}
+        onclick="toggleCenterIsActive({{ center.id }}, this.checked)">
+      <label class="form-check-label" for="centerIsActiveSwitch">
+        Faollikni o'zgartirish
+      </label>
+    </div>
+
+    <div class="form-check form-switch mt-3">
+      <input
+        class="form-check-input"
+        type="checkbox"
+        id="centerAllViewsSwitch"
+        {% if center.all_views %}checked{% endif %}
+        onclick="toggleCenterAllViews({{ center.id }}, this.checked)">
+      <label class="form-check-label" for="centerAllViewsSwitch">
+        Barchaga ko'rinishni o'zgartirish
+      </label>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- School Details -->
+<div class="mb-4 border-opacity-10 border-bottom-dashed">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="text-muted">Maktablar</h3>
+    <button class="btn btn-outline-info btn-sm" id="toggleSchoolsBtn">Ko‘rsatish</button>
+  </div>
+  <div id="schoolsSection" style="display: none;">
+    <div class="row gy-4">
+      <!-- Left Side: Available Schools -->
+      <div class="col-lg-6">
+        <div class="card shadow-sm border-0 h-100">
+          <div class="card-header bg-transparent">
+            <h5 class="mb-0 text-muted">Mavjud Maktablar</h5>
+          </div>
+          <div class="card-body">
+            <!-- Filters -->
+            <div class="mb-3">
+              <label for="filterRegion" class="form-label">Viloyat</label>
+              <select id="filterRegion" class="form-select">
+                <option value="" selected>Barchasi</option>
+                <!-- Viloyatlar dynamic ravishda to‘ldiriladi -->
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="filterDistrict" class="form-label">Tuman</label>
+              <select id="filterDistrict" class="form-select" disabled>
+                <option value="" selected>Barchasi</option>
+                <!-- Tumanlar dynamic ravishda to‘ldiriladi -->
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="searchSchool" class="form-label">Qidirish</label>
+              <input type="text" id="searchSchool" class="form-control" placeholder="Maktabni qidirish...">
+            </div>
+
+            <!-- Schools List -->
+            <div id="availableSchools" class="list-group">
+              <p class="text-center text-muted">Maktablar yuklanmoqda...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Side: Selected Schools -->
+      <div class="col-lg-6">
+        <div class="card shadow-sm border-0 h-100">
+          <div class="card-header bg-transparent">
+            <h5 class="mb-0 text-muted">Biriktirilgan Maktablar</h5>
+          </div>
+          <div class="card-body">
+            <div id="selectedSchools" class="list-group">
+              <p class="text-center text-muted">Hozircha hech qanday maktab biriktirilmagan.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Filiallar -->
+<div class="mb-4 border-opacity-10 border-bottom-dashed">
+  <h3 class="text-muted">
+    Filiallar
+    <button id="toggleFilialsBtn" class="btn btn-sm btn-outline-secondary float-end">Ko‘rsatish</button>
+  </h3>
+  <ul id="filialsList" class="list-group" style="display: none;">
+    {% for filial in filials %}
+    <li class="list-group-item">
+      <strong>{{ filial.location }}</strong> - {{ filial.contact }}
+      (<a href="{{ filial.telegram }}" target="_blank" class="text-decoration-none text-primary">Telegram</a>)
+    </li>
+    {% empty %}
+    <li class="list-group-item text-center">Hech qanday filial topilmadi.</li>
+    {% endfor %}
+  </ul>
+</div>
+
+<!-- Kasblar -->
+<div class="mb-4 border-opacity-10 border-bottom-dashed">
+  <h3 class="text-muted">
+    Kasblar
+    <button id="toggleKasblarBtn" class="btn btn-sm btn-outline-secondary float-end">Ko‘rsatish</button>
+  </h3>
+  <ul id="kasblarList" class="list-group" style="display: none;">
+    {% for kasb in kasblar %}
+    <li class="list-group-item">{{ kasb.nomi }}</li>
+    {% empty %}
+    <li class="list-group-item text-center">Hech qanday kasb topilmadi.</li>
+    {% endfor %}
+  </ul>
+</div>
+
+<!-- Yo'nalishlar -->
+<div class="mb-4 border-opacity-10 border-bottom-dashed">
+  <h3 class="text-muted">
+    Yo'nalishlar
+    <button id="toggleYonalishlarBtn" class="btn btn-sm btn-outline-secondary float-end">Ko‘rsatish</button>
+  </h3>
+  <ul id="yonalishlarList" class="list-group" style="display: none;">
+    {% for yonalish in yonalishlar %}
+    <li class="list-group-item">{{ yonalish.nomi }}</li>
+    {% empty %}
+    <li class="list-group-item text-center">Hech qanday yo'nalish topilmadi.</li>
+    {% endfor %}
+  </ul>
+</div>
+
+<!-- Kurslar -->
+<div class="mb-4 border-opacity-10 border-bottom-dashed">
+  <div class="d-flex justify-content-between align-items-center">
+    <h3 class="text-muted mb-3">Kurslar</h3>
+    <button class="btn btn-outline-secondary btn-sm" id="toggleCoursesBtn">Ko'rsatish</button>
+  </div>
+  <ul class="list-group" id="coursesList" style="display: none;">
+    {% for kurs in kurslar %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      <div>
+        <h5 class="mb-1 text-primary">{{ kurs.nomi }}</h5>
+        <p class="mb-1">
+          <strong>Narxi:</strong> {{ kurs.narxi }} UZS
+        </p>
+        <small><strong>Yaratilgan:</strong> {{ kurs.created_at|date:"Y-m-d" }}</small>
+      </div>
+      <span class="badge bg-primary rounded-pill">{{ kurs.narxi }} UZS</span>
+    </li>
+    {% empty %}
+    <li class="list-group-item text-center text-muted">Hech qanday kurs topilmadi.</li>
+    {% endfor %}
+  </ul>
+</div>
+
+<!-- E-guruhlar -->
+<div class="mb-4  border-opacity-10 border-bottom-dashed  ">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="text-muted">E-guruhlar</h3>
+    <button class="btn btn-outline-success btn-sm" id="toggleGroupsBtn">Ko'rsatish</button>
+  </div>
+  <div id="groupsSection" style="display: none;">
+    <ul class="list-group">
+      {% for group in e_groups %}
+      <li class="list-group-item">
+        {{ group.group_name }} ({{ group.get_days_of_week_display }})
+      </li>
+      {% empty %}
+      <li class="list-group-item text-center">Hech qanday guruh topilmadi.</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+<!-- Yuborilgan O'quvchilar -->
+<div class="mb-4 border-opacity-10 border-bottom-dashed">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="text-muted">Yuborilgan O'quvchilar</h3>
+    <button class="btn btn-outline-primary btn-sm" id="toggleStudentsBtn">Ko'rsatish</button>
+  </div>
+  <div id="studentsSection" style="display: none;">
+    <ul class="list-group">
+      {% for student in submitted_students %}
+      <li class="list-group-item">
+        <strong>{{ student.first_name }} {{ student.last_name }}</strong> -
+        <span class="badge
+          {% if student.status == 'pending' %}bg-secondary
+          {% elif student.status == 'accepted' %}bg-success
+          {% elif student.status == 'accept_group' %}bg-info
+          {% elif student.status == 'rejected' %}bg-danger
+          {% endif %}">
+          {{ student.get_status_display }}
+        </span>
+      </li>
+      {% empty %}
+      <li class="list-group-item text-center">Hech qanday o'quvchi topilmadi.</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+
+
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // General toggle function
+    function setupToggle(buttonId, sectionId) {
+        const toggleButton = document.getElementById(buttonId);
+        const section = document.getElementById(sectionId);
+
+        if (toggleButton && section) {
+            toggleButton.addEventListener("click", function () {
+                const isHidden = section.style.display === "none";
+                section.style.display = isHidden ? "block" : "none";
+                toggleButton.textContent = isHidden ? "Yashirish" : "Ko‘rsatish";
+            });
+        }
+    }
+
+    // Setting up toggles
+    setupToggle("toggleCoursesBtn", "coursesList");       // Toggle for Courses
+    setupToggle("toggleSchoolsBtn", "schoolsSection");   // Toggle for Schools
+    setupToggle("toggleGroupsBtn", "groupsSection");     // Toggle for E-groups
+    setupToggle("toggleStudentsBtn", "studentsSection"); // Toggle for Students
+    setupToggle("toggleFilialsBtn", "filialsList");       // Toggle for Filiallar
+    setupToggle("toggleKasblarBtn", "kasblarList");       // Toggle for Kasblar
+    setupToggle("toggleYonalishlarBtn", "yonalishlarList"); // Toggle for Yo'nalishlar
+});
+
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const centerId = "{{ center.id }}"; // Center ID
+    const filterRegion = document.getElementById("filterRegion");
+    const filterDistrict = document.getElementById("filterDistrict");
+    const searchSchool = document.getElementById("searchSchool");
+    const availableSchools = document.getElementById("availableSchools");
+    const selectedSchools = document.getElementById("selectedSchools");
+
+    // Fetch and populate filters and schools
+    function fetchSchools() {
+        const region = filterRegion.value;
+        const district = filterDistrict.value;
+        const search = searchSchool.value.toLowerCase();
+
+        fetch(`/api/fetch-schools/?center_id=${centerId}&region=${region}&district=${district}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    populateSchools(data.all_schools, availableSchools, false, search);
+                    populateSchools(data.assigned_schools, selectedSchools, true);
+                    populateRegions(data.regions, region);
+                    populateDistricts(data.districts, district, Boolean(region));
+                } else {
+                    console.error(data.message);
+                }
+            })
+            .catch(error => console.error("Xatolik:", error));
+    }
+
+    // Helper function to truncate strings
+    function truncateString(str, length) {
+        return str.length > length ? str.substring(0, length) + "..." : str;
+    }
+
+    // Populate schools in the list
+    function populateSchools(schools, container, isAssigned, search = "") {
+        container.innerHTML = ""; // Clear the container
+
+        const filteredSchools = schools.filter(school =>
+            school.name.toLowerCase().includes(search)
+        );
+
+        if (filteredSchools.length === 0) {
+            container.innerHTML = `<p class="text-center text-muted">Viloyat va tumanlarni tanlang.</p>`;
+            return;
+        }
+
+        filteredSchools.forEach(school => {
+            const schoolItem = document.createElement("button");
+            schoolItem.className = "list-group-item list-group-item-action";
+
+            // Truncate fields to 13 characters
+            const region = truncateString(school.region || "", 13);
+            const district = truncateString(school.district || "", 13);
+            const name = truncateString(school.name, 13);
+
+            schoolItem.textContent = `${region} | ${district} | ${school.school_number} - ${name}`;
+            schoolItem.dataset.schoolId = school.id;
+
+            // Add double-click event
+            schoolItem.addEventListener("dblclick", () => {
+                if (isAssigned) {
+                    unassignSchoolFromCenter(school.id);
+                } else {
+                    assignSchoolToCenter(school.id);
+                }
+            });
+
+            container.appendChild(schoolItem);
+        });
+    }
+
+    // Populate regions and maintain selection
+    function populateRegions(regions, selectedRegion) {
+        filterRegion.innerHTML = '<option value="" selected>Barchasi</option>';
+        regions.forEach(region => {
+            const option = document.createElement("option");
+            option.value = region;
+            option.textContent = region;
+            if (region === selectedRegion) {
+                option.selected = true;
+            }
+            filterRegion.appendChild(option);
+        });
+    }
+
+    // Populate districts and maintain selection, disable if region is not selected
+    function populateDistricts(districts, selectedDistrict, regionSelected) {
+        filterDistrict.innerHTML = '<option value="" selected>Barchasi</option>';
+        filterDistrict.disabled = !regionSelected; // Disable if no region selected
+        if (regionSelected) {
+            districts.forEach(district => {
+                const option = document.createElement("option");
+                option.value = district;
+                option.textContent = district;
+                if (district === selectedDistrict) {
+                    option.selected = true;
+                }
+                filterDistrict.appendChild(option);
+            });
+        }
+    }
+
+    // Assign school to center
+    function assignSchoolToCenter(schoolId) {
+        fetch(`/api/assign-school-to-center/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}",
+            },
+            body: JSON.stringify({ center_id: centerId, school_id: schoolId }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                  toastr.success("Muvaffaqiyatli qo'shildi", "Muvaffaqiyatli")
+                    fetchSchools(); // Refresh
+                } else {
+                    toastr.error(data.message, "Hatolik")
+                    {#console.error(data.message);#}
+                }
+            })
+            .catch(error => console.error("Xatolik:", error));
+    }
+
+    // Unassign school from center
+    function unassignSchoolFromCenter(schoolId) {
+        fetch(`/api/unassign-school-from-center/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}",
+            },
+            body: JSON.stringify({ center_id: centerId, school_id: schoolId }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    toastr.success("Maktab o'quv markazdan muvaffaqiyatli ajradi", "Muvaffaqiyatli")
+                    fetchSchools(); // Refresh
+                } else {
+                    toastr.error(data.message, "Hatolik")
+                    {#console.error(data.message);#}
+                }
+            })
+            .catch(error => console.error("Xatolik:", error));
+    }
+
+    // Filter event listeners
+    filterRegion.addEventListener("change", fetchSchools);
+    filterDistrict.addEventListener("change", fetchSchools);
+    searchSchool.addEventListener("input", fetchSchools);
+
+    fetchSchools(); // Fetch initial data
+});
+
+
+</script>
+
+<script>
+  function toggleCenterStatus(centerId, apiUrl, successMessage, errorMessage) {
+    const csrfToken = "{{ csrf_token }}"; // CSRF token
+    fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrfToken,
+      },
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Dinamik muvaffaqiyat xabari
+          const message = data.message || successMessage;
+          toastr.success(message, "Muvaffaqiyatli");
+
+          if (apiUrl.includes("change-center-is-active")) {
+            setTimeout(() => {
+              location.reload(); // Sahifani yangilash faqat "is_active" uchun
+            }, 500);
+          }
+        } else {
+          toastr.error(errorMessage, "Hatolik");
+        }
+      })
+      .catch(error => {
+        console.error("Xatolik:", error);
+        toastr.error("Xatolik yuz berdi", "Hatolik");
+      });
+  }
+
+  // Faollik holatini o'zgartirish
+  function toggleCenterIsActive(centerId) {
+    const apiUrl = `/api/change-center-is-active/${centerId}/`;
+    const successMessage = "Faollik holati muvaffaqiyatli o'zgartirildi!";
+    const errorMessage = "Xato sodir bo'ldi. Iltimos, qayta urinib ko'ring";
+    toggleCenterStatus(centerId, apiUrl, successMessage, errorMessage);
+  }
+
+  // Barchaga ko'rinish holatini o'zgartirish
+  function toggleCenterAllViews(centerId) {
+    const apiUrl = `/api/toggle-center-all-views/${centerId}/`;
+    const successMessage = "Barchaga ko'rinish holati muvaffaqiyatli o'zgartirildi!";
+    const errorMessage = "Xato sodir bo'ldi. Iltimos, qayta urinib ko'ring";
+    toggleCenterStatus(centerId, apiUrl, successMessage, errorMessage);
+  }
+</script>
+
+
+
+
+{% endblock %}

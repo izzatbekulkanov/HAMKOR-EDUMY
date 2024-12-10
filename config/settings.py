@@ -42,6 +42,7 @@ GLOBAL_APPS = [
 ]
 
 SYSTEM_APPS = [
+    'jazzmin',
     "django.contrib.admin",
     "django.contrib.sites",
     "django.contrib.auth",
@@ -245,6 +246,167 @@ CSRF_TRUSTED_ORIGINS = [
     "https://ref.edumy.uz",
     "https://www.ref.edumy.uz",
 ]
+
+
+
+JAZZMIN_SETTINGS = {
+    # Title and Branding
+    "site_title": "Hamkor Edumy Admin",
+    "site_header": "Hamkor Edumy",
+    "site_brand": "Hamkor Edumy",
+    "site_logo": "img/branding/logo.png",
+    "site_icon": "img/hamkor/img/favicon.ico",
+    "welcome_sign": "Xush kelibsiz! Hamkor Edumy tizimiga kirish",
+    "copyright": "© 2024 Izzatbek Ulkanov",
+
+    ####################
+    # Login Page Setup #
+    ####################
+    "login_logo": "img/branding/logo.png",  # Kirish oynasi uchun logotip
+    "login_logo_dark": "img/branding/logo.png",  # Qorong'u mavzuda ishlatiladigan logotip
+    "login_background": "img/branding/login-bg.jpg",  # Kirish oynasi uchun fon rasmi
+    "user_avatar": "img/users/default-avatar.png",  # Foydalanuvchi uchun avatar rasmi
+
+
+    ################
+    # Sidebar Setup #
+    ################
+    "show_sidebar": True,
+    "navigation_expanded": False,  # Default: Auto-expand menus
+
+    # Sidebar ordering
+    "order_with_respect_to": [
+        "auth",
+        "account",
+        "center",
+        "school",
+        "auth_token",
+        "sites",
+    ],
+
+    #####################
+    # Top Navigation Bar #
+    #####################
+    "topmenu_links": [
+        {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "Contact", "url": "#", "new_window": True},
+        {"model": "auth.User"},  # User Model topmenyuda qidirish uchun
+    ],
+
+
+    #####################
+    # Sidebar Search #
+    #####################
+    "search_model": ["auth.User", "account.CustomUser", "auth.Group"],  # Sidebar qidiruv modeli
+
+
+
+    #################
+    # App Icons #
+    #################
+    "icons": {
+        # Auth
+        "auth": "fas fa-users-cog",
+        "auth.User": "fas fa-user",
+        "auth.Group": "fas fa-users",
+
+        # Account
+        "account": "fas fa-user",
+        "account.Cashback": "fas fa-coins",
+        "account.District": "fas fa-map-marker-alt",
+        "account.Gender": "fas fa-venus-mars",
+        "account.Quarters": "fas fa-th",
+        "account.Regions": "fas fa-globe",
+        "account.Roles": "fas fa-user-tag",
+        "account.CustomUser": "fas fa-user-circle",
+        "account.UserActivity": "fas fa-chart-line",
+
+        # Center
+        "center": "fas fa-building",
+        "center.Center": "fas fa-building",
+        "center.E_groups": "fas fa-users",
+        "center.Filial": "fas fa-map",
+        "center.Images": "fas fa-image",
+        "center.Kasb": "fas fa-briefcase",
+        "center.Kurs": "fas fa-graduation-cap",
+        "center.SubmittedStudent": "fas fa-check-circle",
+        "center.Yonalish": "fas fa-route",
+
+        # School
+        "school": "fas fa-school",
+        "school.Belgisi": "fas fa-tag",
+        "school.Maktab": "fas fa-building",
+        "school.Sinf": "fas fa-chalkboard-teacher",
+
+        # Sites
+        "sites": "fas fa-sitemap",
+        "sites.Site": "fas fa-line",
+    },
+
+    ######################
+    # Notification Items #
+    ######################
+    "usermenu_links": [
+        {"name": "Notifications", "url": "#", "icon": "fas fa-bell", "new_window": False},
+        {"name": "Messages", "url": "#", "icon": "fas fa-envelope", "new_window": False},
+        {"name": "Asosiy sahifa", "url": "/", "icon": "fas fa-cog", "new_window": False},  # `/` URL to‘g‘rilandi
+        # {"name": "Logout", "url": "/logout/", "icon": "fas fa-sign-out-alt", "new_window": False},
+    ],
+
+    "custom_links": {
+        "auth": [
+            {"name": "Logout", "url": "/logout/", "icon": "fas fa-sign-out-alt", "new_window": False},
+        ]
+    },
+
+    ##################
+    # Night Mode #
+    ##################
+    "theme": {
+        "default_mode": "dark",  # Default holatda qorong'u rejim
+        "toggle_button": True,  # Kun-tun rejimi tugmasi
+    },
+    #################
+    # UI Tweaks #
+    #################
+    "custom_css": "css/custom-adminlte.css",  # Add your custom CSS
+    "custom_js": "js/custom-adminlte.js",  # Add your custom JS
+    "use_google_fonts_cdn": True,
+    "show_ui_builder": True,
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": True,
+    "footer_small_text": True,
+    "body_small_text": False,
+    "brand_small_text": True,
+    "brand_colour": False,
+    "accent": "accent-primary",
+    "navbar": "navbar-dark",
+    "no_navbar_border": True,
+    "navbar_fixed": False,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-dark-primary",
+    "sidebar_nav_small_text": True,
+    "sidebar_disable_expand": True,
+    "sidebar_nav_child_indent": True,
+    "sidebar_nav_compact_style": True,
+    "sidebar_nav_legacy_style": True,
+    "sidebar_nav_flat_style": True,
+    "theme": "solar",
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    },
+    "actions_sticky_top": True
+}
 
 
 

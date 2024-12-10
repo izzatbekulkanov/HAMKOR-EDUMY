@@ -17,7 +17,8 @@ $(document).ready(function() {
         }
       },
       error: function() {
-        toastr.error('Kasblarni yuklashda xatolik yuz berdi.', 'Xatolik');
+        // toastr.error('Kasblarni yuklashda xatolik yuz berdi.', 'Xatolik');
+        console.log("Kasblarni yuklashda xatolik yuz berdi")
       }
     });
   }
@@ -64,7 +65,7 @@ $(document).ready(function() {
         }
       },
       error: function() {
-        toastr.error('Yo\'nalishlarni yuklashda xatolik yuz berdi.', 'Xatolik');
+        console.log("Yo\'nalishlarni yuklashda xatolik yuz berdi.")
       }
     });
   }

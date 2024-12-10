@@ -24,3 +24,4 @@ class AuthView(TemplateView):
         )
 
         return context
+

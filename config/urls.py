@@ -11,7 +11,6 @@ main_urlpatterns = [
     path("users/", include("account.urls")),
     path("school/", include("school.urls")),
     path("learning/", include("center.urls")),
-    path("users/", include("account.urls")),
     path("api/", include("api.urls")),
     # auth urls
     path("", include("auth.urls")),

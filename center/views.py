@@ -1,9 +1,11 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView, DetailView, UpdateView
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from account.models import CustomUser
-from center.models import Center, Filial, Images
+from center.models import Center, Filial, Images, SubmittedStudent, Kasb, Yonalish, Kurs, E_groups
+from school.models import Sinf
 from web_project import TemplateLayout
 from django.utils.decorators import method_decorator
 from django.urls import reverse
@@ -21,8 +23,51 @@ class CenterView(TemplateView):
         # Ma'lumotlarni context ga qo'shish
         context['centers'] = centers
 
+        # SubmittedStudent modelining ma'lumotlarini filtr bilan olish
+        if self.request.user.is_authenticated:  # Foydalanuvchi autentifikatsiyadan o'tganligini tekshirish
+            submitted_students = SubmittedStudent.objects.filter(added_by=self.request.user)
+        else:
+            submitted_students = SubmittedStudent.objects.none()  # Agar foydalanuvchi autentifikatsiyadan o'tmagan bo'lsa, bo'sh queryset
+
+        # Ma'lumotlarni context ga qo'shish
+        context['submitted_students'] = submitted_students
+
         return context
 
+class CenterDetailView(LoginRequiredMixin, DetailView):
+    model = Center
+    context_object_name = "center"
+    template_name = "center_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = TemplateLayout.init(self, super().get_context_data(**kwargs))
+
+        # Filiallar
+        context["filials"] = Filial.objects.filter(center=self.object)
+
+        # Kasblar
+        context["kasblar"] = Kasb.objects.filter(center=self.object)
+
+        # Yo'nalishlar
+        context["yonalishlar"] = Yonalish.objects.filter(center=self.object)
+
+        # Kurslar
+        context["kurslar"] = Kurs.objects.filter(center=self.object)
+
+        # E-guruhlar
+        context["e_groups"] = E_groups.objects.filter(kurs__center=self.object)
+
+        # Yuborilgan o'quvchilar
+        context["submitted_students"] = SubmittedStudent.objects.filter(filial__center=self.object)
+
+        # Maktablar
+        context["maktablar"] = self.object.maktab.all()  # Center bilan ManyToManyField orqali bog'langan barcha maktablar
+
+        # Sinflar
+        sinf_list = Sinf.objects.filter(maktab__in=self.object.maktab.all())
+        context["sinflar"] = sinf_list
+
+        return context
 
 @method_decorator(login_required, name='dispatch')
 class FilialDetailUpdateView(DetailView, UpdateView):

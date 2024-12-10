@@ -133,7 +133,12 @@
       <div class="card p-3 mb-4 shadow-sm border">
         <div class="d-flex justify-content-between align-items-center">
           <h5 class="mb-0 text-primary">${capitalizeWords(center.center_name)}</h5>
-          <span class="badge bg-primary">Filiallar: ${center.filials_count}</span>
+          <span class="badge bg-primary">
+            Filiallar: ${center.filials_count}
+            <a href="/learning/center-detail/${center.center_id}" class="text-light ms-2" title="Filiallarni ko'rish">
+              <i class="ti ti-external-link"></i>
+            </a>
+          </span>
         </div>
         <p class="mt-2"><strong>Markaz rahbari:</strong> ${adminFullName}</p>
         <p class="mt-2"><strong>Markaz rahbari ismi:</strong> ${adminFirstName} ${adminLastName}</p>

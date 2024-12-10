@@ -23,6 +23,7 @@ class LoginView(AuthView):
         # Login sahifasini ko'rsatish
         return super().get(request)
 
+
 @method_decorator(csrf_exempt, name='dispatch')
 class DjangoAuthLoginView(View):
     def post(self, request):

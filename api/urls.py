@@ -3,7 +3,9 @@ from django.urls import path
 
 from api.center.addCenter import AddCenterView
 from api.center.addFillial import AddFilialView
-from api.center.getCenter import GetCentersWithFilialsView, GetCenterDetailsView
+from api.center.changeIsActiveCenter import change_center_is_active, ToggleCenterAllViews
+from api.center.fetchSchool import FetchSchoolsView, AssignSchoolToCenterView, UnassignSchoolFromCenterView
+from api.center.getCenter import GetCentersWithFilialsView, GetCenterDetailsView, GetCentersForTeacherView
 from api.center.groups import GroupListView, KursFilterView, YonalishFilterView, KasbFilterView
 from api.center.occupations import KasbListView, KasbUpdateView, YonalishListView, KursListView, GetKasbAndYonalishView
 from api.center.statistics import StatisticsDashboardView
@@ -45,6 +47,7 @@ user_patterns = [
 center_patterns = [
     path('add-center/', AddCenterView.as_view(), name='add_center'),
     path('get-centers/', GetCentersWithFilialsView.as_view(), name='get-centers'),
+    path('get-centers-teacher/', GetCentersForTeacherView.as_view(), name='get-centers'),
     path('get-center-details/<int:center_id>/', GetCenterDetailsView.as_view(), name='get-center-details'),
     path("add-filial/<int:center_id>/", AddFilialView.as_view(), name="add-filial"),
     path('kasblar/', KasbListView.as_view(), name='kasb_list_create'),
@@ -58,6 +61,13 @@ center_patterns = [
     path('statistics/', StatisticsDashboardView.as_view(), name='statistics_dashboard'),
 
     path('get-kasb-yonalish/', GetKasbAndYonalishView.as_view(), name='get-kasb-yonalish'),
+
+    path("change-center-is-active/<int:pk>/", change_center_is_active, name="change-center-is-active"),
+
+    path("fetch-schools/", FetchSchoolsView.as_view(), name="fetch-schools"),
+    path("assign-school-to-center/", AssignSchoolToCenterView.as_view(), name="assign-school-to-center"),
+    path("unassign-school-from-center/", UnassignSchoolFromCenterView.as_view(), name="unassign-school-from-center"),
+    path("toggle-center-all-views/<int:center_id>/", ToggleCenterAllViews.as_view(), name="toggle-center-all-views"),
 
 ]
 

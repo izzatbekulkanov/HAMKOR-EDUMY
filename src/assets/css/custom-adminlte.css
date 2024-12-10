@@ -1,0 +1,16 @@
+body {
+    font-family: 'Source Sans Pro', sans-serif;
+}
+
+.sidebar .nav-link {
+    color: #fff !important;
+}
+
+.sidebar .nav-link.active {
+    background-color: #007bff !important;
+    color: #fff !important;
+}
+
+.sidebar-dark-primary {
+    background-color: #343a40 !important;
+}

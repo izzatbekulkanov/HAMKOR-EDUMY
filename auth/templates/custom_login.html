@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hamkor Edumy Admin Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .login-container {
+      background: white;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      width: 300px;
+    }
+
+    .login-container h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .login-container form div {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    .login-container label {
+      font-size: 14px;
+      display: block;
+    }
+
+    .login-container input {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+      margin-top: 5px;
+    }
+
+    .login-container button {
+      width: 100%;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .errors {
+      color: red;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+<div class="login-container">
+  <h1>Hamkor Edumy Admin</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div>
+      <label for="id_username">Foydalanuvchi nomi:</label>
+      <input type="text" name="username" id="id_username" required>
+    </div>
+    <div>
+      <label for="id_password">Parol:</label>
+      <input type="password" name="password" id="id_password" required>
+    </div>
+    <button type="submit">Kirish</button>
+  </form>
+  {% if form.errors %}
+    <div class="errors">
+      <p>Foydalanuvchi nomi yoki parol noto'g'ri!</p>
+    </div>
+  {% endif %}
+</div>
+</body>
+</html>

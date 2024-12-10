@@ -51,11 +51,13 @@ class UserDetailView(TemplateView):
         context["phone_number"] = phone_number  # Telefon raqamni konteksga yuborish
         context["birth_date"] = user.birth_date  # Tug‘ilgan sanani konteksga yuborish
         context["gender"] = user.gender  # Genderni konteksga yuborish
+        context["type_choices"] = CustomUser.type_choice  # Type choice ma'lumotlari
         return context
 
     def post(self, request, *args, **kwargs):
         user_id = self.kwargs.get("pk")
         user = get_object_or_404(CustomUser, pk=user_id)
+        print(request.POST)
 
         # Foydalanuvchi ma'lumotlarini yangilash
         user.first_name = request.POST.get("first_name", user.first_name)
@@ -105,6 +107,12 @@ class UserDetailView(TemplateView):
             user.gender = gender  # Genderni foydalanuvchiga biriktirish
         else:
             user.gender = None
+
+        # Type choice va now_role yangilash
+        user_type = request.POST.get("type_choice", user.user_type)
+        if user_type in dict(CustomUser.type_choice):
+            user.user_type = user_type
+            user.now_role = user_type  # now_role maydonini user_type ga tenglashtirish
 
         user.save()
         messages.success(request, "Foydalanuvchi muvaffaqiyatli saqlandi!")

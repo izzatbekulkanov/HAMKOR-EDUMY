@@ -149,6 +149,15 @@
       ]
     },
     {
+      "url": "main-teacher",
+      "name": "Mening sahifam",
+      "icon": "menu-icon tf-icons ti ti-backpack",
+      "slug": "main-teacher",
+      "allowed_roles": [
+        "2"
+      ]
+    },
+    {
       "url": "teacher-cashback",
       "name": "Keshbek",
       "icon": "menu-icon tf-icons ti ti-brand-cashapp",
@@ -164,17 +173,6 @@
       "name": "O'quvchi yuborish",
       "icon": "menu-icon tf-icons ti ti-user-circle",
       "slug": "teacher-send-student",
-      "allowed_roles": [
-        "1",
-        "2",
-        "3"
-      ]
-    },
-    {
-      "url": "user-administrator",
-      "name": "Maktab",
-      "icon": "menu-icon tf-icons ti ti-backpack",
-      "slug": "user-administrator",
       "allowed_roles": [
         "1",
         "2",

@@ -165,9 +165,12 @@ class CustomUser(AbstractUser):
 
 class Cashback(models.Model):
     type_choices = (
-        ("1", "Referal tizim"),
-        ("2", "Kurs uchun to'lov"),
-        ("3", "Admin"),
+        ("1", "Ro'yhatdan o'tganlik uchun"),
+        ("2", "Qabul qilingani"),
+        ("3", "Kurs uchun to'lov"),
+        ("4", "Referal tizim"),
+        ("5", "Direktor uchun"),
+
         # Additional types if necessary
     )
 
@@ -176,15 +179,13 @@ class Cashback(models.Model):
 
     name = models.CharField(max_length=255, verbose_name="Cashback turi")
     summasi = models.BigIntegerField(verbose_name="Cashback summa", default=0)
+    parent_summ = models.BigIntegerField(verbose_name="Parent uchun summa", default=0)
     type = models.CharField(max_length=20, choices=type_choices, verbose_name="Turi", null=True, blank=True)
-    user_type = models.CharField(
-        max_length=20,
-        choices=filtered_user_type_choices,
-        verbose_name="Foydalanuvchi turi"
-    )  # New field with filtered user type choices
+    user_type = models.CharField(max_length=20, choices=filtered_user_type_choices, verbose_name="Foydalanuvchi turi")  # New field with filtered user type choices
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaratilgan vaqti")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="O'zgartirilgan vaqti")
     is_active = models.BooleanField(default=True, verbose_name="Faolmi")
+    center = models.ForeignKey('center.Center', on_delete=models.CASCADE, null=True, blank=True, verbose_name="O'quv markazi")
 
     def __str__(self):
         return self.name

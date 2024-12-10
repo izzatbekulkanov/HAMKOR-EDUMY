@@ -116,7 +116,7 @@ class RolesAdmin(admin.ModelAdmin):
 
 @admin.register(Cashback)
 class CashbackAdmin(admin.ModelAdmin):
-    list_display = ('name', 'type', 'user_type', 'summasi', 'is_active', 'created_at', 'updated_at')
+    list_display = ('name', 'type', 'user_type', 'summasi', 'parent_summ', 'is_active', 'created_at', 'updated_at')
     list_filter = ('type', 'user_type', 'is_active', 'created_at')
     search_fields = ('name', 'type', 'user_type')
     list_editable = ('is_active', 'summasi')
@@ -128,7 +128,7 @@ class CashbackAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('name', 'summasi', 'type', 'user_type')
+            'fields': ('name', 'summasi', 'parent_summ', 'type', 'user_type')
         }),
         ('Status', {
             'fields': ('is_active',)

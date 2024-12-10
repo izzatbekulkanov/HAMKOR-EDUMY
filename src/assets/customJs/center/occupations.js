@@ -80,7 +80,8 @@ $(document).ready(function() {
         }
       },
       error: function() {
-        toastr.error('Kasblarni yuklashda xatolik yuz berdi.', 'Xatolik');
+        // toastr.error('Kasblarni yuklashda xatolik yuz berdi.', 'Xatolik');
+        console.log("Kasblarni yuklashda xatolik yuz berdi")
       }
     });
   }

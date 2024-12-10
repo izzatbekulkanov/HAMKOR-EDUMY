@@ -85,46 +85,44 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+
 const populateCashbacks = (cashbacks) => {
   cashbackList.innerHTML = '';
   cashbacks.forEach((cashback) => {
     const card = `
-    <div class="col-lg-4 col-md-6 mb-4">
+    <div class="col-lg-4 col-md-6 mb-3">
       <div class="card border-0 shadow-sm h-100">
-        <div class="card-header text-white rounded-top">
-          <h5 class="card-title mb-0 fw-bold">${cashback.name}</h5>
+        <div class="card-header d-flex justify-content-between align-items-center bg-light">
+          <h6 class="card-title mb-0 text-primary fw-bold">${cashback.name}</h6>
         </div>
-        <div class="card-body">
-          <p class="card-text">
-            <span class="badge bg-success mb-2 d-block">Summasi: ${cashback.summasi}</span>
-            <span class="badge bg-info mb-2 d-block">Turi: ${cashback.type}</span>
-            <span class="badge bg-warning mb-2 d-block">Foydalanuvchi turi: ${cashback.user_type}</span>
-            <span class="badge ${cashback.is_active ? 'bg-primary' : 'bg-danger'} d-block">
-              Status: ${cashback.is_active ? 'Faol' : 'Nofaol'}
+        <div class="card-body small">
+          <p class="mb-1">
+            <strong>Summasi:</strong> ${cashback.summasi} |
+            <strong>Parent:</strong> ${cashback.parent_sum}
+          </p>
+          <p class="mb-1">
+            <strong>Turi:</strong> ${cashback.type} |
+            <strong>Foydalanuvchi turi:</strong> ${cashback.user_type}
+          </p>
+          <p class="mb-1">
+            <strong>Status:</strong> <span class="badge ${cashback.is_active ? 'bg-success' : 'bg-danger'}">
+              ${cashback.is_active ? 'Faol' : 'Nofaol'}
             </span>
           </p>
-          <div class="mt-4">
-            <h6 class="fw-bold text-muted">Foydalanuvchilar:</h6>
-            <ul class="list-group list-group-flush">
+          <div class="mt-2">
+            <strong>Foydalanuvchilar:</strong>
+            <ul class="list-group list-group-flush small">
               ${cashback.users
                 .map(
-                  (user) =>
-                    `<li class="list-group-item d-flex align-items-center">
+                  (user) => `
+                    <li class="list-group-item px-0 d-flex align-items-center">
                       <i class="ti ti-user text-primary me-2"></i>
-                      <span>${user.full_name} <small class="text-muted">(${user.email})</small></span>
+                      ${user.full_name} <small class="text-muted">(${user.email})</small>
                     </li>`
                 )
                 .join('')}
             </ul>
           </div>
-        </div>
-        <div class="card-footer bg-light d-flex justify-content-between align-items-center">
-          <button class="btn btn-outline-primary btn-sm shadow-sm rounded-pill">
-            <i class="ti ti-pencil"></i> O'zgartirish
-          </button>
-          <button class="btn btn-outline-danger btn-sm shadow-sm rounded-pill">
-            <i class="ti ti-trash"></i> O'chirish
-          </button>
         </div>
       </div>
     </div>

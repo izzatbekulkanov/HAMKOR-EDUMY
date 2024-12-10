@@ -11,13 +11,24 @@ try:
 except ImportError:
     from django.contrib.postgres.fields import JSONField  # Django versiyasi past bo'lsa
 
+
 class Center(models.Model):
     nomi = models.CharField(max_length=255, null=True, blank=True, verbose_name="Markaz nomi")
-    rahbari = models.ForeignKey("account.CustomUser", on_delete=models.CASCADE, max_length=100, null=True, blank=True, verbose_name="Rahbari")
+    rahbari = models.ForeignKey("account.CustomUser", on_delete=models.CASCADE, max_length=100, null=True, blank=True,
+                                verbose_name="Rahbari")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaratilgan vaqti")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="O'zgartirilgan vaqti")
     is_active = models.BooleanField(default=True, verbose_name="Faolmi")
     is_verified = models.BooleanField(default=False, verbose_name="Tasdiqlanganmi")
+    all_views = models.BooleanField(default=False, verbose_name="Barchaga ko'rinadi")
+
+    # Many-to-ManyField for schools
+    maktab = models.ManyToManyField(
+        "school.Maktab",
+        blank=True,
+        related_name="centers",
+        verbose_name="Maktablar",
+    )
 
     def __str__(self):
         return self.nomi or "Markaz"

@@ -96,11 +96,13 @@ $(document).ready(function() {
             yonalishDropdown.append(`<option value="${yonalish.id}">${yonalish.nomi}</option>`);
           });
         } else {
-          toastr.error('Yo\'nalishlarni yuklashda xatolik yuz berdi.', 'Xatolik');
+          // toastr.error('Yo\'nalishlarni yuklashda xatolik yuz berdi.', 'Xatolik');
+          console.log("Yo\'nalishlarni yuklashda xatolik yuz berdi.")
         }
       },
       error: function() {
-        toastr.error('Yo\'nalishlarni yuklashda xatolik yuz berdi.', 'Xatolik');
+        // toastr.error('Yo\'nalishlarni yuklashda xatolik yuz berdi.', 'Xatolik');
+        console.log("Yo\'nalishlarni yuklashda xatolik yuz berdi.")
       }
     });
   }
