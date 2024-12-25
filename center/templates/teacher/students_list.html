@@ -1,0 +1,202 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Send Student{% endblock %}
+
+{% block vendor_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
+<link rel="stylesheet" href="{% static 'vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css' %}" />
+<link rel="stylesheet" href="{% static 'vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css' %}" />
+<link rel="stylesheet" href="{% static 'vendor/libs/select2/select2.css' %}" />
+<link rel="stylesheet" href="{% static 'vendor/libs/toastr/toastr.css' %}" />
+<link rel="stylesheet" href="{% static 'vendor/libs/sweetalert2/sweetalert2.css' %}" />
+<style>
+  #studentsTable .badge {
+    font-size: 0.75rem; /* Kichikroq badge */
+    padding: 0.4em 0.6em; /* Kichikroq padding */
+  }
+</style>
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+{{ block.super }}
+<script src="{% static 'vendor/libs/moment/moment.js' %}"></script>
+<script src="{% static 'vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
+<script src="{% static 'vendor/libs/select2/select2.js' %}"></script>
+<script src="{% static 'vendor/libs/toastr/toastr.js' %}"></script>
+<script src="{% static 'vendor/libs/sweetalert2/sweetalert2.js' %}"></script>
+{% endblock vendor_js %}
+
+{% block page_js %}
+{{ block.super }}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const filterStatus = document.getElementById("filterStatus");
+    const filterDate = document.getElementById("filterDate");
+    const searchFirstName = document.getElementById("searchFirstName");
+    const searchLastName = document.getElementById("searchLastName");
+    const searchFilial = document.getElementById("searchFilial");
+    const tableRows = document.querySelectorAll("#studentsTable tbody tr");
+
+    // Filter va qidiruv funksiyasi
+    function filterTable() {
+        const status = filterStatus.value.toLowerCase();
+        const date = filterDate.value;
+        const firstName = searchFirstName.value.toLowerCase();
+        const lastName = searchLastName.value.toLowerCase();
+        const filial = searchFilial.value.toLowerCase();
+
+        tableRows.forEach(row => {
+            const rowStatus = row.getAttribute("data-status").toLowerCase();
+            const rowDate = row.querySelector("td:nth-child(9)").textContent.trim(); // Jadvaldagi vaqt ustuni
+            const rowFirstName = row.querySelector("td:nth-child(2)").textContent.toLowerCase();
+            const rowLastName = row.querySelector("td:nth-child(3)").textContent.toLowerCase();
+            const rowFilial = row.querySelector("td:nth-child(5)").textContent.toLowerCase();
+
+            // Filtrlar va qidiruvga moslikni tekshirish
+            const matchesStatus = !status || rowStatus.includes(status);
+            const matchesDate = !date || rowDate === date;
+            const matchesFirstName = !firstName || rowFirstName.includes(firstName);
+            const matchesLastName = !lastName || rowLastName.includes(lastName);
+            const matchesFilial = !filial || rowFilial.includes(filial);
+
+            // Qatorni ko'rsatish yoki yashirish
+            if (matchesStatus && matchesDate && matchesFirstName && matchesLastName && matchesFilial) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    }
+
+    // Event Listeners
+    filterStatus.addEventListener("change", filterTable);
+    filterDate.addEventListener("input", filterTable);
+    searchFirstName.addEventListener("input", filterTable);
+    searchLastName.addEventListener("input", filterTable);
+    searchFilial.addEventListener("input", filterTable);
+});
+
+</script>
+{% endblock page_js %}
+
+{% block content %}
+
+<!-- Yuborilgan O'quvchilar Ro'yhati -->
+<div class="card mt-4">
+  <div class="card-header">
+    <h5 class="card-title mb-0">Yuborilgan O'quvchilar Ro'yhati</h5>
+  </div>
+  <div class="card-body">
+    <!-- Filters -->
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label for="filterStatus" class="form-label">Status bo'yicha filtrlash</label>
+        <select class="form-select" id="filterStatus">
+          <option value="" selected>Barchasi</option>
+          <option value="pending">Kutilmoqda</option>
+          <option value="accepted">Qabul qilingan</option>
+          <option value="rejected">Rad etilgan</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label for="filterDate" class="form-label">Vaqt bo'yicha filtrlash</label>
+        <input type="date" class="form-control" id="filterDate" />
+      </div>
+    </div>
+
+    <!-- Search Inputs -->
+    <div class="row mb-3">
+      <div class="col-md-4">
+        <label for="searchFirstName" class="form-label">Ism bo'yicha qidiruv</label>
+        <input type="text" class="form-control" id="searchFirstName" placeholder="Ismni kiriting">
+      </div>
+      <div class="col-md-4">
+        <label for="searchLastName" class="form-label">Familiya bo'yicha qidiruv</label>
+        <input type="text" class="form-control" id="searchLastName" placeholder="Familiyani kiriting">
+      </div>
+      <div class="col-md-4">
+        <label for="searchFilial" class="form-label">Filial bo'yicha qidiruv</label>
+        <input type="text" class="form-control" id="searchFilial" placeholder="Filialni kiriting">
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover table-sm text-nowrap small" id="studentsTable">
+        <thead class="table-light">
+          <tr>
+            <th>#</th>
+            <th>Ismi</th>
+            <th>Familiyasi</th>
+            <th>Telefon</th>
+            <th>Filial</th>
+            <th>Sinf</th>
+            <th>Kurslar</th>
+            <th>Status</th>
+            <th>Vaqt</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for student in submitted_students %}
+          <tr data-status="{{ student.status }}">
+            <td class="fw-bold">{{ forloop.counter }}</td>
+            <td>{{ student.first_name }}</td>
+            <td>{{ student.last_name }}</td>
+            <td>{{ student.phone_number }}</td>
+            <td>{{ student.filial }}</td>
+            <td>{{ student.sinf }}-{{ student.belgisi }}</td>
+            <td>
+              {% if student.kurslar.exists %}
+              <ul class="list-unstyled mb-0 p-0">
+                {% for kurs in student.kurslar.all %}
+                <li>
+                  <span class="badge bg-secondary">{{ kurs.nomi }}</span>,
+                </li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <span class="text-muted">Kurs yo'q</span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="d-flex justify-content-center align-items-center">
+                {% if student.get_status_display == "Kutilmoqda" %}
+                <i class="ti ti-clock text-warning me-1"></i>
+                <span class="badge bg-warning text-dark">{{ student.get_status_display }}</span>
+                {% elif student.get_status_display == "Qabul qilingan" %}
+                <i class="ti ti-check-circle text-primary me-1"></i>
+                <span class="badge bg-primary">{{ student.get_status_display }}</span>
+                {% elif student.get_status_display == "Guruhga qabul qilindi" %}
+                <i class="ti ti-users text-success me-1"></i>
+                <span class="badge bg-success">{{ student.get_status_display }}</span>
+                {% elif student.get_status_display == "Rad etilgan" %}
+                <i class="ti ti-ban text-danger me-1"></i>
+                <span class="badge bg-danger">{{ student.get_status_display }}</span>
+                {% endif %}
+              </span>
+            </td>
+            <td class="text-muted small">{{ student.created_at|date:"Y-m-d" }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="9" class="text-center text-muted">Hech qanday ma'lumot topilmadi.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+
+
+
+
+
+

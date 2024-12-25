@@ -108,11 +108,38 @@
       return cleanValue;
     }
 
-    // Telefon raqam kiritilganda avtomatik formatlash
+    // Telefon raqamni formatlash va username o'zgartirilmagan holda saqlash
     loginInput.addEventListener("input", function () {
       const value = loginInput.value.trim();
+      const selectionStart = loginInput.selectionStart;
+
       if (value.startsWith("998") || value.startsWith("+998")) {
-        loginInput.value = formatPhoneNumber(value);
+        // Telefon raqamni formatlash
+        const formattedValue = formatPhoneNumber(value.replace(/\s+/g, ""));
+        loginInput.value = formattedValue;
+
+        // Kursorni to'g'ri joyga qaytarish
+        const diff = formattedValue.length - value.length;
+        loginInput.setSelectionRange(selectionStart + diff, selectionStart + diff);
+      } else {
+        // Username sifatida ishlash
+        loginInput.value = value; // Formatlashsiz kiritilgan qiymatni qoldirish
+        loginInput.setSelectionRange(selectionStart, selectionStart);
+      }
+    });
+
+    // O'chirish hodisasi uchun maxsus ishlov
+    loginInput.addEventListener("keydown", function (event) {
+      if (event.key === "Backspace") {
+        const value = loginInput.value;
+        const selectionStart = loginInput.selectionStart;
+
+        // Agar kursor bo'shliq oldida bo'lsa, bir qadam oldin o'chirish
+        if (value.charAt(selectionStart - 1) === " ") {
+          event.preventDefault();
+          loginInput.value = value.slice(0, selectionStart - 2) + value.slice(selectionStart);
+          loginInput.setSelectionRange(selectionStart - 2, selectionStart - 2);
+        }
       }
     });
 
@@ -175,5 +202,6 @@
     });
   });
 </script>
+
 
 {% endblock content %}

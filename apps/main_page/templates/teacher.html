@@ -20,6 +20,13 @@
 <script src="{% static 'vendor/libs/apex-charts/apexcharts.js' %}"></script>
 {% endblock vendor_js %}
 
+{% block page_css %}
+{{ block.super }}
+  .text-uppercase {
+    text-transform: uppercase;
+  }
+{% endblock page_css %}
+
 {% block page_js %}
 {{ block.super }}
 <script src="{% static 'js/app-academy-dashboard.js' %}"></script>
@@ -31,7 +38,10 @@
 <div class="card bg-transparent shadow-none my-6 border-0">
   <div class="card-body row p-0 pb-6 g-6">
     <div class="col-12 col-lg-8 card-separator">
-      <h5 class="mb-2">Xush kelibsiz, <span class="h4">Olimjon Qosimov 👋🏻</span></h5>
+      <h5 class="mb-2">
+        Xush kelibsiz,
+        <span class="h4 text-uppercase">{{ request.user.first_name }} {{ request.user.second_name }} 👋🏻</span>
+      </h5>
       <div class="col-12 col-lg-5">
         <p>Sizning umumiy cashback daromadingiz <strong>1,500,000 so'm</strong>. Muvaffaqiyatlaringizni davom ettiring va yanada ko‘proq mukofotlarga erishing!</p>
       </div>

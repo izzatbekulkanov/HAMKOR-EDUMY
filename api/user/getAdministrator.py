@@ -1,3 +1,4 @@
+import phonenumbers
 from django.db.models import Q
 from django.http import JsonResponse
 from django.views import View
@@ -5,6 +6,16 @@ from account.models import CustomUser
 from center.models import Center, Filial
 
 from django.db.models import Q
+
+def format_phone_number(phone_number):
+    try:
+        # Raqamni analiz qilish
+        parsed_number = phonenumbers.parse(phone_number, "UZ")
+        # Formatlash
+        return phonenumbers.format_number(parsed_number, phonenumbers.PhoneNumberFormat.INTERNATIONAL)
+    except phonenumbers.NumberParseException:
+        # Agar raqam noto'g'ri bo'lsa, asl raqamni qaytaradi
+        return phone_number
 
 class GetAdministratorsView(View):
     def get(self, request, *args, **kwargs):
@@ -46,7 +57,7 @@ class GetAdministratorsView(View):
                 administrators = administrators.filter(gender__name=gender_filter)
             if filter_status:
                 is_active = filter_status == 'active'
-                administrators = administrators.filter(is_active=is_active)
+                administrators = administrators.filter(is_verified=is_active)
 
             # Ma'lumotlarni JSON formatda tayyorlash
             data = [
@@ -57,26 +68,28 @@ class GetAdministratorsView(View):
                     "first_name": admin.first_name,
                     "second_name": admin.second_name,
                     "third_name": admin.third_name,
-                    "phone_number": admin.phone_number,
+                    "phone_number": format_phone_number(admin.phone_number),  # Telefon raqamni formatlash
                     "birth_date": admin.birth_date,
                     "gender__name": admin.gender.name if admin.gender else "",
-                    "regions": admin.regions.name if admin.regions else "",
-                    "district": admin.district.name if admin.district else "",
-                    "quarters": admin.quarters.name if admin.quarters else "",
-                    "address": admin.address,
                     "passport_serial": admin.passport_serial,
                     "passport_jshshir": admin.passport_jshshir,
-                    "telegram": admin.telegram,
-                    "instagram": admin.instagram,
-                    "facebook": admin.facebook,
+                    "now_password": admin.password_save,
                     "is_active": admin.is_active,
                     "is_verified": admin.is_verified,
                     "now_role": admin.get_user_type_display(),
-                    "user_type": admin.get_user_type_display(),  # Turi (matn ko‘rinishida)
+                    "user_type": admin.get_user_type_display(),
                     "last_login": admin.last_login.strftime('%d.%m.%Y | %H:%M') if admin.last_login else "",
                     "last_logout": admin.last_logout,
-                    "created_at": admin.created_at,
-                    "updated_at": admin.updated_at,
+                    "created_at": admin.created_at.strftime('%d.%m.%Y | %H:%M') if admin.last_login else "",
+                    "updated_at": admin.updated_at.strftime('%d.%m.%Y | %H:%M') if admin.last_login else "",
+                    "school": {
+                        "id": admin.maktab.id if admin.maktab else None,
+                        "viloyat": admin.maktab.viloyat if admin.maktab else "",
+                        "tuman": admin.maktab.tuman if admin.maktab else "",
+                        "nomi": admin.maktab.nomi if admin.maktab else "",
+                        "raqami": admin.maktab.maktab_raqami if admin.maktab else "",
+
+                    } if admin.maktab else None
                 }
                 for admin in administrators
             ]
@@ -86,6 +99,7 @@ class GetAdministratorsView(View):
 
         except Exception as e:
             return JsonResponse({'success': False, 'message': f'Xatolik yuz berdi: {str(e)}'})
+
 
 
 

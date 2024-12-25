@@ -200,7 +200,7 @@
     function populateSchools(schools) {
       schoolSelect.innerHTML = '<option value="" disabled selected>Maktabni tanlang</option>';
       schools.forEach(school => {
-        const option = new Option(`${school.maktab_raqami} - ${school.nomi}`, school.id);
+        const option = new Option(`${school.nomi}`, school.id);
         schoolSelect.add(option);
       });
       schoolSelect.disabled = false;

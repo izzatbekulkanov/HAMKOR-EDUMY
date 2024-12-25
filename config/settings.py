@@ -12,9 +12,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('SECRET_KEY', default='fallback-secret-key')
 
-DEBUG = config('DEBUG', default=False, cast=bool)
+# DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1", "ref.edumy.uz"]
+DEBUG = True
+
+ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1", "ref.edumy.uz", "inihub.namspi.uz"]
 
 ENVIRONMENT = config('DJANGO_ENVIRONMENT', default='local')
 
@@ -126,6 +128,8 @@ TEMPLATES = [
                 "config.context_processors.my_setting",
                 "config.context_processors.get_cookie",
                 "config.context_processors.environment",
+                "config.context_processors.active_season_css",
+                "config.context_processors.active_season_js",
             ],
             "libraries": {
                 "theme": "web_project.template_tags.theme",
@@ -173,6 +177,17 @@ SITE_ID = 1
 
 LOCALE_PATHS = [BASE_DIR / "locale"]
 
+
+# Static files
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Productionda collectstatic ishlashi uchun STATICFILES_DIRS ni to'g'ri sozlang
+STATICFILES_DIRS = [
+    BASE_DIR / "src" / "assets",  # Qo'shimcha statik fayllar joylashuvi
+]
+
+
 # # Statik va media fayllar konfiguratsiyasi
 # if ENVIRONMENT == "production":
 #     # Ishlab chiqarish muhitida
@@ -187,15 +202,15 @@ LOCALE_PATHS = [BASE_DIR / "locale"]
 #     MEDIA_URL = '/media/'
 #     MEDIA_ROOT = BASE_DIR / 'media'
 
-# Statik va media fayllar konfiguratsiyasi
-STATIC_URL = "/static/"
+# # Statik va media fayllar konfiguratsiyasi
+# STATIC_URL = "/static/"
 
-if ENVIRONMENT == "production":
-    # Ishlab chiqarish muhitida
-    STATIC_ROOT = BASE_DIR / "staticfiles"
-else:
-    # Lokal muhitda collectstatic ishlatilmasdan
-    STATICFILES_DIRS = [BASE_DIR / "src" / "assets"]
+# if ENVIRONMENT == "production":
+#     # Ishlab chiqarish muhitida
+#     STATIC_ROOT = BASE_DIR / "staticfiles"
+# else:
+#     # Lokal muhitda collectstatic ishlatilmasdan
+#     STATICFILES_DIRS = [BASE_DIR / "src" / "assets"]
 
 # Media fayllar uchun sozlamalar
 MEDIA_URL = '/media/'
@@ -244,6 +259,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
     "https://ref.edumy.uz",
+    "https://inihub.namspi.uz",
     "https://www.ref.edumy.uz",
 ]
 
@@ -407,10 +423,3 @@ JAZZMIN_UI_TWEAKS = {
     },
     "actions_sticky_top": True
 }
-
-
-
-
-
-
-

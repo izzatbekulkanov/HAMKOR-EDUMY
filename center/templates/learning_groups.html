@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="{% static 'vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css' %}" />
   <link rel="stylesheet" href="{% static 'vendor/libs/select2/select2.css' %}" />
   <link rel="stylesheet" href="{% static 'vendor/libs/toastr/toastr.css' %}" />
+
 {% endblock vendor_css %}
 
 {% block vendor_js %}
@@ -27,7 +28,212 @@
 
 {% block page_js %}
   {{ block.super }}
-  <script src="{% static 'customJs/center/groups.js' %}"></script>
+{#  <script src="{% static 'customJs/center/groups.js' %}"></script>#}
+<script>
+$(document).ready(function () {
+  // API endpointlar
+  const apiEndpoints = {
+    kasblar: '/api/kasblar/',
+    yonalishlar: '/api/filter-yonalishlar/',
+    kurslar: '/api/filter-kurslar/',
+    groups: '/api/groups/'
+  };
+
+  // Select elementlar
+  const selects = {
+    kasb: $('#kasbSelect'),
+    yonalish: $('#yonalishSelect'),
+    kurs: $('#kursSelect')
+  };
+
+  // Guruhlar jadvali
+  const groupsTableBody = $('#groupsTableBody');
+  const totalGroupsCount = $('#totalGroupsCount');
+
+  // Qo'shimcha ma'lumotni ko'rsatish funksiyasi
+  const getAdditionalInfo = (item) => {
+    if (item.yonalish_count) {
+      return `(${item.yonalish_count})`; // Yo'nalish count mavjud bo'lsa
+    } else if (item.kurs_count) {
+      return `(${item.kurs_count})`; // Kurs count mavjud bo'lsa
+    } else if (item.narxi) {
+      return `${item.narxi.toLocaleString('uz-UZ')} so'm`; // Narxi mavjud bo'lsa
+    }
+    return ''; // Agar hech biri mavjud bo'lmasa
+  };
+
+  // Xatoliklarni ko'rsatish funksiyasi
+  const showError = () => {
+    toastr.error("Ma'lumotlarni yuklashda xatolik yuz berdi.", 'Xatolik');
+  };
+
+  // Select dropdownlariga ma'lumot yuklash funksiyasi
+  const loadOptions = (url, select, dataKey, params = {}) => {
+    select.empty().append('<option value="" disabled selected>Tanlang</option>').prop('disabled', true);
+
+    $.ajax({
+      url,
+      type: 'GET',
+      data: params,
+      success: (response) => {
+        if (response.success) {
+          response.data.forEach((item) => {
+            select.append(`<option value="${item.id}" data-info="${getAdditionalInfo(item)}">${item.nomi} ${getAdditionalInfo(item)}</option>`);
+          });
+          select.prop('disabled', false);
+        }
+      },
+      error: showError
+    });
+  };
+
+  // Haftaning kunlarini tarjima qilish uchun
+  const weekDaysUzbek = {
+    Monday: 'Dushanba',
+    Tuesday: 'Seshanba',
+    Wednesday: 'Chorshanba',
+    Thursday: 'Payshanba',
+    Friday: 'Juma',
+    Saturday: 'Shanba',
+    Sunday: 'Yakshanba'
+  };
+
+  // Guruhlar jadvalini yuklash funksiyasi
+  const loadGroupsTable = () => {
+    groupsTableBody.empty();
+
+    $.ajax({
+      url: apiEndpoints.groups,
+      type: 'GET',
+      success: (response) => {
+        if (response.success && response.data.length > 0) {
+          totalGroupsCount.text(response.data.length);
+
+          response.data.forEach((group, index) => {
+            groupsTableBody.append(`
+              <tr>
+                <td>${index + 1}</td>
+                <td>${group.group_name}</td>
+                <td>${group.kurs.nomi}</td>
+                <td>${group.kurs.narxi.toLocaleString('uz-UZ')} so'm</td>
+                <td>${group.days_of_week.map(day => weekDaysUzbek[day]).join(', ')}</td>
+                <td>${group.yonalish.nomi}</td>
+                <td>${group.kasb.nomi}</td>
+                <td>${group.created_at}</td>
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-sm btn-primary edit-group d-flex align-items-center" data-group-id="${group.id}">
+                      <i class="ti ti-edit me-1"></i>
+                    </button>
+
+                    <label class="switch switch-primary switch-square m-0">
+                      <input type="checkbox" class="switch-input toggle-active" data-group-id="${group.id}" ${group.is_active ? 'checked' : ''}>
+                      <span class="switch-toggle-slider">
+                        <span class="switch-on">
+                          <i class="ti ti-check"></i>
+                        </span>
+                        <span class="switch-off">
+                          <i class="ti ti-x"></i>
+                        </span>
+                      </span>
+                    </label>
+                  </div>
+                </td>
+              </tr>
+            `);
+          });
+        } else {
+          totalGroupsCount.text(0);
+          groupsTableBody.append('<tr><td colspan="9" class="text-center text-muted">Guruhlar mavjud emas.</td></tr>');
+        }
+      },
+      error: showError
+    });
+  };
+
+  // Guruh qo'shish funksiyasi
+  $('#addGroupForm').on('submit', function (e) {
+    e.preventDefault(); // Form yuborilishini to'xtatish
+
+    const formData = $(this).serializeArray();
+    formData.push({
+      name: 'days_of_week',
+      value: $('input[name="days_of_week"]:checked').map(function () {
+        return $(this).val();
+      }).get()
+    });
+
+    $.ajax({
+      url: apiEndpoints.groups,
+      type: 'POST',
+      data: JSON.stringify(Object.fromEntries(formData.map(item => [item.name, item.value]))),
+      contentType: 'application/json',
+      headers: { 'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val() },
+      success: (response) => {
+        if (response.success) {
+          toastr.success('Guruh muvaffaqiyatli qo\'shildi!', 'Muvaffaqiyat');
+          $('#addGroupForm')[0].reset();
+          loadGroupsTable(); // Jadvalni qayta yuklash
+        } else {
+          showError();
+        }
+      },
+      error: showError
+    });
+  });
+
+  // Select tanlovlari uchun Event Listeners
+  selects.kasb.on('change', function () {
+    loadOptions(`${apiEndpoints.yonalishlar}?kasb_id=${$(this).val()}`, selects.yonalish, 'yonalish_count');
+    selects.kurs.empty().append('<option value="" disabled selected>Kursni tanlang</option>').prop('disabled', true);
+  });
+
+  selects.yonalish.on('change', function () {
+    loadOptions(`${apiEndpoints.kurslar}?yonalish_id=${$(this).val()}`, selects.kurs, 'narxi');
+  });
+
+  // Ma'lumotlarni yuklash
+  loadOptions(apiEndpoints.kasblar, selects.kasb, 'kasb_count');
+  loadGroupsTable();
+});
+
+
+$(document).on('change', '.toggle-active', function () {
+    const groupId = $(this).data('group-id'); // Get the group ID
+    const isActive = $(this).is(':checked'); // Get the current state of the checkbox
+
+    $.ajax({
+        url: `/api/groups/${groupId}/toggle-active/`, // API endpoint to toggle activity
+        type: 'POST',
+        headers: { 'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val() }, // CSRF token for security
+        data: JSON.stringify({ is_active: isActive }), // Send the new state
+        contentType: 'application/json',
+        success: (response) => {
+            if (response.success) {
+                toastr.success('Guruh holati muvaffaqiyatli o‘zgartirildi!');
+            } else {
+                toastr.error('Xatolik yuz berdi. Holat o‘zgartirilmadi.');
+                // Optionally, revert the state of the checkbox
+                $(this).prop('checked', !isActive);
+            }
+        },
+        error: () => {
+            toastr.error('So‘rov yuborishda xatolik yuz berdi.');
+            // Revert the state of the checkbox
+            $(this).prop('checked', !isActive);
+        }
+    });
+});
+
+$(document).on('click', '.edit-group', function () {
+    const groupId = $(this).data('group-id');
+
+    // Open a modal or navigate to an edit page
+  alert("Tez orada Guruh tahrirlash qo'shiladi")
+    {#window.location.href = `/groups/edit/${groupId}/`;#}
+});
+
+</script>
 
 {% endblock page_js %}
 
@@ -69,7 +275,7 @@
               <div class="d-flex align-items-center">
                 <div class="flex-shrink-0">
                   <div class="badge bg-label-warning rounded-circle p-3">
-                    <i class="ti ti-users-off ti-lg"></i>
+                    <i class="ti ti-user-exclamation ti-lg"></i>
                   </div>
                 </div>
                 <div class="flex-grow-1 ms-3">
@@ -126,38 +332,89 @@
             <!-- Dars kunlari -->
             <div class="mt-4">
               <label class="form-label fw-bold"><i class="ti ti-calendar-event"></i> Dars kunlari</label>
-              <div class="d-flex flex-wrap gap-2">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="days_of_week" value="Monday" id="dayMonday">
-                  <label class="form-check-label" for="dayMonday">Dushanba</label>
+              <div class="row gy-3">
+                <div class="col-md-1">
+                  <div class="form-check custom-option custom-option-icon text-center">
+                    <label class="form-check-label custom-option-content text-truncate" for="dayMonday" style="max-width: 80px;">
+                      <span class="custom-option-body">
+                        <i class="ti ti-calendar mb-1"></i>
+                        <span class="custom-option-title text-muted text-nowrap">Dushanba</span>
+                      </span>
+                      <input class="form-check-input" type="checkbox" name="days_of_week" value="Monday" id="dayMonday" />
+                    </label>
+                  </div>
                 </div>
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="days_of_week" value="Tuesday" id="dayTuesday">
-                  <label class="form-check-label" for="dayTuesday">Seshanba</label>
+                <div class="col-md-1">
+                  <div class="form-check custom-option custom-option-icon text-center">
+                    <label class="form-check-label custom-option-content text-truncate" for="dayTuesday" style="max-width: 80px;">
+                      <span class="custom-option-body">
+                        <i class="ti ti-calendar mb-1"></i>
+                        <span class="custom-option-title text-muted text-nowrap">Seshanba</span>
+                      </span>
+                      <input class="form-check-input" type="checkbox" name="days_of_week" value="Tuesday" id="dayTuesday" />
+                    </label>
+                  </div>
                 </div>
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="days_of_week" value="Wednesday"
-                         id="dayWednesday">
-                  <label class="form-check-label" for="dayWednesday">Chorshanba</label>
+                <div class="col-md-1">
+                  <div class="form-check custom-option custom-option-icon text-center">
+                    <label class="form-check-label custom-option-content text-truncate" for="dayWednesday" style="max-width: 80px;">
+                      <span class="custom-option-body">
+                        <i class="ti ti-calendar mb-1"></i>
+                        <span class="custom-option-title text-muted text-nowrap">Chorshanba</span>
+                      </span>
+                      <input class="form-check-input" type="checkbox" name="days_of_week" value="Wednesday" id="dayWednesday" />
+                    </label>
+                  </div>
                 </div>
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="days_of_week" value="Thursday" id="dayThursday">
-                  <label class="form-check-label" for="dayThursday">Payshanba</label>
+                <div class="col-md-1">
+                  <div class="form-check custom-option custom-option-icon text-center">
+                    <label class="form-check-label custom-option-content text-truncate" for="dayThursday" style="max-width: 80px;">
+                      <span class="custom-option-body">
+                        <i class="ti ti-calendar mb-1"></i>
+                        <span class="custom-option-title text-muted text-nowrap">Payshanba</span>
+                      </span>
+                      <input class="form-check-input" type="checkbox" name="days_of_week" value="Thursday" id="dayThursday" />
+                    </label>
+                  </div>
                 </div>
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="days_of_week" value="Friday" id="dayFriday">
-                  <label class="form-check-label" for="dayFriday">Juma</label>
+                <div class="col-md-1">
+                  <div class="form-check custom-option custom-option-icon text-center">
+                    <label class="form-check-label custom-option-content text-truncate" for="dayFriday" style="max-width: 80px;">
+                      <span class="custom-option-body">
+                        <i class="ti ti-calendar mb-1"></i>
+                        <span class="custom-option-title text-muted text-nowrap">Juma</span>
+                      </span>
+                      <input class="form-check-input" type="checkbox" name="days_of_week" value="Friday" id="dayFriday" />
+                    </label>
+                  </div>
                 </div>
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="days_of_week" value="Saturday" id="daySaturday">
-                  <label class="form-check-label" for="daySaturday">Shanba</label>
+                <div class="col-md-1">
+                  <div class="form-check custom-option custom-option-icon text-center">
+                    <label class="form-check-label custom-option-content text-truncate" for="daySaturday" style="max-width: 80px;">
+                      <span class="custom-option-body">
+                        <i class="ti ti-calendar mb-1"></i>
+                        <span class="custom-option-title text-muted text-nowrap">Shanba</span>
+                      </span>
+                      <input class="form-check-input" type="checkbox" name="days_of_week" value="Saturday" id="daySaturday" />
+                    </label>
+                  </div>
                 </div>
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="days_of_week" value="Sunday" id="daySunday">
-                  <label class="form-check-label" for="daySunday">Yakshanba</label>
+                <div class="col-md-1">
+                  <div class="form-check custom-option custom-option-icon text-center">
+                    <label class="form-check-label custom-option-content text-truncate" for="daySunday" style="max-width: 80px;">
+                      <span class="custom-option-body">
+                        <i class="ti ti-calendar mb-1"></i>
+                        <span class="custom-option-title text-muted text-nowrap">Yakshanba</span>
+                      </span>
+                      <input class="form-check-input" type="checkbox" name="days_of_week" value="Sunday" id="daySunday" />
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
+
+
+
             <!-- Qo'shish tugmasi -->
             <div class="text-end mt-4">
               <button type="submit" class="btn btn-primary">
@@ -180,7 +437,26 @@
           <h5 class="mb-3 text-primary"><i class="ti ti-users"></i> Guruhlar ro'yxati</h5>
           <div class="row gy-3" id="groupsList">
             <!-- Guruhlar dinamik ravishda bu yerga yuklanadi -->
-            <div class="col-12 text-center text-muted" id="emptyGroupsMessage">Guruhlar mavjud emas.</div>
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover table-sm text-nowrap small" id="groupsTable">
+                <thead class="table-light">
+                  <tr>
+                    <th>#</th>
+                    <th>Guruh nomi</th>
+                    <th>Kurs</th>
+                    <th>Narxi</th>
+                    <th>Dars kunlari</th>
+                    <th>Yo'nalish</th>
+                    <th>Kasb</th>
+                    <th>Yaratilgan</th>
+                    <th>Faollik</th>
+                  </tr>
+                </thead>
+                <tbody id="groupsTableBody">
+                  <!-- JavaScript orqali ma'lumotlar yuklanadi -->
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

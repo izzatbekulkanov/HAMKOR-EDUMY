@@ -72,20 +72,28 @@ class Kasb(models.Model):
 
 
 class Yonalish(models.Model):
-    kasb = models.ForeignKey(Kasb, on_delete=models.CASCADE, related_name='yonalishlar', verbose_name="Kasb")
-    center = models.ForeignKey(Center, on_delete=models.CASCADE, related_name='yonalishlar', verbose_name="Markaz")
+    kasb = models.ForeignKey(
+        'Kasb', on_delete=models.CASCADE, related_name='yonalishlar', verbose_name="Kasb"
+    )
+    center = models.ForeignKey(
+        'Center', on_delete=models.CASCADE, related_name='yonalishlar', verbose_name="Markaz"
+    )
     nomi = models.CharField(max_length=255, verbose_name="Yo'nalish nomi")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaratilgan vaqti")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="O'zgartirilgan vaqti")
     is_active = models.BooleanField(default=True, verbose_name="Faolmi")
+    kurslar = models.ManyToManyField(
+        'Kurs', related_name='yonalishlar', verbose_name="Kurslar", blank=True
+    )
 
     def __str__(self):
         return self.nomi
 
 
 class Kurs(models.Model):
-    yonalish = models.ForeignKey(Yonalish, on_delete=models.CASCADE, related_name='kurslar', verbose_name="Yo'nalish")
-    center = models.ForeignKey(Center, on_delete=models.CASCADE, related_name='kurslar', verbose_name="Markaz")
+    center = models.ForeignKey(
+        'Center', on_delete=models.CASCADE, related_name='kurslar', verbose_name="Markaz"
+    )
     nomi = models.CharField(max_length=255, verbose_name="Kurs nomi")
     narxi = models.BigIntegerField(verbose_name="Narxi")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaratilgan vaqti")
@@ -178,25 +186,30 @@ class SubmittedStudent(models.Model):
     yonalish = models.ForeignKey(Yonalish, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Yo'nalish")
     filial = models.ForeignKey(Filial, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Filial")  # Added Filial field
 
+    # Many-to-Many Field for Kurs
+    kurslar = models.ManyToManyField(
+        Kurs,
+        blank=True,
+        related_name='submitted_students',
+        verbose_name="Kurslar"
+    )
+
     belgisi = models.CharField(max_length=100, verbose_name="Sinf Belgisi")
 
     # Phone Number (added field)
     phone_number = models.CharField(
-        max_length=13,  # Including country code
+        max_length=13,
         verbose_name="Telefon raqami",
-        validators=[RegexValidator(
-            regex=r'^\+998\d{9}$',
-            message="Telefon raqami +998 bilan boshlanishi va 9 raqamdan iborat bo'lishi kerak."
-        )]
+        validators=[
+            RegexValidator(
+                regex=r'^\+998\d{9}$',
+                message="Telefon raqami +998 bilan boshlanishi va 9 raqamdan iborat bo'lishi kerak."
+            )
+        ]
     )
 
     # Status
-    status = models.CharField(
-        max_length=15,  # Kifoya qiladigan uzunlikka oshirildi
-        choices=STATUS_CHOICES,
-        default='pending',
-        verbose_name="Holati"
-    )
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='pending', verbose_name="Holati")
 
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaratilgan vaqti")
@@ -205,4 +218,3 @@ class SubmittedStudent(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {self.status}"
-

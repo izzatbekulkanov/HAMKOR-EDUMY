@@ -88,3 +88,26 @@ class KursFilterView(View):
         kurslar = Kurs.objects.filter(yonalish_id=yonalish_id)
         data = [{'id': kurs.id, 'nomi': kurs.nomi, 'narxi': kurs.narxi} for kurs in kurslar]
         return JsonResponse({'success': True, 'data': data})
+
+
+@csrf_exempt
+def toggle_group_active(request, group_id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)  # Parse the JSON data
+            is_active = data.get('is_active', None)  # Get the new active state
+
+            if is_active is None:
+                return JsonResponse({'success': False, 'message': 'Invalid data.'})
+
+            group = E_groups.objects.get(id=group_id)  # Find the group by ID
+            group.is_active = is_active  # Update the active state
+            group.save()  # Save the changes
+
+            return JsonResponse({'success': True, 'message': 'Group status updated successfully.'})
+        except E_groups.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Group not found.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})

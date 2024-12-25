@@ -64,28 +64,6 @@
     numericOnly: true
   });
 
-  // Rasmni jonli ko‘rsatish va faqat kerakli formatlarni qabul qilish
-  document.getElementById("imageFile").addEventListener("change", function(event) {
-    const file = event.target.files[0];
-
-    // Rasm fayl turi
-    const allowedFormats = ['image/png', 'image/jpeg', 'image/jpg', 'image/avif'];
-
-    if (file && allowedFormats.includes(file.type)) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        document.getElementById("user-image-preview").src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    } else {
-      // Toastr bilan xabar chiqarish
-      toastr.error("Iltimos, faqat PNG, JPG, JPEG yoki AVIF formatidagi rasmni tanlang.");
-
-      // Inputni tozalash
-      document.getElementById("imageFile").value = '';
-    }
-  });
-
   // Telefon raqamni jonli ko‘rsatish
   const phoneInput = document.getElementById("phone_number");
   const phonePreview = document.getElementById("phone-preview");
@@ -126,12 +104,61 @@
   confirmPasswordInput.addEventListener("input", validatePasswords);
 </script>
 
+  <script>
+  document.getElementById("imageFile").addEventListener("change", function (event) {
+    const file = event.target.files[0];
+    const userId = "{{ user.id }}"; // Django template tag to pass the user ID
+
+    if (!file) {
+        toastr.error("Iltimos, rasmni tanlang.");
+        return;
+    }
+
+    const allowedFormats = ["image/png", "image/jpeg", "image/jpg", "image/avif"];
+    if (!allowedFormats.includes(file.type)) {
+        toastr.error("Faqat PNG, JPG, JPEG yoki AVIF formatdagi rasmni yuklang.");
+        return;
+    }
+
+    // Prepare form data
+    const formData = new FormData();
+    formData.append("user_id", userId);
+    formData.append("imageFile", file);
+
+    // Send to the server
+    fetch("{% url 'update_user_photo' %}", {
+        method: "POST",
+        body: formData,
+        headers: {
+            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value, // Add CSRF token
+        },
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.status === "success") {
+                toastr.success(data.message);
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById("user-image-preview").src = e.target.result; // Update the preview image
+                };
+                reader.readAsDataURL(file);
+            } else {
+                toastr.error(data.message);
+            }
+        })
+        .catch((error) => {
+            toastr.error("Rasmni yuklashda xatolik yuz berdi.");
+            console.error("Error:", error);
+        });
+});
+
+  </script>
 {% endblock page_js %}
 
 
 
 {% block content %}
-<div class="container my-5">
+<div class="my-5">
   <!-- Breadcrumb -->
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb">
@@ -160,6 +187,17 @@
           </label>
         </div>
         <small class="text-muted d-block mt-2">Rasmni yangilash uchun tanlang.</small>
+
+        {% if messages %}
+          <div class="messages">
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
       </div>
 
       <!-- Foydalanuvchi ma'lumotlari -->
@@ -210,10 +248,10 @@
             <div class="col-md-6">
               <label for="type_choice" class="form-label">Foydalanuvchi Turi</label>
               <select id="type_choice" name="type_choice" class="form-select">
-                {% for key, value in user.type_choice %}
-                <option value="{{ key }}" {% if user.user_type == key %}selected{% endif %}>
-                  {{ value }}
-                </option>
+                {% for key, value in type_choices %}
+                  <option value="{{ key }}" {% if user.user_type == key %}selected{% endif %}>
+                    {{ value }}
+                  </option>
                 {% endfor %}
               </select>
             </div>
@@ -247,12 +285,12 @@
             <div id="password-fields" class="row mt-3 d-none">
               <div class="col-md-6">
                 <label for="new_password" class="form-label">Yangi parol</label>
-                <input type="password" id="new_password" class="form-control">
+                <input type="password" id="new_password" class="form-control" name="new_password">
                 <small id="password-strength" class="text-danger"></small>
               </div>
               <div class="col-md-6">
                 <label for="confirm_password" class="form-label">Parolni tasdiqlash</label>
-                <input type="password" id="confirm_password" class="form-control">
+                <input type="password" id="confirm_password" class="form-control" name="confirm_password">
                 <small id="password-match" class="text-danger"></small>
               </div>
             </div>

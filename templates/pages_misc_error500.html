@@ -1,0 +1,30 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Server Error - Pages{% endblock %}
+
+{% block page_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'vendor/css/pages/page-misc.css' %}" />
+{% endblock page_css %}
+
+{% block content %}
+<!-- Server Error -->
+<div class="container-xxl container-p-y">
+  <div class="misc-wrapper">
+    <h1 class="mb-2 mx-2" style="line-height: 6rem;font-size: 6rem;">500</h1>
+    <h4 class="mb-2 mx-2">{% trans "Serverda xatolik yuz berdi! 😓" %}</h4>
+    <p class="mb-6 mx-2">{% trans "Biror narsa noto'g'ri ishladi. Iltimos, keyinroq urinib ko'ring yoki administrator bilan bog'laning." %}</p>
+    <a href="{% url 'index' %}" class="btn btn-primary">{% trans "Bosh sahifaga qaytish" %}</a>
+    <div class="mt-12">
+      <img src="{% static 'img/illustrations/page-misc-error.png' %}" alt="page-misc-error" width="170" class="img-fluid">
+    </div>
+  </div>
+</div>
+<div class="container-fluid misc-bg-wrapper">
+  <img src="{% static 'img/illustrations/bg-shape-image-' %}{{ COOKIES.style|default:style }}.png" height="355" alt="page-misc-error" data-app-light-img="illustrations/bg-shape-image-light.png" data-app-dark-img="illustrations/bg-shape-image-dark.png">
+</div>
+<!-- /Server Error -->
+{% endblock %}

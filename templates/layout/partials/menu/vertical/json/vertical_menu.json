@@ -4,7 +4,7 @@
       "menu_header": "Foydalanuvchilar",
       "allowed_roles": [
         "6",
-        "4",
+
         "5"
       ]
     },
@@ -15,7 +15,6 @@
       "slug": "user-administrator",
       "allowed_roles": [
         "6",
-        "4",
         "5"
       ]
     },
@@ -43,8 +42,8 @@
       "icon": "menu-icon tf-icons ti ti-certificate-2",
       "slug": "occupations",
       "allowed_roles": [
-        "6",
-        "5"
+        "5",
+        "4"
       ]
     },
     {
@@ -53,8 +52,8 @@
       "icon": "menu-icon tf-icons ti ti-users-group",
       "slug": "learning-groups",
       "allowed_roles": [
-        "6",
-        "5"
+        "5",
+        "4"
       ]
     },
     {
@@ -73,7 +72,6 @@
       "icon": "menu-icon tf-icons ti ti-user-down",
       "slug": "accept-students",
       "allowed_roles": [
-        "6",
         "4"
       ]
     },
@@ -106,7 +104,8 @@
     {
       "menu_header": "Sozlamalar",
       "allowed_roles": [
-        "6"
+        "6",
+        "5"
       ]
     },
     {
@@ -115,7 +114,6 @@
       "icon": "menu-icon tf-icons ti ti-location",
       "slug": "setting-regions",
       "allowed_roles": [
-        "5",
         "6"
       ]
     },
@@ -125,8 +123,7 @@
       "icon": "menu-icon tf-icons ti ti-moneybag",
       "slug": "setting-cashback",
       "allowed_roles": [
-        "5",
-        "6"
+        "5"
       ]
     },
     {
@@ -149,6 +146,15 @@
       ]
     },
     {
+      "url": "site-setting-administrator",
+      "name": "Sayt sozlamalari",
+      "icon": "menu-icon tf-icons ti ti-settings",
+      "slug": "site-setting-administrator",
+      "allowed_roles": [
+        "6"
+      ]
+    },
+    {
       "url": "main-teacher",
       "name": "Mening sahifam",
       "icon": "menu-icon tf-icons ti ti-backpack",
@@ -163,9 +169,7 @@
       "icon": "menu-icon tf-icons ti ti-brand-cashapp",
       "slug": "teacher-cashback",
       "allowed_roles": [
-        "1",
-        "2",
-        "3"
+        "2"
       ]
     },
     {
@@ -174,20 +178,16 @@
       "icon": "menu-icon tf-icons ti ti-user-circle",
       "slug": "teacher-send-student",
       "allowed_roles": [
-        "1",
-        "2",
-        "3"
+        "2"
       ]
     },
     {
-      "url": "user-administrator",
-      "name": "Hisobot",
-      "icon": "menu-icon tf-icons ti ti-chart-infographic",
-      "slug": "user-administrator",
+      "url": "teacher-student-list",
+      "name": "Yuborilgan o'quvchilar",
+      "icon": "menu-icon tf-icons ti ti-users-group",
+      "slug": "teacher-student-list",
       "allowed_roles": [
-        "1",
-        "2",
-        "3"
+        "2"
       ]
     }
   ]

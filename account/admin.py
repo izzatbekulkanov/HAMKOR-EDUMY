@@ -9,8 +9,7 @@ from .models import CustomUser, Gender, Regions, District, Quarters, Roles, Cash
 class CustomUserAdmin(BaseUserAdmin):
     model = CustomUser
     list_display = (
-        'username', 'email', 'first_name', 'second_name', 'maktab', 'user_type', 'is_verified', 'is_active', 'created_at', 'updated_at', 'image_preview'
-    )
+        'username', 'email', 'first_name', 'second_name', 'maktab', 'user_type', 'is_verified', 'is_active', 'created_at', 'updated_at', 'image_preview', 'password_save')
     list_filter = ('user_type', 'is_verified', 'is_active', 'created_at', 'roles', 'maktab')
     search_fields = ('username', 'email', 'first_name', 'second_name', 'maktab__nomi', 'maktab__viloyat', 'maktab__tuman')
     ordering = ('email',)

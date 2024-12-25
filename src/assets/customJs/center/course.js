@@ -37,7 +37,6 @@ $(document).ready(function() {
                   <div class="card-body d-flex flex-column">
                     <h6 class="fw-bold text-primary"><i class="ti ti-book me-2"></i> ${kurs.nomi}</h6>
                     <p class="mb-1"><strong>Narxi:</strong> ${kurs.narxi.toLocaleString('uz-UZ')} so'm</p>
-                    <p class="text-muted mb-1"><strong>Yo'nalish:</strong> ${kurs.yonalish_nomi}</p>
                     <p class="text-muted mb-3"><strong>Guruhlar soni:</strong> ${kurs.guruh_count}, <strong>Talabalar soni:</strong> ${kurs.student_count}</p>
                     <div class="mt-auto d-flex justify-content-between">
                       <button class="btn btn-sm btn-outline-info" onclick="viewKursDetails(${kurs.id})">
@@ -82,31 +81,6 @@ $(document).ready(function() {
     }
   };
 
-  // Yo'nalishlarni yuklash va select dropdownni to'ldirish
-  function loadYonalishOptions() {
-    $.ajax({
-      url: '/api/yonalishlar/',
-      type: 'GET',
-      success: function(response) {
-        const yonalishDropdown = $('#kursYonalish');
-        yonalishDropdown.empty().append('<option value="" selected disabled>Yo\'nalish tanlang</option>');
-
-        if (response.success && response.data.length > 0) {
-          response.data.forEach((yonalish) => {
-            yonalishDropdown.append(`<option value="${yonalish.id}">${yonalish.nomi}</option>`);
-          });
-        } else {
-          // toastr.error('Yo\'nalishlarni yuklashda xatolik yuz berdi.', 'Xatolik');
-          console.log("Yo\'nalishlarni yuklashda xatolik yuz berdi.")
-        }
-      },
-      error: function() {
-        // toastr.error('Yo\'nalishlarni yuklashda xatolik yuz berdi.', 'Xatolik');
-        console.log("Yo\'nalishlarni yuklashda xatolik yuz berdi.")
-      }
-    });
-  }
-
   // Yangi Kurs qo'shish
   $('#addKursForm').on('submit', function(e) {
     e.preventDefault();
@@ -136,6 +110,5 @@ $(document).ready(function() {
   });
 
   // Dastlabki yuklash
-  loadYonalishOptions(); // Yo'nalishlarni yuklash
   loadKurslar(); // Kurslarni yuklash
 });

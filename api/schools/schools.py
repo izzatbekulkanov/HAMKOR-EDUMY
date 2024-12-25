@@ -94,11 +94,17 @@ def get_schools_by(request):
 
                 result[viloyat][tuman] = {
                     "maktab_soni": entry['school_count'],
-                    "maktablar": list(
-                        Maktab.objects.filter(viloyat=viloyat, tuman=tuman).values(
+                    "maktablar": [
+                        {
+                            "id": maktab['id'],
+                            "maktab_raqami": maktab['maktab_raqami'],
+                            "sharntoma_raqam": maktab['sharntoma_raqam'],
+                            "nomi": f"{maktab['maktab_raqami']} - {maktab['nomi']}"
+                        }
+                        for maktab in Maktab.objects.filter(viloyat=viloyat, tuman=tuman).values(
                             'id', 'maktab_raqami', 'sharntoma_raqam', 'nomi'
                         )
-                    )
+                    ]
                 }
             return JsonResponse({"data": result}, status=200)
         except Exception as e:

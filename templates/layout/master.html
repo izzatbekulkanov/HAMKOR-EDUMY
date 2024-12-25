@@ -2,7 +2,7 @@
 
 <!DOCTYPE html>
 
-<html lang="en"
+<html lang="uz"
       class="{{ style }}-style {{ navbar_type_class }} {{ header_type_class }} {{ menu_fixed_class }} {{ menu_collapsed_class }} {{ footer_fixed_class }} {{ display_customizer_class }} {{ content_layout_class }}"
       dir="{{ text_direction_value }}" data-theme="{{ theme }}" data-assets-path="{% static '/' %}"
       data-base-url="{{ url }}" data-framework="django"
@@ -30,6 +30,7 @@
   <!--Page CSS-->
   {% block page_css %}{% endblock page_css %}
 
+  {% include "layout/season.html" %}
 
   <!-- Include the scripts partial (required ) -->
   {% include is_front|yesno:"./partials/scripts_includes_front.html,./partials/scripts_includes.html" %}
@@ -37,6 +38,7 @@
 </head>
 
 <body>
+<div id="season-container"></div>
 
 
 <!-- beautify ignore:end -->
@@ -48,10 +50,13 @@
 
 <!--Vendors Javascript-->
 {% block vendor_js %} {% endblock vendor_js %}
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 
 <!--Page Javascript-->
 {% block page_js %} {% endblock page_js %}
+<script>
 
+</script>
 </body>
 
 </html>

@@ -6,7 +6,7 @@ from api.center.addFillial import AddFilialView
 from api.center.changeIsActiveCenter import change_center_is_active, ToggleCenterAllViews
 from api.center.fetchSchool import FetchSchoolsView, AssignSchoolToCenterView, UnassignSchoolFromCenterView
 from api.center.getCenter import GetCentersWithFilialsView, GetCenterDetailsView, GetCentersForTeacherView
-from api.center.groups import GroupListView, KursFilterView, YonalishFilterView, KasbFilterView
+from api.center.groups import GroupListView, KursFilterView, YonalishFilterView, KasbFilterView, toggle_group_active
 from api.center.occupations import KasbListView, KasbUpdateView, YonalishListView, KursListView, GetKasbAndYonalishView
 from api.center.statistics import StatisticsDashboardView
 from api.center.teacher import submit_student
@@ -21,6 +21,7 @@ from api.settings.role import SaveRolesView, RolesWithUsersView
 from api.user.addAdministrator import AddAdministratorView
 from api.user.getAdministrator import GetAdministratorsView, GetAdminsView
 from api.user.updateAdministrator import UpdateActivityView
+from api.user.updateUserPhoto import update_user_photo
 
 role_patterns = [
     path('save-roles/', SaveRolesView.as_view(), name='save_roles'),
@@ -41,6 +42,7 @@ user_patterns = [
     path('cashbacks/add/', AddCashbackAPIView.as_view(), name='add-cashback'),
     path('cashbacks/list/', CashbackListAPIView.as_view(), name='list-cashback'),
     path('user-types/', UserTypeAPIView.as_view(), name='user-types'),
+    path("update-user-photo/", update_user_photo, name="update_user_photo"),
 
 ]
 
@@ -68,6 +70,9 @@ center_patterns = [
     path("assign-school-to-center/", AssignSchoolToCenterView.as_view(), name="assign-school-to-center"),
     path("unassign-school-from-center/", UnassignSchoolFromCenterView.as_view(), name="unassign-school-from-center"),
     path("toggle-center-all-views/<int:center_id>/", ToggleCenterAllViews.as_view(), name="toggle-center-all-views"),
+
+
+    path('groups/<int:group_id>/toggle-active/', toggle_group_active, name='toggle_group_active'),
 
 ]
 

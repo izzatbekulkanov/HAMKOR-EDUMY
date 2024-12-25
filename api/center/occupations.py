@@ -15,20 +15,30 @@ class KasbListView(View):
 
     def get(self, request, *args, **kwargs):
         """
-        GET so'rov: Foydalanuvchiga biriktirilgan markazlar bo‘yicha `Kasb` ob'yektlarini qaytaradi.
+        GET so'rov: Foydalanuvchiga biriktirilgan markazlar va filiallar orqali `Kasb` ob'yektlarini qaytaradi.
         """
         print(f"GET so'rov qabul qilindi. Foydalanuvchi: {request.user}")  # Debugging
 
-        # Foydalanuvchiga biriktirilgan markaz
-        center = Center.objects.filter(rahbari=request.user).first()
-        if not center:
-            print("Foydalanuvchiga markaz biriktirilmagan.")  # Debugging
+        # Foydalanuvchiga biriktirilgan center (rahbari)
+        rahbar_center = Center.objects.filter(rahbari=request.user).first()
+
+        # Foydalanuvchi admin sifatida biriktirilgan filialga tegishli centerlarni olish
+        filial_centers = Center.objects.filter(filial__admins=request.user).distinct()
+
+        # Markazlarni birlashtirish (rahbar markaz + filial markazlari)
+        centers = set()
+        if rahbar_center:
+            centers.add(rahbar_center)
+        centers.update(filial_centers)
+
+        if not centers:
+            print("Foydalanuvchiga hech qanday markaz biriktirilmagan.")  # Debugging
             return JsonResponse({"success": False, "message": "Sizga biriktirilgan markaz mavjud emas."}, status=403)
 
-        print(f"Foydalanuvchiga biriktirilgan markaz: {center}")  # Debugging
+        print(f"Foydalanuvchiga biriktirilgan markazlar: {centers}")  # Debugging
 
-        # Kasblarni filtr qilish
-        kasblar = Kasb.objects.filter(center=center).order_by('-created_at')
+        # Kasblarni filtr qilish (barcha markazlarga tegishli)
+        kasblar = Kasb.objects.filter(center__in=centers).order_by('-created_at')
         print(f"Kasblar soni: {kasblar.count()}")  # Debugging
 
         # Ma'lumotlarni formatlash
@@ -224,24 +234,34 @@ class KursListView(View):
         POST so'rovlar uchun yangi `Kurs` ob'yektini yaratadi.
         """
         if request.content_type != "application/x-www-form-urlencoded":
+            print("[DEBUG] Noto'g'ri kontent turi:", request.content_type)
             return JsonResponse({"success": False, "message": "Noto'g'ri kontent turi."}, status=400)
 
         try:
             nomi = request.POST.get("nomi")
             narxi = request.POST.get("narxi")
-            yonalish_id = request.POST.get("yonalish")
-            if not nomi or not narxi or not yonalish_id:
-                return JsonResponse({"success": False, "message": "Nomi, narxi va yo'nalish kiritilishi kerak."}, status=400)
 
-            yonalish = Yonalish.objects.get(id=yonalish_id)
+            print(f"[DEBUG] POST ma'lumotlar: nomi={nomi}, narxi={narxi}")
+
+            if not nomi or not narxi:
+                print("[DEBUG] Kerakli ma'lumotlar yo'q:", {
+                    "nomi": nomi, "narxi": narxi
+                })
+                return JsonResponse({"success": False, "message": "Nomi, narxi va yo'nalish kiritilishi kerak."},
+                                    status=400)
+
             # Foydalanuvchiga biriktirilgan markazni olish
             center = Center.objects.filter(rahbari=request.user).first()
+            print(f"[DEBUG] Foydalanuvchiga biriktirilgan markaz: {center}")
+
             if not center:
-                print("Foydalanuvchiga biriktirilmagan markazga urinish.")  # Debugging
+                print("[DEBUG] Foydalanuvchiga biriktirilmagan markazga urinish.")
                 return JsonResponse({"success": False, "message": "Sizga biriktirilgan markaz mavjud emas."},
                                     status=403)
 
-            kurs = Kurs.objects.create(nomi=nomi, narxi=narxi, yonalish=yonalish, center=center)
+            kurs = Kurs.objects.create(nomi=nomi, narxi=narxi, center=center)
+            print(f"[DEBUG] Yaratilgan Kurs: {kurs}")
+
             return JsonResponse(
                 {
                     "success": True,
@@ -249,39 +269,50 @@ class KursListView(View):
                         "id": kurs.id,
                         "nomi": kurs.nomi,
                         "narxi": kurs.narxi,
-                        "yonalish_nomi": yonalish.nomi,
                     },
                 }
             )
-        except Yonalish.DoesNotExist:
-            return JsonResponse({"success": False, "message": "Noto'g'ri Yo'nalish ID."}, status=400)
         except Exception as e:
+            print(f"[DEBUG] Xato yuz berdi: {e}")
             return JsonResponse({"success": False, "message": str(e)}, status=400)
-
 
 class GetKasbAndYonalishView(View):
     """
-    Kasb va Yo'nalishlarni olish uchun API.
+    Kasb, Yo'nalish va Kurslarni olish uchun API.
     """
 
     def get(self, request, *args, **kwargs):
         try:
-            # Get all Kasb
-            kasb_list = Kasb.objects.all()
+            # Barcha Kasblarni olish
+            kasb_list = Kasb.objects.filter(is_active=True)
 
-            # Prepare Kasb data
-            kasb_data = [{"id": kasb.id, "name": kasb.nomi} for kasb in kasb_list]
-
-            # Get all Yonalish based on Kasb (can also add filters if needed)
-            yonalish_data = {}
+            # Kasb ma'lumotlarini tayyorlash
+            kasb_data = []
             for kasb in kasb_list:
-                yonalish_list = Yonalish.objects.filter(kasb=kasb)
-                yonalish_data[kasb.id] = [{"id": yonalish.id, "name": yonalish.nomi} for yonalish in yonalish_list]
+                yonalish_data = []
+                yonalish_list = Yonalish.objects.filter(kasb=kasb, is_active=True)
+
+                for yonalish in yonalish_list:
+                    kurs_data = Kurs.objects.filter(yonalish=yonalish, is_active=True).values(
+                        'id', 'nomi', 'narxi'
+                    )
+
+                    yonalish_data.append({
+                        "id": yonalish.id,
+                        "name": yonalish.nomi,
+                        "kurslar": list(kurs_data),
+                    })
+
+                kasb_data.append({
+                    "id": kasb.id,
+                    "name": kasb.nomi,
+                    "yonalishlar": yonalish_data
+                })
 
             return JsonResponse({
                 "success": True,
-                "kasb": kasb_data,
-                "yonalish": yonalish_data
+                "kasb": kasb_data
             }, status=200)
         except Exception as e:
             return JsonResponse({"success": False, "message": f"Xatolik yuz berdi: {str(e)}"}, status=500)
+

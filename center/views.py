@@ -1,38 +1,61 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView, DetailView, UpdateView
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from account.models import CustomUser
 from center.models import Center, Filial, Images, SubmittedStudent, Kasb, Yonalish, Kurs, E_groups
-from school.models import Sinf
+from school.models import Sinf, Maktab
 from web_project import TemplateLayout
 from django.utils.decorators import method_decorator
 from django.urls import reverse
 
 
 class CenterView(TemplateView):
-    # Predefined function
     def get_context_data(self, **kwargs):
-        # A function to init the global layout
+        # Initialize the base context using TemplateLayout
         context = TemplateLayout.init(self, super().get_context_data(**kwargs))
 
-        # Center modelining barcha ma'lumotlarini olish
+        # Foydalanuvchi obyektini olish
+        user = self.request.user
+
+        # Center obyektlari
         centers = Center.objects.all()
 
-        # Ma'lumotlarni context ga qo'shish
-        context['centers'] = centers
+        # Userga tegishli submitted students
+        submitted_students = (
+            SubmittedStudent.objects.filter(added_by=user)
+            if user.is_authenticated
+            else SubmittedStudent.objects.none()
+        )
 
-        # SubmittedStudent modelining ma'lumotlarini filtr bilan olish
-        if self.request.user.is_authenticated:  # Foydalanuvchi autentifikatsiyadan o'tganligini tekshirish
-            submitted_students = SubmittedStudent.objects.filter(added_by=self.request.user)
-        else:
-            submitted_students = SubmittedStudent.objects.none()  # Agar foydalanuvchi autentifikatsiyadan o'tmagan bo'lsa, bo'sh queryset
+        # Barcha submitted students
+        all_submitted_students = SubmittedStudent.objects.all()
 
-        # Ma'lumotlarni context ga qo'shish
-        context['submitted_students'] = submitted_students
+        # Faqat SubmittedStudent orqali mavjud maktablarni olish
+        school_ids = SubmittedStudent.objects.filter(sinf__maktab__isnull=False).values_list('sinf__maktab', flat=True).distinct()
+        schools = Maktab.objects.filter(id__in=school_ids)
+
+        # Qo'shimcha kerakli contextlar
+        teachers = CustomUser.objects.filter(now_role="2")  # O'qituvchilar
+        sinflar = Sinf.objects.all()  # Sinflar
+        kasblar = Kasb.objects.all()  # Kasblar
+        yonalishlar = Yonalish.objects.all()  # Yo'nalishlar
+
+        # Add data to context
+        context.update({
+            'centers': centers,
+            'grades': range(1, 12),  # 1-dan 11-gacha
+            'submitted_students': submitted_students,  # Userga tegishli
+            'all_submitted_students': all_submitted_students,  # Barcha submitted students
+            'teachers': teachers,  # O'qituvchilar
+            'schools': schools,  # Filterlangan maktablar
+            'sinflar': sinflar,  # Sinflar
+            'kasblar': kasblar,  # Kasblar
+            'yonalishlar': yonalishlar,  # Yo'nalishlar
+        })
 
         return context
+
 
 class CenterDetailView(LoginRequiredMixin, DetailView):
     model = Center
@@ -61,13 +84,15 @@ class CenterDetailView(LoginRequiredMixin, DetailView):
         context["submitted_students"] = SubmittedStudent.objects.filter(filial__center=self.object)
 
         # Maktablar
-        context["maktablar"] = self.object.maktab.all()  # Center bilan ManyToManyField orqali bog'langan barcha maktablar
+        context[
+            "maktablar"] = self.object.maktab.all()  # Center bilan ManyToManyField orqali bog'langan barcha maktablar
 
         # Sinflar
         sinf_list = Sinf.objects.filter(maktab__in=self.object.maktab.all())
         context["sinflar"] = sinf_list
 
         return context
+
 
 @method_decorator(login_required, name='dispatch')
 class FilialDetailUpdateView(DetailView, UpdateView):

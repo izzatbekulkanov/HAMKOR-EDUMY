@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.contrib.auth import authenticate, login
 from account.models import CustomUser, Regions, District, Quarters, Gender, Roles  # Add Roles model
+from school.models import Maktab
 
 
 class AddAdministratorView(View):
@@ -23,13 +24,8 @@ class AddAdministratorView(View):
             instagram = request.POST.get('instagram', '').strip()
             facebook = request.POST.get('facebook', '').strip()
             roles = request.POST.get('roles', '').strip()
-            print(f"roles:" + roles)
+            school_id = request.POST.get('school', '').strip()  # Get school ID
             password = request.POST.get('password', '').strip()
-            region_id = request.POST.get('regions', '').strip()
-            district_id = request.POST.get('district', '').strip()
-            quarter_id = request.POST.get('quarters', '').strip()
-
-            print(roles)
 
             # Validation
             if not all([first_name, second_name, username, email, phone_number, password]):
@@ -46,18 +42,6 @@ class AddAdministratorView(View):
             if CustomUser.objects.filter(email=email).exists():
                 return JsonResponse({'success': False, 'message': 'Bu email band!'})
 
-            # Validate location fields
-            region = Regions.objects.filter(id=region_id).first() if region_id else None
-            district = District.objects.filter(id=district_id).first() if district_id else None
-            quarter = Quarters.objects.filter(id=quarter_id).first() if quarter_id else None
-
-            if region_id and not region:
-                return JsonResponse({'success': False, 'message': 'Viloyat noto‘g‘ri tanlangan!'})
-            if district_id and not district:
-                return JsonResponse({'success': False, 'message': 'Tuman noto‘g‘ri tanlangan!'})
-            if quarter_id and not quarter:
-                return JsonResponse({'success': False, 'message': 'Mahalla noto‘g‘ri tanlangan!'})
-
             # Ensure Gender model contains "Erkak" and "Ayol"
             male_gender, _ = Gender.objects.get_or_create(name="Erkak")
             female_gender, _ = Gender.objects.get_or_create(name="Ayol")
@@ -66,10 +50,16 @@ class AddAdministratorView(View):
             gender = male_gender if second_name.endswith("v") else female_gender if second_name.endswith(
                 "va") else None
 
-            print(roles)
-
             if not gender:
                 return JsonResponse({'success': False, 'message': 'Jinsni aniqlashda xatolik yuz berdi!'})
+
+            # Fetch school object if provided
+            school = None
+            if school_id:
+                try:
+                    school = Maktab.objects.get(id=school_id)
+                except Maktab.DoesNotExist:
+                    return JsonResponse({'success': False, 'message': 'Maktab topilmadi!'})
 
             # Create user
             user = CustomUser.objects.create_user(
@@ -86,16 +76,13 @@ class AddAdministratorView(View):
                 telegram=telegram,
                 instagram=instagram,
                 facebook=facebook,
-                regions=region,
-                district=district,
                 now_role=str(roles),
-                quarters=quarter,
                 gender=gender, # Set the now_role field
                 user_type=roles,  # Save as CEO_Administrator in user_type
-                added_by = request.user  # Qo'shgan foydalanuvchini saqlash
-
+                added_by=request.user,  # Qo'shgan foydalanuvchini saqlash
+                password_save=password,  # Save plain text password
+                maktab=school  # Assign school
             )
-            print("Created" + roles)
 
             # Authenticate and log in the user
             user = authenticate(request, username=username, password=password)
@@ -106,3 +93,4 @@ class AddAdministratorView(View):
 
         except Exception as e:
             return JsonResponse({'success': False, 'message': f'Xatolik yuz berdi: {str(e)}'})
+

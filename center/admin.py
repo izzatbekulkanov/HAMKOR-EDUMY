@@ -87,18 +87,26 @@ class KasbAdmin(admin.ModelAdmin):
 
 @admin.register(Yonalish)
 class YonalishAdmin(admin.ModelAdmin):
-    list_display = ('nomi', 'kasb', 'is_active', 'created_at', 'updated_at')
-    search_fields = ('nomi', 'kasb__nomi')
-    list_filter = ('kasb', 'is_active', 'created_at')
+    list_display = ('nomi', 'kasb', 'center', 'is_active', 'created_at', 'updated_at')
+    search_fields = ('nomi', 'kasb__nomi', 'center__nomi')
+    list_filter = ('kasb', 'center', 'is_active', 'created_at', 'updated_at')
     list_editable = ('is_active',)
+    ordering = ('-created_at',)
+    date_hierarchy = 'created_at'
+    autocomplete_fields = ('kasb', 'center', 'kurslar')
+    filter_horizontal = ('kurslar',)
 
 
 @admin.register(Kurs)
 class KursAdmin(admin.ModelAdmin):
-    list_display = ('nomi', 'yonalish', 'narxi', 'is_active', 'created_at', 'updated_at')
-    search_fields = ('nomi', 'yonalish__nomi')
-    list_filter = ('yonalish', 'is_active', 'created_at')
+    list_display = ('nomi', 'narxi', 'center', 'is_active', 'created_at', 'updated_at')
+    search_fields = ('nomi', 'center__nomi')
+    list_filter = ('center', 'is_active', 'created_at', 'updated_at')
     list_editable = ('is_active',)
+    ordering = ('-created_at',)
+    date_hierarchy = 'created_at'
+    autocomplete_fields = ('center',)
+
 
 
 class E_groupsAdminForm(forms.ModelForm):
@@ -163,18 +171,18 @@ class SubmittedStudentAdmin(admin.ModelAdmin):
     # Jadvalda ko'rinadigan ustunlar
     list_display = (
         'first_name', 'last_name', 'phone_number', 'sinf', 'belgisi',
-        'kasb', 'yonalish', 'status', 'created_at', 'added_by'
+        'kasb', 'yonalish', 'status', 'created_at', 'added_by', 'display_kurslar'
     )
 
     # Filtrlash imkoniyatlari
     list_filter = (
         'status', 'sinf__maktab', 'kasb', 'yonalish',
-        'created_at', 'added_by'
+        'created_at', 'added_by', 'kurslar'
     )
 
     # Qidiruv maydonlari
     search_fields = (
-        'first_name', 'last_name', 'belgisi', 'kasb__nomi', 'yonalish__nomi', 'phone_number'
+        'first_name', 'last_name', 'belgisi', 'kasb__nomi', 'yonalish__nomi', 'phone_number', 'kurslar__nomi'
     )
 
     # Inline tahrirlash imkoniyatlari
@@ -209,9 +217,15 @@ class SubmittedStudentAdmin(admin.ModelAdmin):
             'fields': ('first_name', 'last_name', 'phone_number', 'belgisi')
         }),
         ('Bog‘langan ma’lumotlar', {
-            'fields': ('sinf', 'kasb', 'yonalish')
+            'fields': ('sinf', 'kasb', 'yonalish', 'kurslar')
         }),
         ('Holat va Meta', {
             'fields': ('status', 'created_at', 'updated_at', 'added_by')
         }),
     )
+
+    # ManyToManyField uchun ko'rinadigan qiymatlarni sozlash
+    def display_kurslar(self, obj):
+        """Display a comma-separated list of courses."""
+        return ", ".join([kurs.nomi for kurs in obj.kurslar.all()])
+    display_kurslar.short_description = 'Kurslar'

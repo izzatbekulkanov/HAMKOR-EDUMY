@@ -17,7 +17,7 @@
       <excludeFolder url="file://$MODULE_DIR$/templates/layout/partials/menu/horizontal" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.12 virtualenv at C:\Users\Izzatbek\Documents\GitHub\HAMKOR-EDUMY\venv" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.12 virtualenv at ~/HAMKOR-EDUMY/venv" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PyDocumentationSettings">

@@ -30,81 +30,64 @@
 
 {% block content %}
   <!-- Administrator statistikasi -->
-  <div class="card mb-6">
-    <div class="card-widget-separator-wrapper">
-      <div class="card-body card-widget-separator">
-        <div class="row gy-4 gy-sm-1">
-          <!-- Barcha adminlar -->
-          <div class="col-sm-6 col-lg-3">
-            <div class="d-flex justify-content-between align-items-start card-widget-1 border-end pb-4 pb-sm-0">
-              <div>
-                <p class="mb-1">Barcha adminlar</p>
-                <h4 class="mb-1">222</h4>
-                <p class="mb-0"><span class="badge bg-label-success">Umumiy soni</span></p>
+   <div class="card mb-6">
+      <div class="container-fluid py-3">
+          <div class="row gx-3 gy-3 justify-content-center">
+              <!-- Jami foydalanuvchilar -->
+              <div class="col-lg-2 col-md-4 col-sm-6 d-flex">
+                  <button id="all-users-btn" type="button" class="btn btn-light shadow-sm w-100 py-3 d-flex flex-column align-items-center justify-content-center">
+                      <i class="ti ti-users-group text-warning ti-32 mb-2"></i>
+                      <h5 class="mb-1">{{ user_counts.students|add:user_counts.teachers|add:user_counts.directors|add:user_counts.administrators|add:user_counts.ceo_administrators|add:user_counts.superadmins }}</h5>
+                      <p class="text-muted mb-0">Jami foydalanuvchilar</p>
+                  </button>
               </div>
-              <span class="avatar me-sm-6">
-              <span class="avatar-initial rounded"><i class="ti-28px ti ti-users text-heading"></i></span>
-            </span>
-            </div>
-            <hr class="d-none d-sm-block d-lg-none me-6">
-          </div>
+              <!-- Direktorlar -->
+              <div class="col-lg-2 col-md-4 col-sm-6 d-flex">
+                  <button id="directors-btn" type="button" class="btn btn-light shadow-sm w-100 py-3 d-flex flex-column align-items-center justify-content-center">
+                      <i class="ti ti-users text-primary ti-32 mb-2"></i>
+                      <h5 class="mb-1">{{ user_counts.directors }}</h5>
+                      <p class="text-muted mb-0">Direktorlar</p>
+                  </button>
+              </div>
 
-          <!-- Kichik adminlar -->
-          <div class="col-sm-6 col-lg-3">
-            <div class="d-flex justify-content-between align-items-start card-widget-2 border-end pb-4 pb-sm-0">
-              <div>
-                <p class="mb-1">Kichik adminlar</p>
-                <h4 class="mb-1">222</h4>
-                <p class="mb-0"><span class="badge bg-label-success">Faol kichik adminlar</span></p>
+              <!-- Hamkorlar va O'qituvchilar -->
+              <div class="col-lg-2 col-md-4 col-sm-6 d-flex">
+                  <button id="partners-btn" type="button" class="btn btn-light shadow-sm w-100 py-3 d-flex flex-column align-items-center justify-content-center">
+                      <i class="ti ti-user-circle text-success ti-32 mb-2"></i>
+                      <h5 class="mb-1">{{ user_counts.teachers }}</h5>
+                      <p class="text-muted mb-0">O'qituvchilar</p>
+                  </button>
               </div>
-              <span class="avatar p-2 me-lg-6">
-              <span class="avatar-initial rounded"><i class="ti-28px ti ti-user-circle text-heading"></i></span>
-            </span>
-            </div>
-            <hr class="d-none d-sm-block d-lg-none">
-          </div>
 
-          <!-- Nofaol adminlar -->
-          <div class="col-sm-6 col-lg-3">
-            <div class="d-flex justify-content-between align-items-start border-end pb-4 pb-sm-0 card-widget-3">
-              <div>
-                <p class="mb-1">Nofaol adminlar</p>
-                <h4 class="mb-1">222</h4>
-                <p class="mb-0"><span class="badge bg-label-danger">Hozircha faol emas</span></p>
+              <!-- Menejerlar -->
+              <div class="col-lg-2 col-md-4 col-sm-6 d-flex">
+                  <button id="managers-btn" type="button" class="btn btn-light shadow-sm w-100 py-3 d-flex flex-column align-items-center justify-content-center">
+                      <i class="ti ti-users-group text-info ti-32 mb-2"></i>
+                      <h5 class="mb-1">{{ user_counts.administrators }}</h5>
+                      <p class="text-muted mb-0">Administratorlar</p>
+                  </button>
               </div>
-              <span class="avatar p-2 me-sm-6">
-              <span class="avatar-initial rounded"><i class="ti-28px ti ti-user-off text-heading"></i></span>
-            </span>
-            </div>
-          </div>
 
-          <!-- Jami foydalanuvchilar -->
-          <div class="col-sm-6 col-lg-3">
-            <div class="d-flex justify-content-between align-items-start">
-              <div>
-                <p class="mb-1">Jami foydalanuvchilar</p>
-                <h4 class="mb-1">222</h4>
-                <p class="mb-0"><span class="badge bg-label-info">Umumiy tizim foydalanuvchilari</span></p>
+              <!-- Nofaol adminlar -->
+              <div class="col-lg-2 col-md-4 col-sm-6 d-flex">
+                  <button id="deactivities-btn" type="button" class="btn btn-light shadow-sm w-100 py-3 d-flex flex-column align-items-center justify-content-center">
+                      <i class="ti ti-user-off text-danger ti-32 mb-2"></i>
+                      <h5 class="mb-1">{{ user_counts.unverified }}</h5>
+                      <p class="text-muted mb-0">Nofaol foydalanuvchilar</p>
+                  </button>
               </div>
-              <span class="avatar p-2">
-              <span class="avatar-initial rounded"><i class="ti-28px ti ti-users-group text-heading"></i></span>
-            </span>
-            </div>
           </div>
-        </div>
       </div>
-    </div>
   </div>
-
 
   <div class="card">
     <div class="card-header">
       <h5 class="card-title">Administratorlar ro'yhati</h5>
       <div class="d-flex justify-content-between align-items-center row pt-4 gap-6 gap-md-0">
-        <div class="col-md-3">
+        <div class="col-md-9">
           <input type="text" class="form-control" id="search-name" placeholder="Ismni qidirish">
         </div>
-        <div class="col-md-3">
+        <div style="display: none;">
           <select class="form-select" id="filter-role">
             <option value="">Tizimdagi rolli</option>
             <option value="5">CEO_Administrator</option>
@@ -114,20 +97,25 @@
             <option value="1">O'quvchi</option>
           </select>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
           <select class="form-select" id="filter-gender">
             <option value="">Jinsi</option>
             <option value="male">Erkak</option>
             <option value="female">Ayol</option>
           </select>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2" style="display: none;">
           <select class="form-select" id="filter-status">
-            <option value="">Faollik holati</option>
-            <option value="active">Faol</option>
-            <option value="inactive">Nofaol</option>
-          </select>
+             <option value="">Faollik holati</option>
+             <option value="active">Faol</option>
+             <option value="inactive">Nofaol</option>
+           </select>
         </div>
+        <div class="col-md-1">
+          <a href="/user/addAdministrators/" class="btn btn-primary ms-2 ms-sm-0 waves-effect waves-light"><i class="ti ti-plus me-0 me-sm-1 ti-xs"></i></a>
+        </div>
+
+
       </div>
     </div>
     <div class="card-datatable table-responsive">
@@ -136,12 +124,13 @@
         <tr>
           <th>#</th>
           <th>Foydalanuvchi</th>
-          <th>Telefon raqami</th>
           <th>Tug‘ilgan sanasi</th>
           <th>Jinsi</th>
           <th>Faollik holati</th>
           <th>Hozirgi roli</th>
+          <th>Maktab</th>
           <th>Oxirgi kirish</th>
+          <th>PAROL</th>
           <th>Amallar</th>
         </tr>
         </thead>
@@ -155,5 +144,350 @@
     {% csrf_token %}
     <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
   </form>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const filterRole = document.getElementById('filter-role');
+    const filterStatus = document.getElementById('filter-status');
+    const roleButtons = [
+      document.getElementById('directors-btn'),
+      document.getElementById('partners-btn'),
+      document.getElementById('managers-btn'),
+      document.getElementById('all-users-btn')
+    ];
+    const deactivitiesButton = document.getElementById('deactivities-btn');
+
+    // Function to reset all role buttons to default state
+    const resetRoleButtons = () => {
+      roleButtons.forEach(button => {
+        button.classList.remove('btn-success');
+        button.classList.add('btn-light');
+      });
+    };
+
+    // Add click listeners to role buttons
+    roleButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        resetRoleButtons();
+        filterRole.value = button.id === 'directors-btn' ? "3" :
+                          button.id === 'partners-btn' ? "2" :
+                          button.id === 'managers-btn' ? "4" : "";
+        button.classList.remove('btn-light');
+        button.classList.add('btn-success');
+
+        // Trigger DataTable redraw
+        $('.datatables-administrators').DataTable().draw();
+      });
+    });
+
+    // Add click listener to deactivities button
+    deactivitiesButton.addEventListener('click', () => {
+      if (filterStatus.value === "inactive") {
+        filterStatus.value = "active";
+        deactivitiesButton.classList.remove('btn-danger');
+        deactivitiesButton.classList.add('btn-success');
+      } else if (filterStatus.value === "active") {
+        filterStatus.value = "";
+        deactivitiesButton.classList.remove('btn-success');
+        deactivitiesButton.classList.add('btn-light');
+      } else {
+        filterStatus.value = "inactive";
+        deactivitiesButton.classList.remove('btn-light');
+        deactivitiesButton.classList.add('btn-danger');
+      }
+
+      // Trigger DataTable redraw
+      $('.datatables-administrators').DataTable().draw();
+    });
+
+    // Function to initialize or reinitialize DataTable
+    const initializeDataTable = () => {
+      const dt_admins_table = $('.datatables-administrators');
+
+      // Destroy existing DataTable instance if already initialized
+      if ($.fn.DataTable.isDataTable(dt_admins_table)) {
+        dt_admins_table.DataTable().clear().destroy();
+      }
+
+      // Initialize DataTable
+      dt_admins_table.DataTable({
+        processing: true,
+        serverSide: true,
+        paging: true,
+        pageLength: 10,
+        lengthChange: false,
+        info: false,
+        ajax: {
+          url: '/api/get-ceo-administrators/',
+          type: 'GET',
+          data: function(d) {
+            d.searchName = $('#search-name').val();
+            d.filterGender = $('#filter-gender').val();
+            d.filterStatus = $('#filter-status').val();
+            d.filterRole = $('#filter-role').val();
+          }
+        },
+        columns: [
+          {
+            data: null,
+            title: '#',
+            render: (data, type, row, meta) => meta.row + 1
+          },
+          {
+            data: null,
+            title: 'Foydalanuvchi',
+            render: data => `
+              <div>
+                <strong>${data.first_name || ''} ${data.second_name || ''}</strong><br>
+                <small class="text-info">${data.phone_number || '<span class="text-muted text-info">Mavjud emas</span>'}</small> <br>
+                <small>${data.email || '<span class="text-muted">Mavjud emas</span>'}</small>
+              </div>`
+          },
+          {
+            data: 'birth_date',
+            title: 'Tug‘ilgan sanasi',
+            render: data => {
+              if (data) {
+                return `
+                  <div class="d-flex align-items-center">
+                    <i class="ti ti-calendar text-primary me-2"></i>
+                    <span>${data}</span>
+                  </div>
+                `;
+              } else {
+                return `
+                  <div class="d-flex align-items-center">
+                    <i class="ti ti-calendar-off text-muted me-2"></i>
+                    <span class="text-muted">Noma’lum</span>
+                  </div>
+                `;
+              }
+            }
+          },
+          {
+            data: 'gender__name',
+            title: 'Jinsi',
+            render: data => {
+              if (data === "Erkak") {
+                return `
+                  <div class="d-flex align-items-center">
+                    <i class="ti ti-man text-primary me-2"></i>
+                    <span>Erkak</span>
+                  </div>
+                `;
+              } else if (data === "Ayol") {
+                return `
+                  <div class="d-flex align-items-center">
+                    <i class="ti ti-woman text-pink me-2"></i>
+                    <span>Ayol</span>
+                  </div>
+                `;
+              } else {
+                return `
+                  <div class="d-flex align-items-center">
+                    <i class="ti ti-help text-muted me-2"></i>
+                    <span class="text-muted">Noma’lum</span>
+                  </div>
+                `;
+              }
+            }
+          },
+          {
+            data: 'is_verified',
+            title: 'Faollik holati',
+            render: (data, type, full) => `
+              <label class="switch switch-success switch-square">
+                <input type="checkbox" class="switch-input is-active-toggle" data-id="${full.id}" ${data ? 'checked' : ''}>
+                <span class="switch-toggle-slider">
+                  <span class="switch-on">
+                    <i class="ti ti-check"></i>
+                  </span>
+                  <span class="switch-off">
+                    <i class="ti ti-x"></i>
+                  </span>
+                </span>
+                <span class="switch-label">${data ? 'Tasdiqlangan' : 'Tasdiqlanmagan'}</span>
+              </label>
+            `
+          },
+          {
+            data: null,
+            title: 'Maktab',
+            render: function (data) {
+              if (data.school) {
+                return `
+                  <div>
+                    <strong>${data.school.raqami || 'Noma’lum'} - ${data.school.nomi || 'Noma’lum'}</strong><br>
+                    <small>Viloyat: ${data.school.viloyat || 'Noma’lum'}</small><br>
+                    <small>Tuman: ${data.school.tuman || 'Noma’lum'}</small>
+                  </div>
+                `;
+              } else {
+                return '<span class="text-muted"><code>Maktab ma’lumotlari yo‘q</code></span>';
+              }
+            },
+            defaultContent: '<span class="text-muted">Noma’lum</span>'
+          },
+          { data: 'now_role', title: 'Hozirgi roli', defaultContent: '<span class="text-muted alert alert-danger">Noma’lum</span>' },
+          {
+            data: null,
+            title: 'Kirish ma\'lumotlari',
+            render: data => {
+              if (data) {
+                return `
+                  <div class="d-flex align-items-center">
+                    <i class="ti ti-user text-primary me-2"></i>
+                    <span>${data.username || `<div class="d-flex align-items-center">
+                        <i class="ti ti-user text-muted me-2"></i>
+                        <span class="text-muted">Mavjud emas</span>
+                      </div>`}</span>
+                  </div>
+                  <div class="d-flex align-items-center mt-2">
+                    <i class="ti ti-lock text-primary me-2"></i>
+                    <span>${data.now_password || `<div class="d-flex align-items-center">
+                        <span class="text-muted">Mavjud emas</span>
+                      </div>`}</span>
+                  </div>
+                `;
+              } else {
+                return `
+                  <div class="d-flex align-items-center">
+                    <span class="text-muted">Mavjud emas</span>
+                  </div>
+                  <div class="d-flex align-items-center mt-2">
+                    <i class="ti ti-lock text-muted me-2"></i>
+                    <span class="text-muted">Mavjud emas</span>
+                  </div>
+                `;
+              }
+            }
+          },
+          {
+            data: 'last_login',
+            title: 'Oxirgi kirish',
+            render: data => data || '<span class="text-muted">Mavjud emas</span>'
+          },
+          {
+            data: 'id',
+            orderable: false,
+            title: 'Amallar',
+            render: data => `
+              <div class="d-inline-block">
+                <button class="btn btn-sm btn-icon btn-primary me-1 view-details" data-id="${data}" title="Ko‘rish">
+                  <i class="ti ti-eye"></i>
+                </button>
+              </div>`
+          }
+        ],
+        order: [[1, 'asc']],
+        className: 'btn btn-label-primary dropdown-toggle me-4 waves-effect waves-light border-none',
+        text: '<i class="ti ti-file-export ti-xs me-sm-1"></i> <span class="d-none d-sm-inline-block">Export</span>',
+         buttons: [
+                  {
+                    extend: 'collection',
+                    text: '<i class="ti ti-file-export ti-xs me-sm-1"></i> Export',
+                    className: 'btn btn-label-primary dropdown-toggle waves-effect',
+                    buttons: [
+                            {
+                              extend: 'print',
+                              text: '<i class="ti ti-printer me-1"></i> Print',
+                              className: 'dropdown-item',
+                              exportOptions: { columns: [0, 1, 2, 5, 6, 7] }
+                            },
+                            {
+                              extend: 'csv',
+                              text: '<i class="ti ti-file-text me-1"></i> CSV',
+                              className: 'dropdown-item',
+                              exportOptions: { columns: [0, 1, 2, 5, 6, 7] }
+                            },
+                            {
+                              extend: 'excel',
+                              text: '<i class="ti ti-file-spreadsheet me-1"></i> Excel',
+                              className: 'dropdown-item',
+                              exportOptions: { columns: [0, 1, 2, 5, 6, 7] }
+                            },
+                            {
+                              extend: 'pdf',
+                              text: '<i class="ti ti-file-description me-1"></i> PDF',
+                              className: 'dropdown-item',
+                              exportOptions: { columns: [0, 1, 2, 5, 6, 7] }
+                            },
+                            {
+                              extend: 'copy',
+                              text: '<i class="ti ti-copy me-1"></i> Copy',
+                              className: 'dropdown-item',
+                              exportOptions: { columns: [0, 1, 2, 5, 6, 7] }
+                            }
+                          ]
+                        }
+          ],
+        language: {
+          zeroRecords: 'Hech qanday ma’lumot topilmadi'
+        },
+        dom: '<"d-flex justify-content-between align-items-center mb-4"B>t',
+      });
+
+      // Ko‘rish tugmachasi
+      dt_admins_table.on('click', '.view-details', function() {
+        var adminId = $(this).data('id');
+        window.location.href = "/user/user-details/" + adminId + "/";
+      });
+
+      toastr.options = {
+        closeButton: true,
+        progressBar: true,
+        positionClass: 'toast-bottom-right', // Xabar chiqish joyi: ong pastki qism
+        showDuration: 300,
+        hideDuration: 1000,
+        timeOut: 5000,
+        extendedTimeOut: 1000
+      };
+
+      // Faollik holatini o'zgartirish
+      dt_admins_table.on('change', '.is-active-toggle', function() {
+        const adminId = $(this).data('id');
+        const isVerified = $(this).is(':checked');
+        const csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+        const label = $(this).closest('.switch').find('.switch-label');
+
+        // Holatni darhol o'zgartirish
+        label.text(isVerified ? 'Tasdiqlangan' : 'Tasdiqlanmagan');
+
+        // Serverga so'rov yuborish
+        $.ajax({
+          url: `/api/update-activity/${adminId}/`,
+          type: 'POST',
+          headers: { 'X-CSRFToken': csrfToken },
+          contentType: 'application/json',
+          data: JSON.stringify({ is_verified: isVerified }),
+          success: function(response) {
+            toastr.success(response.message, 'Muvaffaqiyatli');
+          },
+          error: function(response) {
+            toastr.error(response.responseJSON.message || 'Xatolik yuz berdi.', 'Xato');
+            // Holatni qayta tiklash (agar serverda xatolik bo‘lsa)
+            label.text(isVerified ? 'Tasdiqlanmagan' : 'Tasdiqlangan');
+            $(this).prop('checked', !isVerified);
+          }
+        });
+      });
+    };
+
+    initializeDataTable();
+
+    // Add event listeners for filter changes
+    $('#filter-gender, #filter-status, #filter-role').on('change', function() {
+      initializeDataTable();
+    });
+
+    // Real-time search functionality
+    $('#search-name').on('input', function() {
+      $('.datatables-administrators').DataTable().draw();
+    });
+  });
+</script>
+
+
+
 
 {% endblock %}
