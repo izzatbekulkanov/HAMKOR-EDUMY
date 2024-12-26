@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager, Group, Per
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.templatetags.static import static
 
 from school.models import Maktab
 
@@ -112,7 +113,7 @@ class CustomUser(AbstractUser):
 
     gender = models.ForeignKey('Gender', on_delete=models.SET_NULL, verbose_name="Jins", blank=True, null=True)
     birth_date = models.DateField(null=True, blank=True, verbose_name="Tug'ilgan kun")
-    imageFile = models.ImageField(upload_to='students/%Y/%m/%d', default='default/user.png', verbose_name="Rasmi faylda", blank=True, null=True)
+    imageFile = models.ImageField(upload_to='students/%Y/%m/%d', default=static('default/user.png'), verbose_name="Rasmi faylda", blank=True, null=True)
 
     regions = models.ForeignKey('Regions', on_delete=models.SET_NULL, verbose_name="Viloyat", null=True, blank=True)
     district = models.ForeignKey('District', on_delete=models.SET_NULL, verbose_name="Tuman", null=True, blank=True)

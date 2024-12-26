@@ -10,6 +10,8 @@
   {{ block.super }}
   <link rel="stylesheet" href="{% static 'vendor/libs/flatpickr/flatpickr.css' %}" />
   <link rel="stylesheet" href="{% static 'vendor/libs/toastr/toastr.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/sweetalert2/sweetalert2.css' %}" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
 {% endblock vendor_css %}
 
@@ -20,6 +22,8 @@
   <script src="{% static 'vendor/libs/cleavejs/cleave.js' %}"></script>
   <script src="{% static 'vendor/libs/cleavejs/cleave-phone.js' %}"></script>
   <script src="{% static 'vendor/libs/toastr/toastr.js' %}"></script>
+  <script src="{% static 'vendor/libs/sweetalert2/sweetalert2.js' %}"></script>
+{#  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>#}
 {% endblock vendor_js %}
 
 {% block page_css %}
@@ -28,261 +32,254 @@
 
 {% block page_js %}
   {{ block.super }}
-  <script src="{% static 'customJs/center/occupations.js' %}"></script>
-  <script src="{% static 'customJs/center/lines.js' %}"></script>
-  <script src="{% static 'customJs/center/course.js' %}"></script>
+  {#  <script src="{% static 'customJs/center/occupations.js' %}"></script>#}
+  <script>
+    $(document).ready(function() {
+      // Toastr sozlamalari
+      toastr.options = {
+        'closeButton': true,                // Yopish tugmasi
+        'debug': false,                     // Debug rejimi
+        'newestOnTop': true,                // Yangi xabar ustiga chiqadi
+        'progressBar': true,                // Progress bar ko'rsatish
+        'positionClass': 'toast-bottom-right', // Xabar joylashuvi
+        'preventDuplicates': true,          // Xabarlarni takrorlanishidan himoya
+        'onclick': null,
+        'showDuration': '300',              // Ko'rinish davomiyligi
+        'hideDuration': '1000',             // Yo'qolish davomiyligi
+        'timeOut': '5000',                  // Ko'rinish vaqti
+        'extendedTimeOut': '1000',          // Qo'shimcha vaqt
+        'showEasing': 'swing',              // Easing effekti
+        'hideEasing': 'linear',
+        'showMethod': 'fadeIn',             // Ko'rinish usuli
+        'hideMethod': 'fadeOut'             // Yo'qolish usuli
+      };
 
+      // Toggle faollik holatini o'zgartirish
+      $('.is-active-toggle').on('change', function() {
+        const checkbox = $(this);
+        const kasbId = checkbox.data('id');
+        const isActive = checkbox.is(':checked');
+
+        $.ajax({
+          url: `/api/kasblar/${kasbId}/`, // API yo'li
+          type: 'PATCH',
+          headers: {
+            'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val() // CSRF tokenni qo'shish
+          },
+          contentType: 'application/json',
+          data: JSON.stringify({ is_active: isActive }), // JSON ma'lumot
+          success: function(response) {
+            if (response.success) {
+              toastr.success(response.message, 'Muvaffaqiyat');
+            } else {
+              toastr.error(response.message, 'Xatolik');
+            }
+          },
+          error: function(xhr, status, error) {
+            console.error(`Xatolik: ${xhr.status} - ${xhr.responseText}`);
+            toastr.error('Faollikni o\'zgartirishda xatolik yuz berdi.', 'Xatolik');
+            // Checkbox holatini tiklash
+            checkbox.prop('checked', !isActive);
+          }
+        });
+      });
+    });
+
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.delete-kasb').forEach(button => {
+    button.addEventListener('click', function () {
+      const kasbId = this.getAttribute('data-id');
+
+      Swal.fire({
+        title: 'O\'chirishni tasdiqlaysizmi?',
+        text: 'Bu amalni qaytarib bo\'lmaydi!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ha, o\'chirish!',
+        cancelButtonText: 'Bekor qilish',
+        customClass: {
+          confirmButton: 'btn btn-danger',
+          cancelButton: 'btn btn-secondary',
+        },
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Send delete request if confirmed
+          fetch(`/learning/kasblar/delete/${kasbId}/`, {
+            method: 'DELETE',
+            headers: {
+              'X-CSRFToken': document.querySelector('input[name=csrfmiddlewaretoken]').value,
+            },
+          })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                Swal.fire({
+                  title: 'O\'chirildi!',
+                  text: data.message,
+                  icon: 'success',
+                  confirmButtonText: 'OK',
+                  customClass: {
+                    confirmButton: 'btn btn-primary',
+                  },
+                }).then(() => {
+                  location.reload(); // Reload the page
+                });
+              } else {
+                Swal.fire({
+                  title: 'Xatolik!',
+                  text: data.message,
+                  icon: 'error',
+                  confirmButtonText: 'OK',
+                  customClass: {
+                    confirmButton: 'btn btn-primary',
+                  },
+                });
+              }
+            })
+            .catch(error => {
+              console.error('Xatolik:', error);
+              Swal.fire({
+                title: 'Xatolik!',
+                text: 'Kasbni o\'chirishda muammo yuz berdi.',
+                icon: 'error',
+                confirmButtonText: 'OK',
+                customClass: {
+                  confirmButton: 'btn btn-primary',
+                },
+              });
+            });
+        }
+      });
+    });
+  });
+});
+
+ document.addEventListener('DOMContentLoaded', function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const status = urlParams.get('status');
+    const message = urlParams.get('message');
+
+    if (status && message) {
+      Swal.fire({
+        title: status === 'success' ? 'Muvaffaqiyatli!' : 'Xatolik!',
+        text: decodeURIComponent(message),
+        icon: status === 'success' ? 'success' : 'error',
+        confirmButtonText: 'OK',
+        customClass: {
+          confirmButton: status === 'success' ? 'btn btn-primary' : 'btn btn-danger',
+        },
+      }).then(() => {
+        // URL'dan query string'ni olib tashlash
+        const url = new URL(window.location);
+        url.searchParams.delete('status');
+        url.searchParams.delete('message');
+        window.history.replaceState(null, '', url);
+      });
+    }
+  });
+
+  </script>
 {% endblock page_js %}
 
 {% block content %}
   <div class="row">
-    <div class="col-xl-12">
-      <div class="nav-align-top mb-6">
-        <ul class="nav nav-pills mb-4" role="tablist">
-          <li class="nav-item">
-            <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab"
-                    data-bs-target="#navs-pills-occupations" aria-controls="navs-pills-occupations"
-                    aria-selected="true">Kasblar
-            </button>
-          </li>
-          <li class="nav-item">
-            <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-pills-lines"
-                    aria-controls="navs-pills-lines" aria-selected="false">Yo'nalishlar
-            </button>
-          </li>
-          <li class="nav-item">
-            <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-pills-course"
-                    aria-controls="navs-pills-course" aria-selected="false">Kurslar
-            </button>
-          </li>
-        </ul>
-        <div class="tab-content">
-          <div class="tab-pane fade show active" id="navs-pills-occupations" role="tabpanel">
-            <div class="row gy-4 mb-4">
-              <!-- Add New Kasb Form and Kasblar List -->
-              <div class="col-lg-8 mx-auto">
-                <!-- Add New Kasb Form -->
-                <div class="card border-0 shadow-sm mb-4">
-                  <div class="card-header">
-                    <h5 class="mb-0"><i class="ti ti-plus me-2"></i> Yangi Kasb Qo'shish</h5>
-                  </div>
-                  <div class="card-body">
-                    <form id="addKasbForm">
-                      {% csrf_token %}
-                      <div class="mb-3">
-                        <label for="kasbNomi" class="form-label fw-bold">Kasb nomi</label>
-                        <input type="text" id="kasbNomi" name="nomi" class="form-control"
-                               placeholder="Kasb nomini kiriting" required />
-                      </div>
-                      <div class="mb-3">
-                        <label for="kasbActive" class="form-label fw-bold">Faollik</label>
-                        <select id="kasbActive" name="is_active" class="form-select" required>
-                          <option value="true" selected>Faol</option>
-                          <option value="false">Nofaol</option>
-                        </select>
-                      </div>
-                      <div class="text-end">
-                        <button type="submit" class="btn btn-primary">
-                          <i class="ti ti-check me-1"></i> Qo'shish
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                </div>
+    <!-- Kasb qo'shish formasi -->
+    <div class="col-12">
+      <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between">
+        <!-- Kasb qo'shish formasi -->
+        <form method="post" class="d-flex gap-2 flex-grow-1">
+          {% csrf_token %}
+          <input type="text" name="nomi" class="form-control form-control-sm" placeholder="Kasb nomi" required>
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="ti ti-plus me-1"></i> Qo'shish
+          </button>
+        </form>
 
-                <!-- Kasblar List -->
-                <div class="card border-0 shadow-sm">
-                  <div class="card-header">
-                    <h5 class="mb-0"><i class="ti ti-list me-2"></i> Kasblar</h5>
-                  </div>
-                  <div class="card-body">
-                    <div class="list-group" id="kasbList">
-                      <!-- Kasblar dinamik ravishda bu yerga yuklanadi -->
-                      <div class="list-group-item text-center text-muted">Kasblar mavjud emas.</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="tab-pane fade" id="navs-pills-lines" role="tabpanel">
-            <div class="row gy-4 mb-4">
-              <!-- Yo'nalishlar -->
-              <div class="col-12">
-                <div class="card border-0 shadow-sm">
-                  <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                      <h5 class="mb-0"><i class="ti ti-briefcase me-2"></i> Yo'nalishlar</h5>
-                      <button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#addYonalishCollapse"
-                              aria-expanded="false">
-                        <i class="ti ti-plus me-1"></i> Yangi Qo'shish
-                      </button>
-                    </div>
-
-                    <!-- Add New Yo'nalish Form -->
-                    <div class="collapse" id="addYonalishCollapse">
-                      <div class="card border-0 mb-4 shadow-sm">
-                        <div class="card-body">
-                          <form id="addYonalishForm">
-                            {% csrf_token %}
-                            <div class="row gy-3">
-                              <div class="col-md-6">
-                                <label for="yonalishNomi" class="form-label fw-bold">
-                                  <i class="ti ti-writing me-1"></i> Yo'nalish nomi
-                                </label>
-                                <input type="text" id="yonalishNomi" name="nomi" class="form-control"
-                                       placeholder="Yo'nalish nomini kiriting" required />
-                              </div>
-                              <div class="col-md-6">
-                                <label for="yonalishKasb" class="form-label fw-bold">
-                                  <i class="ti ti-tag me-1"></i> Kasb
-                                </label>
-                                <select id="yonalishKasb" name="kasb" class="form-select" required>
-                                  <option value="" selected disabled>Kasb tanlang</option>
-                                  <!-- Kasblar AJAX orqali yuklanadi -->
-                                </select>
-                              </div>
-                            </div>
-                            <div class="text-end mt-3">
-                              <button type="submit" class="btn btn-success">
-                                <i class="ti ti-check me-1"></i> Qo'shish
-                              </button>
-                            </div>
-                          </form>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Yo'nalishlar List -->
-                    <div class="row gy-3" id="yonalishList">
-                      <!-- Dinamik yo'nalishlar -->
-                      <div class="col-md-6">
-                        <div class="card border-0 shadow-sm h-100">
-                          <div class="card-body d-flex flex-column">
-                            <h6 class="fw-bold">
-                              <i class="ti ti-writing me-2"></i> Web Development
-                            </h6>
-                            <p class="text-muted mb-2">Kasb: IT va Dasturlash</p>
-                            <div class="mt-auto">
-                              <button class="btn btn-sm btn-outline-info">
-                                <i class="ti ti-eye me-1"></i> Batafsil
-                              </button>
-                              <button class="btn btn-sm btn-outline-danger ms-1">
-                                <i class="ti ti-trash me-1"></i> O'chirish
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="col-md-6">
-                        <div class="card border-0 shadow-sm h-100">
-                          <div class="card-body d-flex flex-column">
-                            <h6 class="fw-bold">
-                              <i class="ti ti-writing me-2"></i> Graphic Design
-                            </h6>
-                            <p class="text-muted mb-2">Kasb: Dizayn va San'at</p>
-                            <div class="mt-auto">
-                              <button class="btn btn-sm btn-outline-info">
-                                <i class="ti ti-eye me-1"></i> Batafsil
-                              </button>
-                              <button class="btn btn-sm btn-outline-danger ms-1">
-                                <i class="ti ti-trash me-1"></i> O'chirish
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <!-- Agar yo'nalishlar bo'lmasa -->
-                      <div class="col-12 text-center text-muted" id="emptyYonalishMessage">Yo'nalishlar mavjud emas.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="tab-pane fade" id="navs-pills-course" role="tabpanel">
-            <div class="row gy-4">
-              <!-- Add New Kurs Form -->
-              <div class="col-12">
-                <div class="card border-0 shadow-sm">
-                  <div class="card-body d-flex align-items-center gap-3">
-                    <div class="icon-circle bg-primary text-white d-flex align-items-center justify-content-center">
-                      <i class="ti ti-plus fs-4"></i>
-                    </div>
-                    <div>
-                      <h5 class="mb-0 fw-bold">Yangi Kurs Qo'shish</h5>
-                      <p class="text-muted mb-0">Bu yerda yangi kursni qo'shishingiz mumkin.</p>
-                    </div>
-                  </div>
-                  <div class="card-body border-top">
-                    <form id="addKursForm">
-                      {% csrf_token %}
-                      <div class="row g-3">
-                        <div class="col-md-4">
-                          <label for="kursNomi" class="form-label fw-bold">Kurs nomi</label>
-                          <input type="text" id="kursNomi" name="nomi" class="form-control"
-                                 placeholder="Kurs nomini kiriting" required />
-                        </div>
-                        <div class="col-md-4">
-                          <label for="kursNarxi" class="form-label fw-bold">Narxi</label>
-                          <div class="input-group">
-                            <span class="input-group-text">So'm</span>
-                            <input type="text" id="kursNarxi" name="narxi" class="form-control kurs-narxi"
-                                   placeholder="1,500,000" required />
-                          </div>
-                          <small class="text-muted">Misol: 1,500,000</small>
-                        </div>
-                      </div>
-                      <div class="text-end mt-3">
-                        <button type="submit" class="btn btn-primary">
-                          <i class="ti ti-check me-1"></i> Qo'shish
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Kurslar List -->
-              <div class="col-12">
-                <div class="card border-0 shadow-sm">
-                  <div class="card-header">
-                    <h5 class="mb-0"><i class="ti ti-book me-2"></i> Kurslar</h5>
-                  </div>
-                  <div class="card-body">
-                    <div class="row gy-3" id="kursList">
-                      <!-- Kurslar dinamik ravishda bu yerga yuklanadi -->
-                      <div class="col-12 text-center text-muted" id="emptyKursMessage">Kurslar mavjud emas.</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>
+        <!-- Qidirish formasi -->
+        <form method="get" class="d-flex gap-2 flex-grow-1">
+          <input type="text" name="q" class="form-control form-control-sm" placeholder="Qidirish...">
+          <button type="submit" class="btn btn-secondary btn-sm">
+            <i class="ti ti-search me-1"></i> Qidirish
+          </button>
+          <a href="?" class="btn btn-success btn-sm">
+            <i class="ti ti-reload me-1"></i> Yangilash
+          </a>
+        </form>
       </div>
     </div>
+
+    <hr class="my-4 border-top border-2 border-primary">
+
+    {% if kasblar %}
+      <div class="table-responsive card my-5">
+        <table class="table table-striped table-hover table-sm">
+          <thead class="">
+          <tr>
+            <th>#</th>
+            <th>Kasb nomi</th>
+            <th>Yo'nalishlar</th>
+            <th>Kurslar</th>
+            <th>Guruhlar</th>
+            <th>Faollik</th>
+            <th>Yaratilgan</th>
+            <th>Yangilangan</th>
+            <th>Harakatlar</th>
+          </tr>
+          </thead>
+          <tbody>
+          {% for item in kasblar %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td class="text-truncate" style="max-width: 150px;">{{ item.nomi }}</td>
+              <td>{{ item.yonalish_count }}</td>
+              <td>{{ item.kurs_count }}</td>
+              <td>{{ item.guruh_count }}</td>
+              <td>
+                <label class="switch switch-success switch-square">
+                  <input type="checkbox" class="switch-input is-active-toggle" data-id="{{ item.id }}"
+                         {% if item.is_active %}checked{% endif %}>
+                  <span class="switch-toggle-slider">
+                    <span class="switch-on">
+                      <i class="ti ti-check"></i>
+                    </span>
+                    <span class="switch-off">
+                      <i class="ti ti-x"></i>
+                    </span>
+                  </span>
+                  <span class="switch-label"></span>
+                </label>
+              </td>
+              <td><i class="ti ti-calendar-event"></i> {{ item.created_at|date:"d-m-Y" }}</td>
+              <td><i class="ti ti-clock"></i> {{ item.updated_at|date:"d-m-Y" }}</td>
+              <td>
+                <button class="btn btn-sm btn-primary" title="Tahrirlash">
+                  <i class="ti ti-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-danger delete-kasb" data-id="{{ item.id }}" title="O'chirish" id="confirm-text">
+                  <i class="ti ti-trash"></i>
+                </button>
+
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="col-12 text-center">
+        <p class="text-muted">
+          <i class="ti ti-info-circle"></i> Hozircha hech qanday kasblar mavjud emas.
+        </p>
+      </div>
+    {% endif %}
+
   </div>
+
   <!-- Pills -->
 
-  <!-- Modal: Kurs Tafsilotlari -->
-  <div class="modal fade" id="kursDetailsModal" tabindex="-1" aria-labelledby="kursDetailsModalLabel"
-       aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="kursDetailsModalLabel">Kurs Tafsilotlari</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <!-- Tafsilotlar dinamik ravishda yuklanadi -->
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Yopish</button>
-        </div>
-      </div>
-    </div>
-  </div>
+
 {% endblock %}
+
+

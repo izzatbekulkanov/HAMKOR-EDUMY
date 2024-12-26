@@ -66,6 +66,14 @@ class Kasb(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaratilgan vaqti")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="O'zgartirilgan vaqti")
     is_active = models.BooleanField(default=True, verbose_name="Faolmi")
+    added_by = models.ForeignKey(
+        'account.CustomUser',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='created_kasblar',
+        verbose_name="Qo'shgan foydalanuvchi"
+    )
 
     def __str__(self):
         return self.nomi
