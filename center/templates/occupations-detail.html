@@ -1,0 +1,136 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Kasblar{% endblock %}
+
+
+{% block vendor_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/libs/flatpickr/flatpickr.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/toastr/toastr.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/sweetalert2/sweetalert2.css' %}" />
+
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+  {{ block.super }}
+  <script src="{% static 'vendor/libs/moment/moment.js' %}"></script>
+  <script src="{% static 'vendor/libs/flatpickr/flatpickr.js' %}"></script>
+  <script src="{% static 'vendor/libs/cleavejs/cleave.js' %}"></script>
+  <script src="{% static 'vendor/libs/cleavejs/cleave-phone.js' %}"></script>
+  <script src="{% static 'vendor/libs/toastr/toastr.js' %}"></script>
+  <script src="{% static 'vendor/libs/sweetalert2/sweetalert2.js' %}"></script>
+
+{% endblock vendor_js %}
+
+{% block page_css %}
+  {{ block.super }}
+{% endblock page_css %}
+
+{% block page_js %}
+  {{ block.super }}
+
+{% endblock page_js %}
+
+{% block content %}
+  <div class="row">
+    <div class="container">
+      <!-- Breadcrumb Navigation -->
+      <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb p-2 border border-light rounded shadow-sm d-flex align-items-center gap-2">
+          <li class="breadcrumb-item">
+            <a href="{% url 'main-page-administrator' %}" class="text-decoration-none text-muted d-flex align-items-center gap-1">
+              <i class="ti ti-home"></i>
+              <span class="d-none d-sm-inline">Bosh sahifa</span>
+            </a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'occupations' %}" class="text-decoration-none text-muted d-flex align-items-center gap-1">
+              <i class="ti ti-briefcase"></i>
+              <span class="d-none d-sm-inline">Kasblar</span>
+            </a>
+          </li>
+          <li class="breadcrumb-item active text-dark d-flex align-items-center gap-1" aria-current="page">
+            <i class="ti ti-info-circle"></i>
+            <span>{{ kasb.nomi }}</span>
+          </li>
+        </ol>
+      </nav>
+
+
+      <div class="py-4">
+        <!-- Kasb Detail Header -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h1 class="h4 mb-0">{{ kasb.nomi }}</h1>
+          <a href="{% url 'occupations' %}" class="btn btn-sm btn-light d-flex align-items-center">
+            <i class="ti ti-arrow-left me-1"></i> Ortga
+          </a>
+        </div>
+
+        <!-- Kasb Info Card -->
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-body">
+            <ul class="list-unstyled mb-0">
+              <li class="mb-2">
+                <strong>Yaratilgan:</strong> {{ kasb.created_at|date:"d-m-Y" }}
+              </li>
+              <li class="mb-2">
+                <strong>Yangilangan:</strong> {{ kasb.updated_at|date:"d-m-Y" }}
+              </li>
+              <li>
+                <strong>Faollik:</strong> <span class="badge {{ kasb.is_active|yesno:'bg-success,bg-danger' }}">{{ kasb.is_active|yesno:"Faol,Faol emas" }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Yonlishlar Section -->
+        <div class="card shadow-sm border-0">
+          <div class="card-header bg-light d-flex align-items-center">
+            <h5 class="h6 mb-0">Kasbga birikkan yo'nalishlar ({{ yonalishlar_count }})</h5>
+          </div>
+          <div class="card-body p-0">
+            {% if yonalishlar %}
+              <table class="table table-hover table-sm mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th class="text-center" style="width: 5%;">#</th>
+                    <th>Yo'nalish nomi</th>
+                    <th class="text-center" style="width: 15%;">Kurslar</th>
+                    <th class="text-center" style="width: 15%;">Guruhlar</th>
+                    <th class="text-center" style="width: 20%;">Yaratilgan</th>
+                    <th class="text-center" style="width: 20%;">Yangilangan</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for yonalish in yonalishlar %}
+                    <tr>
+                      <td class="text-center">{{ forloop.counter }}</td>
+                      <td>{{ yonalish.nomi }}</td>
+                      <td class="text-center">{{ yonalish.kurs_count }}</td>
+                      <td class="text-center">{{ yonalish.guruh_count }}</td>
+                      <td class="text-center">{{ yonalish.created_at|date:"d-m-Y" }}</td>
+                      <td class="text-center">{{ yonalish.updated_at|date:"d-m-Y" }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            {% else %}
+              <div class="text-center py-4">
+                <p class="text-muted mb-0">
+                  <i class="ti ti-info-circle me-1"></i> Hozircha hech qanday yo'nalishlar mavjud emas.
+                </p>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+{% endblock %}
+
+
+

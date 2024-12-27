@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, Sum
 from django.http import JsonResponse, HttpResponseRedirect
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import TemplateView, DetailView, UpdateView
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
@@ -269,3 +269,39 @@ class OccupationsView(TemplateView):
 
         except Exception as e:
             return JsonResponse({"success": False, "message": f"Xatolik yuz berdi: {str(e)}"}, status=500)
+
+
+class OccupationsDetailView(DetailView):
+    model = Kasb
+    context_object_name = "kasb"
+
+    def get_object(self):
+        # Get the Kasb object by primary key (pk) or return 404
+        return get_object_or_404(Kasb, pk=self.kwargs['pk'])
+
+    def get_context_data(self, **kwargs):
+        context = TemplateLayout.init(self, super().get_context_data(**kwargs))
+
+        kasb = self.get_object()  # Current `Kasb` object
+
+        # Get all `Yonlishlar` associated with this `Kasb`
+        yonalishlar = kasb.yonalishlar.all().order_by('-created_at')
+
+        # Include related data for each `Yonlish`
+        yonalishlar_data = []
+        for yonalish in yonalishlar:
+            kurslar = yonalish.kurslar.all()
+            guruhlar_count = sum(kurs.groups.count() for kurs in kurslar)
+            yonalishlar_data.append({
+                "id": yonalish.id,
+                "nomi": yonalish.nomi,
+                "kurs_count": kurslar.count(),
+                "guruh_count": guruhlar_count,
+                "created_at": yonalish.created_at,
+                "updated_at": yonalish.updated_at,
+            })
+
+        # Add to context
+        context['yonalishlar'] = yonalishlar_data
+        context['yonalishlar_count'] = len(yonalishlar_data)  # Total count of Yonlishlar
+        return context

@@ -1,6 +1,6 @@
 from django.urls import path
 from config.decorators import verified_required
-from .views import CenterView, FilialDetailUpdateView, CenterDetailView, OccupationsView
+from .views import CenterView, FilialDetailUpdateView, CenterDetailView, OccupationsView, OccupationsDetailView
 
 urlpatterns = [
     path("learning-center/", verified_required(CenterView.as_view(template_name="learning_center.html")),name="learning-center"),
@@ -8,6 +8,8 @@ urlpatterns = [
     path("learning-statistics/", verified_required(CenterView.as_view(template_name="learning_statistics.html")),name="learning-statistics" ),
     path("occupations/", verified_required(OccupationsView.as_view(template_name="occupations.html")), name="occupations" ),
     path("kasblar/delete/<int:pk>/", OccupationsView.as_view(), name="delete_kasb"),
+    path("kasb/<int:pk>/", verified_required(OccupationsDetailView.as_view(template_name="occupations-detail.html")),name="occupations-detail"),
+
 
     path("accept_students/", verified_required(CenterView.as_view(template_name="accept_students.html")), name="accept-students"),
     path("teacher_cashback/", verified_required(CenterView.as_view(template_name="teacher/cashback.html")), name="teacher-cashback"),

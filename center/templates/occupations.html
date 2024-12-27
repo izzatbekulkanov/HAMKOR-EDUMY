@@ -254,7 +254,8 @@ document.addEventListener('DOMContentLoaded', function () {
               <td><i class="ti ti-calendar-event"></i> {{ item.created_at|date:"d-m-Y" }}</td>
               <td><i class="ti ti-clock"></i> {{ item.updated_at|date:"d-m-Y" }}</td>
               <td>
-                <button class="btn btn-sm btn-primary" title="Tahrirlash">
+                <button class="btn btn-sm btn-primary" title="Tahrirlash"
+                        onclick="location.href='{% url 'occupations-detail' item.id %}'">
                   <i class="ti ti-pencil"></i>
                 </button>
                 <button class="btn btn-sm btn-danger delete-kasb" data-id="{{ item.id }}" title="O'chirish" id="confirm-text">
