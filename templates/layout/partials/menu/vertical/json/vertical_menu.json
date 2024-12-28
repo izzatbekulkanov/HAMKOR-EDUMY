@@ -37,13 +37,32 @@
       ]
     },
     {
-      "url": "occupations",
-      "name": "Kasblar",
-      "icon": "menu-icon tf-icons ti ti-certificate-2",
-      "slug": "occupations",
-      "allowed_roles": [
-        "5",
-        "4"
+      "name": "Kasblar & yo'nalishlar",
+      "icon": "menu-icon tf-icons ti ti-briefcase",
+      "slug": "layouts",
+      "submenu": [
+        {
+          "url": "occupations",
+          "name": "Kasblar",
+          "icon": "menu-icon tf-icons ti ti-certificate",
+          "slug": "occupations",
+          "allowed_roles": [
+            "5",
+            "4"
+          ]
+        },
+        {
+          "url": "learning-lines",
+          "name": "Yo'nalishlar",
+          "icon": "menu-icon tf-icons ti ti-directions",
+          "slug": "learning-lines"
+        },
+        {
+          "url": "learning-courses",
+          "name": "Kurslar",
+          "icon": "menu-icon tf-icons ti ti-book",
+          "slug": "learning-courses"
+        }
       ]
     },
     {

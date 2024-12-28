@@ -81,7 +81,7 @@ class Kasb(models.Model):
 
 class Yonalish(models.Model):
     kasb = models.ForeignKey(
-        'Kasb', on_delete=models.CASCADE, related_name='yonalishlar', verbose_name="Kasb"
+        'Kasb', on_delete=models.SET_NULL, related_name='yonalishlar', verbose_name="Kasb", null=True, blank=True
     )
     center = models.ForeignKey(
         'Center', on_delete=models.CASCADE, related_name='yonalishlar', verbose_name="Markaz"

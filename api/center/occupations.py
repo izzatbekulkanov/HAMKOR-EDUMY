@@ -201,6 +201,29 @@ class YonalishListView(View):
             print(f"POST so'rovda xato: {e}")  # Debugging
             return JsonResponse({"success": False, "message": str(e)}, status=400)
 
+class YonalishUpdateView(View):
+    """
+    `Yonalish` ob'yektini yangilashni amalga oshiruvchi View.
+    """
+
+    def patch(self, request, kasb_id, *args, **kwargs):
+        """
+        PATCH so'rovlar uchun `Yonalish` ob'yektining `is_active` maydonini yangilaydi.
+        """
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            yonalish = Yonalish.objects.get(id=kasb_id)
+            is_active = data.get("is_active", True)
+            yonalish.is_active = is_active
+            yonalish.save()
+            return JsonResponse({"success": True, "message": "Faollik muvaffaqiyatli yangilandi."})
+        except Kasb.DoesNotExist:
+            return JsonResponse({"success": False, "message": "Yonalish topilmadi."}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "message": "Noto'g'ri JSON ma'lumotlari."}, status=400)
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)}, status=400)
+
 class KursListView(View):
     """
     `Kurs` ob'yektlarini ro'yxatini olish va yangi kurs qo'shishni amalga oshiruvchi View.

@@ -7,7 +7,8 @@ from api.center.changeIsActiveCenter import change_center_is_active, ToggleCente
 from api.center.fetchSchool import FetchSchoolsView, AssignSchoolToCenterView, UnassignSchoolFromCenterView
 from api.center.getCenter import GetCentersWithFilialsView, GetCenterDetailsView, GetCentersForTeacherView
 from api.center.groups import GroupListView, KursFilterView, YonalishFilterView, KasbFilterView, toggle_group_active
-from api.center.occupations import KasbListView, KasbUpdateView, YonalishListView, KursListView, GetKasbAndYonalishView
+from api.center.occupations import KasbListView, KasbUpdateView, YonalishListView, KursListView, GetKasbAndYonalishView, \
+    YonalishUpdateView
 from api.center.statistics import StatisticsDashboardView
 from api.center.teacher import submit_student
 from api.location.get_location import get_districts, get_quarters
@@ -54,6 +55,7 @@ center_patterns = [
     path("add-filial/<int:center_id>/", AddFilialView.as_view(), name="add-filial"),
     path('kasblar/', KasbListView.as_view(), name='kasb_list_create'),
     path('kasblar/<int:kasb_id>/', KasbUpdateView.as_view(), name='kasb_update'),
+    path('yonalishlar/<int:yonalish_id>/', YonalishUpdateView.as_view(), name='yonalish_update'),
     path('yonalishlar/', YonalishListView.as_view(), name='yonalish_list_create'),
     path('kurslar/', KursListView.as_view(), name='kurs_list_create'),
     path('filter-kasblar/', KasbFilterView.as_view(), name='kasb_list'),

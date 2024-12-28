@@ -1,0 +1,324 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Kasblar{% endblock %}
+
+
+{% block vendor_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/libs/flatpickr/flatpickr.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/toastr/toastr.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/sweetalert2/sweetalert2.css' %}" />
+
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+  {{ block.super }}
+  <script src="{% static 'vendor/libs/moment/moment.js' %}"></script>
+  <script src="{% static 'vendor/libs/flatpickr/flatpickr.js' %}"></script>
+  <script src="{% static 'vendor/libs/cleavejs/cleave.js' %}"></script>
+  <script src="{% static 'vendor/libs/cleavejs/cleave-phone.js' %}"></script>
+  <script src="{% static 'vendor/libs/toastr/toastr.js' %}"></script>
+  <script src="{% static 'vendor/libs/sweetalert2/sweetalert2.js' %}"></script>
+{% endblock vendor_js %}
+
+{% block page_css %}
+  {{ block.super }}
+{% endblock page_css %}
+
+{% block page_js %}
+  {{ block.super }}
+  <script>
+    $(document).ready(function() {
+      // Toastr sozlamalari
+      toastr.options = {
+        'closeButton': true,                // Yopish tugmasi
+        'debug': false,                     // Debug rejimi
+        'newestOnTop': true,                // Yangi xabar ustiga chiqadi
+        'progressBar': true,                // Progress bar ko'rsatish
+        'positionClass': 'toast-bottom-right', // Xabar joylashuvi
+        'preventDuplicates': true,          // Xabarlarni takrorlanishidan himoya
+        'onclick': null,
+        'showDuration': '300',              // Ko'rinish davomiyligi
+        'hideDuration': '1000',             // Yo'qolish davomiyligi
+        'timeOut': '5000',                  // Ko'rinish vaqti
+        'extendedTimeOut': '1000',          // Qo'shimcha vaqt
+        'showEasing': 'swing',              // Easing effekti
+        'hideEasing': 'linear',
+        'showMethod': 'fadeIn',             // Ko'rinish usuli
+        'hideMethod': 'fadeOut'             // Yo'qolish usuli
+      };
+    });
+  </script>
+  <script>
+      function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          // Bu cookie nomini tekshiradi.
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+    function submitForm(event) {
+      event.preventDefault(); // Formani standart yuborilishini to'xtatish
+
+      const form = document.getElementById('add-yonalish-form');
+      const formData = new FormData(form);
+
+      fetch(window.location.href, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+        },
+        body: formData
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            Swal.fire({
+              title: 'Muvaffaqiyat!',
+              text: data.message,
+              icon: 'success',
+              confirmButtonText: 'OK',
+              customClass: {
+                confirmButton: 'btn btn-primary'
+              }
+            }).then(() => {
+              location.reload(); // Sahifani qayta yuklash
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Xatolik!',
+              text: data.message,
+              confirmButtonText: 'OK',
+              customClass: {
+                confirmButton: 'btn btn-primary'
+              }
+            });
+          }
+        })
+        .catch(error => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Xatolik!',
+            text: 'Xatolik yuz berdi. Iltimos qaytadan urinib ko\'ring!',
+            confirmButtonText: 'OK',
+            customClass: {
+              confirmButton: 'btn btn-primary'
+            }
+          });
+          console.error('Error:', error);
+        });
+    }
+
+   document.addEventListener('DOMContentLoaded', () => {
+    const deleteButtons = document.querySelectorAll('.delete-yonalish');
+
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            const yonalishId = button.getAttribute('data-id');
+
+            Swal.fire({
+                title: "Ishonchingiz komilmi?",
+                text: "Bu yo'nalish o'chiriladi!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Ha, o'chirish!",
+                cancelButtonText: "Bekor qilish",
+                customClass: {
+                    confirmButton: 'btn btn-danger',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/learning/learning-lines/delete/${yonalishId}/`, {
+                        method: "DELETE",
+                        headers: {
+                            "X-CSRFToken": getCookie("csrftoken"),
+                        },
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    title: 'Muvaffaqiyat!',
+                                    text: data.message,
+                                    icon: 'success',
+                                    confirmButtonText: 'OK',
+                                    customClass: {
+                                        confirmButton: 'btn btn-primary'
+                                    },
+                                    buttonsStyling: false
+                                }).then(() => {
+                                    location.reload(); // Sahifani qayta yuklash
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Xatolik!',
+                                    text: data.message,
+                                    icon: 'error',
+                                    confirmButtonText: 'OK',
+                                    customClass: {
+                                        confirmButton: 'btn btn-danger'
+                                    },
+                                    buttonsStyling: false
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            Swal.fire({
+                                title: 'Xatolik!',
+                                text: "Xatolik yuz berdi. Iltimos qaytadan urinib ko'ring!",
+                                icon: 'error',
+                                confirmButtonText: 'OK',
+                                customClass: {
+                                    confirmButton: 'btn btn-danger'
+                                },
+                                buttonsStyling: false
+                            });
+                            console.error("Error:", error);
+                        });
+                }
+            });
+        });
+    });
+});
+  </script>
+{% endblock page_js %}
+{% block content %}
+  <div class="row">
+    <nav class="navbar navbar-expand-lg shadow-sm mb-3">
+      <div class="container-fluid">
+        <!-- Toggler for Mobile View -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-main-menu">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbar-main-menu">
+          <!-- Navbar Links -->
+          <div class="navbar-nav me-auto">
+            <a
+              class="nav-item nav-link {% if request.resolver_match.url_name == 'occupations' %}text-primary{% endif %}"
+              href="{% url 'occupations' %}">
+              <i class="tf-icons ti ti-certificate"></i> Kasblar
+            </a>
+            <a
+              class="nav-item nav-link {% if request.resolver_match.url_name == 'learning-lines' %}text-primary{% endif %}"
+              href="{% url 'learning-lines' %}">
+              <i class="tf-icons ti ti-directions"></i> Yo'nalishlar
+            </a>
+            <a
+              class="nav-item nav-link {% if request.resolver_match.url_name == 'learning-courses' %}text-primary{% endif %}"
+              href="{% url 'learning-courses' %}">
+              <i class="tf-icons ti ti-book"></i> Kurslar
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Yo'nalish qo'shish formasi -->
+    <div class="col-12">
+      <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between">
+        <!-- Yo'nalish qo'shish formasi -->
+        <form method="post" class="d-flex gap-2 flex-grow-1" id="add-yonalish-form" onsubmit="submitForm(event)">
+          {% csrf_token %}
+          <input type="text" name="nomi" class="form-control form-control-sm" placeholder="Yo'nalish nomi" required>
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="ti ti-plus me-1"></i> Qo'shish
+          </button>
+        </form>
+
+        <!-- Qidirish formasi -->
+        <form method="get" class="d-flex gap-2 flex-grow-1">
+          <input type="text" name="q" class="form-control form-control-sm" placeholder="Qidirish...">
+          <button type="submit" class="btn btn-secondary btn-sm">
+            <i class="ti ti-search me-1"></i> Qidirish
+          </button>
+          <a href="?" class="btn btn-success btn-sm">
+            <i class="ti ti-reload me-1"></i> Yangilash
+          </a>
+        </form>
+      </div>
+    </div>
+
+    <hr class="my-4 border-top border-2 border-primary">
+    {% if yonalishlar %}
+
+      <div class="table-responsive card my-5">
+        <table class="table table-striped table-hover table-sm">
+          <thead>
+          <tr>
+            <th>#</th>
+            <th>Yo'nalish nomi</th>
+            <th>Kurslar</th>
+            <th>Guruhlar</th>
+            <th>Faollik</th>
+            <th>Yaratilgan</th>
+            <th>Yangilangan</th>
+            <th>Harakatlar</th>
+          </tr>
+          </thead>
+          <tbody>
+          {% for item in yonalishlar %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td class="text-truncate" style="max-width: 150px;">{{ item.nomi }}</td>
+              <td>{{ item.kurs_count }}</td>
+              <td>{{ item.guruh_count }}</td>
+              <td>
+                <label class="switch switch-success switch-square">
+                  <input type="checkbox" class="switch-input is-active-toggle" data-id="{{ item.id }}"
+                         {% if item.is_active %}checked{% endif %}>
+                  <span class="switch-toggle-slider">
+                    <span class="switch-on">
+                      <i class="ti ti-check"></i>
+                    </span>
+                    <span class="switch-off">
+                      <i class="ti ti-x"></i>
+                    </span>
+                  </span>
+                  <span class="switch-label"></span>
+                </label>
+              </td>
+              <td><i class="ti ti-calendar-event"></i> {{ item.created_at|date:"d-m-Y" }}</td>
+              <td><i class="ti ti-clock"></i> {{ item.updated_at|date:"d-m-Y" }}</td>
+              <td>
+                <button class="btn btn-sm btn-primary" title="Tahrirlash"
+                        onclick="location.href=''">
+                  <i class="ti ti-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-danger delete-yonalish" data-id="{{ item.id }}" title="O'chirish">
+                  <i class="ti ti-trash"></i>
+                </button>
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="col-12 text-center">
+        <p class="text-muted">
+          <i class="ti ti-info-circle"></i> Hozircha hech qanday yo'nalishlar mavjud emas.
+        </p>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}
+
+
+
