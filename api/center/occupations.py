@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.views import View
 from center.models import Kasb, Yonalish, Kurs, Center
 from django.utils.decorators import method_decorator
@@ -206,18 +207,18 @@ class YonalishUpdateView(View):
     `Yonalish` ob'yektini yangilashni amalga oshiruvchi View.
     """
 
-    def patch(self, request, kasb_id, *args, **kwargs):
+    def patch(self, request, yonalish_id, *args, **kwargs):
         """
         PATCH so'rovlar uchun `Yonalish` ob'yektining `is_active` maydonini yangilaydi.
         """
         try:
             data = json.loads(request.body.decode('utf-8'))
-            yonalish = Yonalish.objects.get(id=kasb_id)
+            yonalish = Yonalish.objects.get(id=yonalish_id)
             is_active = data.get("is_active", True)
             yonalish.is_active = is_active
             yonalish.save()
             return JsonResponse({"success": True, "message": "Faollik muvaffaqiyatli yangilandi."})
-        except Kasb.DoesNotExist:
+        except Yonalish.DoesNotExist:
             return JsonResponse({"success": False, "message": "Yonalish topilmadi."}, status=404)
         except json.JSONDecodeError:
             return JsonResponse({"success": False, "message": "Noto'g'ri JSON ma'lumotlari."}, status=400)
@@ -339,3 +340,37 @@ class GetKasbAndYonalishView(View):
         except Exception as e:
             return JsonResponse({"success": False, "message": f"Xatolik yuz berdi: {str(e)}"}, status=500)
 
+@method_decorator(csrf_exempt, name='dispatch')
+class KursUpdateView(View):
+    """
+    View to handle course status updates.
+    """
+
+    def patch(self, request, yonalish_id, *args, **kwargs):
+        try:
+            # Parse the JSON data from the request
+            data = json.loads(request.body)
+            is_active = data.get('is_active')
+            kurs_id = data.get('kurs_id')
+
+            if kurs_id is None or is_active is None:
+                return JsonResponse({"success": False, "message": "Kurs ID va holat talab qilinadi."}, status=400)
+
+            # Get the course object and check permissions
+            kurs = get_object_or_404(
+                Kurs,
+                id=kurs_id,
+                center__in=Center.objects.filter(rahbari=request.user) | Center.objects.filter(filial__admins=request.user)
+            )
+
+            # Update the active status
+            kurs.is_active = is_active
+            kurs.save()
+
+            message = "Kurs faollik holati muvaffaqiyatli yangilandi." if is_active else "Kurs faollik holati o'chirildi."
+            return JsonResponse({"success": True, "message": message})
+
+        except Kurs.DoesNotExist:
+            return JsonResponse({"success": False, "message": "Kurs topilmadi."}, status=404)
+        except Exception as e:
+            return JsonResponse({"success": False, "message": f"Xatolik yuz berdi: {str(e)}"}, status=500)

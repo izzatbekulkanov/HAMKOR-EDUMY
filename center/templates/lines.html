@@ -50,6 +50,36 @@
         'showMethod': 'fadeIn',             // Ko'rinish usuli
         'hideMethod': 'fadeOut'             // Yo'qolish usuli
       };
+
+      // Toggle faollik holatini o'zgartirish
+      $('.is-active-toggle').on('change', function() {
+        const checkbox = $(this);
+        const yonalishId = checkbox.data('id');
+        const isActive = checkbox.is(':checked');
+
+        $.ajax({
+          url: `/api/yonalishlar/${yonalishId}/`, // API yo'li
+          type: 'PATCH',
+          headers: {
+            'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val() // CSRF tokenni qo'shish
+          },
+          contentType: 'application/json',
+          data: JSON.stringify({ is_active: isActive }), // JSON ma'lumot
+          success: function(response) {
+            if (response.success) {
+              toastr.success(response.message, 'Muvaffaqiyat');
+            } else {
+              toastr.error(response.message, 'Xatolik');
+            }
+          },
+          error: function(xhr, status, error) {
+            console.error(`Xatolik: ${xhr.status} - ${xhr.responseText}`);
+            toastr.error('Faollikni o\'zgartirishda xatolik yuz berdi.', 'Xatolik');
+            // Checkbox holatini tiklash
+            checkbox.prop('checked', !isActive);
+          }
+        });
+      });
     });
   </script>
   <script>
@@ -298,7 +328,7 @@
               <td><i class="ti ti-clock"></i> {{ item.updated_at|date:"d-m-Y" }}</td>
               <td>
                 <button class="btn btn-sm btn-primary" title="Tahrirlash"
-                        onclick="location.href=''">
+                        onclick="location.href='{% url 'lines-detail' item.id %}'">
                   <i class="ti ti-pencil"></i>
                 </button>
                 <button class="btn btn-sm btn-danger delete-yonalish" data-id="{{ item.id }}" title="O'chirish">

@@ -23,7 +23,7 @@
   <script src="{% static 'vendor/libs/cleavejs/cleave-phone.js' %}"></script>
   <script src="{% static 'vendor/libs/toastr/toastr.js' %}"></script>
   <script src="{% static 'vendor/libs/sweetalert2/sweetalert2.js' %}"></script>
-{#  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>#}
+  {#  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>#}
 {% endblock vendor_js %}
 
 {% block page_css %}
@@ -34,107 +34,237 @@
   {{ block.super }}
   {#  <script src="{% static 'customJs/center/occupations.js' %}"></script>#}
   <script>
-    $(document).ready(function() {
-      // Toastr sozlamalari
-      toastr.options = {
-        'closeButton': true,                // Yopish tugmasi
-        'debug': false,                     // Debug rejimi
-        'newestOnTop': true,                // Yangi xabar ustiga chiqadi
-        'progressBar': true,                // Progress bar ko'rsatish
-        'positionClass': 'toast-bottom-right', // Xabar joylashuvi
-        'preventDuplicates': true,          // Xabarlarni takrorlanishidan himoya
-        'onclick': null,
-        'showDuration': '300',              // Ko'rinish davomiyligi
-        'hideDuration': '1000',             // Yo'qolish davomiyligi
-        'timeOut': '5000',                  // Ko'rinish vaqti
-        'extendedTimeOut': '1000',          // Qo'shimcha vaqt
-        'showEasing': 'swing',              // Easing effekti
-        'hideEasing': 'linear',
-        'showMethod': 'fadeIn',             // Ko'rinish usuli
-        'hideMethod': 'fadeOut'             // Yo'qolish usuli
-      };
+  document.addEventListener("DOMContentLoaded", () => {
+    // Toastr settings
+    toastr.options = {
+      closeButton: true,
+      progressBar: true,
+      positionClass: "toast-bottom-right",
+      preventDuplicates: true,
+      showDuration: 300,
+      hideDuration: 1000,
+      timeOut: 5000,
+      extendedTimeOut: 1000,
+      showEasing: "swing",
+      hideEasing: "linear",
+      showMethod: "fadeIn",
+      hideMethod: "fadeOut"
+    };
 
-      // Toggle faollik holatini o'zgartirish
-      $('.is-active-toggle').on('change', function() {
-        const checkbox = $(this);
-        const kasbId = checkbox.data('id');
-        const isActive = checkbox.is(':checked');
+    // Handle toggle status
+    document.querySelectorAll(".is-active-toggle").forEach(toggle => {
+      toggle.addEventListener("change", () => {
+        const kursId = toggle.dataset.id;
+        const isActive = toggle.checked;
 
-        $.ajax({
-          url: `/api/kasblar/${kasbId}/`, // API yo'li
-          type: 'PATCH',
+        fetch(`/api/kurslar/${kursId}/`, {
+          method: "PATCH",
           headers: {
-            'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val() // CSRF tokenni qo'shish
+            "X-CSRFToken": document.querySelector("input[name=csrfmiddlewaretoken]").value,
+            "Content-Type": "application/json"
           },
-          contentType: 'application/json',
-          data: JSON.stringify({ is_active: isActive }), // JSON ma'lumot
-          success: function(response) {
-            if (response.success) {
-              toastr.success(response.message, 'Muvaffaqiyat');
+          body: JSON.stringify({ kurs_id: kursId, is_active: isActive })
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              toastr.success(data.message, "Muvaffaqiyat!");
             } else {
-              toastr.error(response.message, 'Xatolik');
+              toastr.error(data.message, "Xatolik!");
+              toggle.checked = !isActive; // Revert toggle state on error
             }
-          },
-          error: function(xhr, status, error) {
-            console.error(`Xatolik: ${xhr.status} - ${xhr.responseText}`);
-            toastr.error('Faollikni o\'zgartirishda xatolik yuz berdi.', 'Xatolik');
-            // Checkbox holatini tiklash
-            checkbox.prop('checked', !isActive);
-          }
-        });
+          })
+          .catch(error => {
+            console.error("Xatolik:", error);
+            toastr.error("Xatolik yuz berdi. Iltimos, qaytadan urinib ko'ring.", "Xatolik!");
+            toggle.checked = !isActive; // Revert toggle state on error
+          });
       });
     });
+  });
+</script>
 
-document.addEventListener('DOMContentLoaded', function () {
-  document.querySelectorAll('.delete-kasb').forEach(button => {
-    button.addEventListener('click', function () {
-      const kasbId = this.getAttribute('data-id');
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('addCourseForm');
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault(); // Prevent the default form submission behavior
+
+        const formData = new FormData(form);
+        const csrfToken = formData.get('csrfmiddlewaretoken');
+
+        fetch(window.location.href, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': csrfToken,
+            'Accept': 'application/json'
+          },
+          body: new URLSearchParams(formData)
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              Swal.fire({
+                title: 'Muvaffaqiyat!',
+                text: data.message,
+                icon: 'success',
+                confirmButtonText: 'OK',
+                customClass: {
+                  confirmButton: 'btn btn-primary'
+                },
+                buttonsStyling: false
+              }).then(() => {
+                location.reload(); // Reload the page to update the course list
+              });
+            } else {
+              Swal.fire({
+                title: 'Xatolik!',
+                text: data.message,
+                icon: 'error',
+                confirmButtonText: 'OK',
+                customClass: {
+                  confirmButton: 'btn btn-danger'
+                },
+                buttonsStyling: false
+              });
+            }
+          })
+          .catch(error => {
+            Swal.fire({
+              title: 'Xatolik!',
+              text: 'Xatolik yuz berdi. Iltimos, qaytadan urinib ko\'ring!',
+              icon: 'error',
+              confirmButtonText: 'OK',
+              customClass: {
+                confirmButton: 'btn btn-danger'
+              },
+              buttonsStyling: false
+            });
+            console.error('Error:', error);
+          });
+      });
+    });
+  </script>
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Populate the modal with course data for editing
+  document.querySelectorAll('.edit-course').forEach(button => {
+    button.addEventListener('click', () => {
+      const id = button.getAttribute('data-id');
+      const nomi = button.getAttribute('data-nomi');
+      const narxi = button.getAttribute('data-narxi');
+
+      document.getElementById('editKursNomi').value = nomi;
+      document.getElementById('editKursNarxi').value = narxi;
+      document.getElementById('editCourseForm').setAttribute('data-id', id);
+    });
+  });
+
+  // Handle form submission for editing a course
+  const editForm = document.getElementById('editCourseForm');
+  editForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const id = editForm.getAttribute('data-id');
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    // Prepare form data
+    const formData = {
+      nomi: document.getElementById('editKursNomi').value.trim(),
+      narxi: document.getElementById('editKursNarxi').value.trim()
+    };
+
+    // Send PATCH request to update course
+    fetch(`/learning/learning-courses/${id}/edit/`, {
+      method: 'PATCH',
+      headers: {
+        'X-CSRFToken': csrfToken,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(formData)
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          Swal.fire({
+            title: 'Muvaffaqiyat!',
+            text: data.message,
+            icon: 'success',
+            confirmButtonText: 'OK',
+            customClass: { confirmButton: 'btn btn-primary' },
+            buttonsStyling: false
+          }).then(() => location.reload());
+        } else {
+          Swal.fire({
+            title: 'Xatolik!',
+            text: data.message,
+            icon: 'error',
+            confirmButtonText: 'OK',
+            customClass: { confirmButton: 'btn btn-danger' },
+            buttonsStyling: false
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Xatolik:', error);
+        Swal.fire({
+          title: 'Xatolik!',
+          text: 'Xatolik yuz berdi. Iltimos, qaytadan urinib ko\'ring!',
+          icon: 'error',
+          confirmButtonText: 'OK',
+          customClass: { confirmButton: 'btn btn-danger' },
+          buttonsStyling: false
+        });
+      });
+  });
+
+  // Handle delete course functionality
+  document.querySelectorAll('.delete-course').forEach(button => {
+    button.addEventListener('click', () => {
+      const id = button.getAttribute('data-id');
+      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
       Swal.fire({
-        title: 'O\'chirishni tasdiqlaysizmi?',
-        text: 'Bu amalni qaytarib bo\'lmaydi!',
-        icon: 'warning',
+        title: "Ishonchingiz komilmi?",
+        text: "Ushbu kursni o'chirmoqchimisiz?",
+        icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Ha, o\'chirish!',
-        cancelButtonText: 'Bekor qilish',
+        confirmButtonText: "Ha, o'chirish!",
+        cancelButtonText: "Bekor qilish",
         customClass: {
           confirmButton: 'btn btn-danger',
-          cancelButton: 'btn btn-secondary',
+          cancelButton: 'btn btn-secondary'
         },
-      }).then((result) => {
+        buttonsStyling: false
+      }).then(result => {
         if (result.isConfirmed) {
-          // Send delete request if confirmed
-          fetch(`/learning/kasblar/delete/${kasbId}/`, {
+          // Send DELETE request to remove the course
+          fetch(`/learning/learning-courses/${id}/delete/`, {
             method: 'DELETE',
             headers: {
-              'X-CSRFToken': document.querySelector('input[name=csrfmiddlewaretoken]').value,
-            },
+              'X-CSRFToken': csrfToken,
+              'Content-Type': 'application/json'
+            }
           })
             .then(response => response.json())
             .then(data => {
               if (data.success) {
                 Swal.fire({
-                  title: 'O\'chirildi!',
+                  title: 'Muvaffaqiyat!',
                   text: data.message,
                   icon: 'success',
                   confirmButtonText: 'OK',
-                  customClass: {
-                    confirmButton: 'btn btn-primary',
-                  },
-                }).then(() => {
-                  location.reload(); // Reload the page
-                });
+                  customClass: { confirmButton: 'btn btn-primary' },
+                  buttonsStyling: false
+                }).then(() => location.reload());
               } else {
                 Swal.fire({
                   title: 'Xatolik!',
                   text: data.message,
                   icon: 'error',
                   confirmButtonText: 'OK',
-                  customClass: {
-                    confirmButton: 'btn btn-primary',
-                  },
+                  customClass: { confirmButton: 'btn btn-danger' },
+                  buttonsStyling: false
                 });
               }
             })
@@ -142,12 +272,11 @@ document.addEventListener('DOMContentLoaded', function () {
               console.error('Xatolik:', error);
               Swal.fire({
                 title: 'Xatolik!',
-                text: 'Kasbni o\'chirishda muammo yuz berdi.',
+                text: 'Xatolik yuz berdi. Iltimos, qaytadan urinib ko\'ring!',
                 icon: 'error',
                 confirmButtonText: 'OK',
-                customClass: {
-                  confirmButton: 'btn btn-primary',
-                },
+                customClass: { confirmButton: 'btn btn-danger' },
+                buttonsStyling: false
               });
             });
         }
@@ -156,36 +285,12 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
- document.addEventListener('DOMContentLoaded', function () {
-    const urlParams = new URLSearchParams(window.location.search);
-    const status = urlParams.get('status');
-    const message = urlParams.get('message');
-
-    if (status && message) {
-      Swal.fire({
-        title: status === 'success' ? 'Muvaffaqiyatli!' : 'Xatolik!',
-        text: decodeURIComponent(message),
-        icon: status === 'success' ? 'success' : 'error',
-        confirmButtonText: 'OK',
-        customClass: {
-          confirmButton: status === 'success' ? 'btn btn-primary' : 'btn btn-danger',
-        },
-      }).then(() => {
-        // URL'dan query string'ni olib tashlash
-        const url = new URL(window.location);
-        url.searchParams.delete('status');
-        url.searchParams.delete('message');
-        window.history.replaceState(null, '', url);
-      });
-    }
-  });
-
   </script>
 {% endblock page_js %}
 
 {% block content %}
   <div class="row">
-    <nav class="navbar navbar-expand-lg  shadow-sm mb-3">
+    <nav class="navbar navbar-expand-lg shadow-sm mb-3">
       <div class="container-fluid">
         <!-- Toggler for Mobile View -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-main-menu">
@@ -195,115 +300,193 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="collapse navbar-collapse" id="navbar-main-menu">
           <!-- Navbar Links -->
           <div class="navbar-nav me-auto">
-            <a class="nav-item nav-link {% if request.resolver_match.url_name == 'occupations' %}text-primary{% endif %}" href="{% url 'occupations' %}">
+            <a
+              class="nav-item nav-link {% if request.resolver_match.url_name == 'occupations' %}text-primary{% endif %}"
+              href="{% url 'occupations' %}">
               <i class="tf-icons ti ti-certificate"></i> Kasblar
             </a>
-            <a class="nav-item nav-link {% if request.resolver_match.url_name == 'learning-lines' %}text-primary{% endif %}" href="{% url 'learning-lines' %}">
+            <a
+              class="nav-item nav-link {% if request.resolver_match.url_name == 'learning-lines' %}text-primary{% endif %}"
+              href="{% url 'learning-lines' %}">
               <i class="tf-icons ti ti-directions"></i> Yo'nalishlar
             </a>
-            <a class="nav-item nav-link {% if request.resolver_match.url_name == 'learning-courses' %}text-primary{% endif %}" href="{% url 'learning-courses' %}">
+            <a
+              class="nav-item nav-link {% if request.resolver_match.url_name == 'learning-courses' %}text-primary{% endif %}"
+              href="{% url 'learning-courses' %}">
               <i class="tf-icons ti ti-book"></i> Kurslar
             </a>
           </div>
         </div>
       </div>
     </nav>
-    <!-- Kasb qo'shish formasi -->
-    <div class="col-12">
-      <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between">
-        <!-- Kasb qo'shish formasi -->
-        <form method="post" class="d-flex gap-2 flex-grow-1">
-          {% csrf_token %}
-          <input type="text" name="nomi" class="form-control form-control-sm" placeholder="Kasb nomi" required>
-          <button type="submit" class="btn btn-primary btn-sm">
-            <i class="ti ti-plus me-1"></i> Qo'shish
-          </button>
-        </form>
 
-        <!-- Qidirish formasi -->
-        <form method="get" class="d-flex gap-2 flex-grow-1">
-          <input type="text" name="q" class="form-control form-control-sm" placeholder="Qidirish...">
-          <button type="submit" class="btn btn-secondary btn-sm">
-            <i class="ti ti-search me-1"></i> Qidirish
-          </button>
-          <a href="?" class="btn btn-success btn-sm">
-            <i class="ti ti-reload me-1"></i> Yangilash
-          </a>
+    <!-- Main Content -->
+    <div class="row gx-3">
+      <!-- Left Column (Course List) -->
+      <div class="col-lg-8">
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-light py-2 px-3">
+            <h6 class="mb-0">Barcha Kurslar</h6>
+          </div>
+          <div class="card-body py-2 px-3">
+            {% if kurslar %}
+              <table class="table table-striped table-hover">
+                <thead>
+                <tr>
+                  <th>#</th>
+                  <th>
+                    Kurs nomi
+                  </th>
+                  <th>
+                     Narxi
+                  </th>
+                  <th>
+                   Guruhlar
+                  </th>
+                  <th>
+                    O'quvchilar
+                  </th>
+                  <th>
+                   Holati
+                  </th>
+                  <th>
+                   Yaratilgan
+                  </th>
+                  <th>
+                    Amallar
+                  </th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for kurs in kurslar %}
+                  <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ kurs.nomi }}</td>
+                    <td>{{ kurs.narxi_formatted }} so'm</td>
+                    <td>{{ kurs.group_count }}</td>
+                    <td>{{ kurs.student_count }}</td>
+                    <td>
+                      <label class="switch switch-success switch-square">
+                        <input type="checkbox" class="switch-input is-active-toggle" data-id="{{ kurs.id }}"
+                               {% if kurs.is_active %}checked{% endif %}>
+                        <span class="switch-toggle-slider">
+                          <span class="switch-on">
+                            <i class="ti ti-check"></i>
+                          </span>
+                          <span class="switch-off">
+                            <i class="ti ti-x"></i>
+                          </span>
+                        </span>
+                        <span class="switch-label"></span>
+                      </label>
+                    </td>
+                    <td>{{ kurs.created_at|date:"d-m-Y" }}</td>
+                    <td>
+                      <!-- Edit Button -->
+                      <button
+                        class="btn btn-sm btn-primary edit-course"
+                        data-id="{{ kurs.id }}"
+                        data-nomi="{{ kurs.nomi }}"
+                        data-narxi="{{ kurs.narxi }}"
+                        data-bs-toggle="modal"
+                        data-bs-target="#editCourseModal">
+                        <i class="ti ti-pencil"></i>
+                      </button>
+                      <!-- Delete Button -->
+                      <button
+                        class="btn btn-sm btn-danger delete-course"
+                        data-id="{{ kurs.id }}">
+                        <i class="ti ti-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            {% else %}
+              <div class="text-center py-2">
+                <p class="text-muted mb-0">
+                  <i class="ti ti-info-circle me-1"></i> Kurslar mavjud emas.
+                </p>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column (Add Course Form) -->
+      <div class="col-lg-4">
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-light py-2 px-3">
+            <h6 class="mb-0">Yangi Kurs Qo'shish</h6>
+          </div>
+          <div class="card-body py-2 px-3">
+            <form id="addCourseForm" method="post">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label for="kursNomi" class="form-label">Kurs nomi</label>
+                <input type="text" id="kursNomi" name="nomi" class="form-control" required
+                       placeholder="Kurs nomini kiriting">
+              </div>
+              <div class="mb-3">
+                <label for="kursNarxi" class="form-label">Narxi</label>
+                <input type="number" id="kursNarxi" name="narxi" class="form-control" required
+                       placeholder="Kurs narxini kiriting">
+              </div>
+              <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary btn-sm">Qo'shish</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Course Modal -->
+  <div class="modal fade" id="editCourseModal" tabindex="-1" aria-labelledby="editCourseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content shadow-sm">
+        <div class="modal-header">
+          <h5 class="modal-title d-flex align-items-center gap-2 text-primary" id="editCourseModalLabel">
+            <i class="ti ti-pencil"></i> Kursni tahrirlash
+          </h5>
+
+        </div>
+        <form id="editCourseForm">
+          {% csrf_token %}
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="editKursNomi" class="form-label text-muted">
+                <i class="ti ti-book me-2"></i>Kurs nomi
+              </label>
+              <input type="text" id="editKursNomi" name="nomi" class="form-control form-control-sm" required>
+            </div>
+            <div class="mb-3">
+              <label for="editKursNarxi" class="form-label text-muted">
+                <i class="ti ti-currency-dollar me-2"></i>Kurs narxi
+              </label>
+              <input
+                type="text"
+                id="editKursNarxi"
+                name="narxi"
+                class="form-control form-control-sm"
+                required
+                placeholder="Kurs narxini kiriting"
+              >
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-sm btn-primary d-flex align-items-center gap-2">
+              <i class="ti ti-check"></i> Saqlash
+            </button>
+          </div>
         </form>
       </div>
     </div>
-
-    <hr class="my-4 border-top border-2 border-primary">
-
-    {% if kasblar %}
-      <div class="table-responsive card my-5">
-        <table class="table table-striped table-hover table-sm">
-          <thead class="">
-          <tr>
-            <th>#</th>
-            <th>Kasb nomi</th>
-            <th>Yo'nalishlar</th>
-            <th>Kurslar</th>
-            <th>Guruhlar</th>
-            <th>Faollik</th>
-            <th>Yaratilgan</th>
-            <th>Yangilangan</th>
-            <th>Harakatlar</th>
-          </tr>
-          </thead>
-          <tbody>
-          {% for item in kasblar %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td class="text-truncate" style="max-width: 150px;">{{ item.nomi }}</td>
-              <td>{{ item.yonalish_count }}</td>
-              <td>{{ item.kurs_count }}</td>
-              <td>{{ item.guruh_count }}</td>
-              <td>
-                <label class="switch switch-success switch-square">
-                  <input type="checkbox" class="switch-input is-active-toggle" data-id="{{ item.id }}"
-                         {% if item.is_active %}checked{% endif %}>
-                  <span class="switch-toggle-slider">
-                    <span class="switch-on">
-                      <i class="ti ti-check"></i>
-                    </span>
-                    <span class="switch-off">
-                      <i class="ti ti-x"></i>
-                    </span>
-                  </span>
-                  <span class="switch-label"></span>
-                </label>
-              </td>
-              <td><i class="ti ti-calendar-event"></i> {{ item.created_at|date:"d-m-Y" }}</td>
-              <td><i class="ti ti-clock"></i> {{ item.updated_at|date:"d-m-Y" }}</td>
-              <td>
-                <button class="btn btn-sm btn-primary" title="Tahrirlash"
-                        onclick="location.href='{% url 'occupations-detail' item.id %}'">
-                  <i class="ti ti-pencil"></i>
-                </button>
-                <button class="btn btn-sm btn-danger delete-kasb" data-id="{{ item.id }}" title="O'chirish" id="confirm-text">
-                  <i class="ti ti-trash"></i>
-                </button>
-
-              </td>
-            </tr>
-          {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      <div class="col-12 text-center">
-        <p class="text-muted">
-          <i class="ti ti-info-circle"></i> Hozircha hech qanday kasblar mavjud emas.
-        </p>
-      </div>
-    {% endif %}
-
   </div>
 
-  <!-- Pills -->
-
-
 {% endblock %}
+
 
 

@@ -1,6 +1,7 @@
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.views import View
-from center.models import Kurs, E_groups, Kasb, Yonalish
+from center.models import Kurs, E_groups, Kasb, Yonalish, Center
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -94,20 +95,20 @@ class KursFilterView(View):
 def toggle_group_active(request, group_id):
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)  # Parse the JSON data
-            is_active = data.get('is_active', None)  # Get the new active state
+            data = json.loads(request.body)  # JSON ma'lumotni o'qish
+            is_active = data.get('is_active', None)  # Faollik holatini olish
 
             if is_active is None:
-                return JsonResponse({'success': False, 'message': 'Invalid data.'})
+                return JsonResponse({'success': False, 'message': 'Noto\'g\'ri ma\'lumot kiritildi.'})
 
-            group = E_groups.objects.get(id=group_id)  # Find the group by ID
-            group.is_active = is_active  # Update the active state
-            group.save()  # Save the changes
+            group = E_groups.objects.get(id=group_id)  # ID bo'yicha guruhni topish
+            group.is_active = is_active  # Faollik holatini yangilash
+            group.save()  # O'zgarishlarni saqlash
 
-            return JsonResponse({'success': True, 'message': 'Group status updated successfully.'})
+            return JsonResponse({'success': True, 'message': 'Guruh holati muvaffaqiyatli o\'zgartirildi.'})
         except E_groups.DoesNotExist:
-            return JsonResponse({'success': False, 'message': 'Group not found.'})
+            return JsonResponse({'success': False, 'message': 'Guruh topilmadi.'})
         except Exception as e:
-            return JsonResponse({'success': False, 'message': str(e)})
+            return JsonResponse({'success': False, 'message': f"Xatolik yuz berdi: {str(e)}"})
 
-    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+    return JsonResponse({'success': False, 'message': 'Noto\'g\'ri so\'rov usuli.'})

@@ -147,7 +147,7 @@ class E_groups(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaratilgan vaqti")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="O'zgartirilgan vaqti")
     is_active = models.BooleanField(default=True, verbose_name="Faolmi")
-
+    center = models.ForeignKey('Center', on_delete=models.CASCADE, related_name='guruhlar', verbose_name="Markaz", null=True, blank=True )
     def __str__(self):
         return f"{self.group_name} - {self.kurs.nomi}"
 

@@ -1,0 +1,389 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Kasblar{% endblock %}
+
+
+{% block vendor_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/libs/flatpickr/flatpickr.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/toastr/toastr.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/sweetalert2/sweetalert2.css' %}" />
+
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+  {{ block.super }}
+  <script src="{% static 'vendor/libs/moment/moment.js' %}"></script>
+  <script src="{% static 'vendor/libs/flatpickr/flatpickr.js' %}"></script>
+  <script src="{% static 'vendor/libs/cleavejs/cleave.js' %}"></script>
+  <script src="{% static 'vendor/libs/cleavejs/cleave-phone.js' %}"></script>
+  <script src="{% static 'vendor/libs/toastr/toastr.js' %}"></script>
+  <script src="{% static 'vendor/libs/sweetalert2/sweetalert2.js' %}"></script>
+
+{% endblock vendor_js %}
+
+{% block page_css %}
+  {{ block.super }}
+{% endblock page_css %}
+
+{% block page_js %}
+  {{ block.super }}
+  <script>
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          // Bu cookie nomini tekshiradi.
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+  </script>
+
+  <script>
+  function updateCourseAssociation(courseId, action) {
+    const url = window.location.href; // Current URL for POST request
+
+    console.log(courseId, action)
+
+    // Display confirmation dialog
+    const actionText = action === 'add' ? 'Qo\'shish' : 'Olib tashlash';
+    Swal.fire({
+      title: `${actionText}ni tasdiqlaysizmi?`,
+      text: `Ushbu kursni ${actionText.toLowerCase()}ni tasdiqlang!`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: `Ha, ${actionText}`,
+      cancelButtonText: 'Bekor qilish',
+      customClass: {
+        confirmButton: 'btn btn-primary',
+        cancelButton: 'btn btn-secondary',
+      },
+      buttonsStyling: false,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Perform the fetch request
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            kurs_id: courseId,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              Swal.fire({
+                title: 'Muvaffaqiyat!',
+                text: data.message,
+                icon: 'success',
+                confirmButtonText: 'OK',
+                customClass: {
+                  confirmButton: 'btn btn-primary',
+                },
+              }).then(() => {
+                location.reload(); // Refresh the page to update the lists
+              });
+            } else {
+              Swal.fire({
+                title: 'Xatolik!',
+                text: data.message,
+                icon: 'error',
+                confirmButtonText: 'OK',
+                customClass: {
+                  confirmButton: 'btn btn-danger',
+                },
+              });
+            }
+          })
+          .catch((error) => {
+            Swal.fire({
+              title: 'Xatolik!',
+              text: 'Xatolik yuz berdi. Iltimos, qaytadan urinib ko\'ring!',
+              icon: 'error',
+              confirmButtonText: 'OK',
+              customClass: {
+                confirmButton: 'btn btn-danger',
+              },
+            });
+            console.error('Error:', error);
+          });
+      }
+    });
+  }
+
+  // Helper function to get CSRF token
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === `${name}=`) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+</script>
+{% endblock page_js %}
+
+{% block content %}
+<div class="row">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <!-- Ortga Tugmasi -->
+      <a href="{% url 'learning-lines' %}" class="btn btn-sm btn-light d-flex align-items-center shadow-sm me-2">
+        <i class="ti ti-arrow-left me-1"></i> Ortga
+      </a>
+
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb" class="flex-grow-1">
+        <ol class="breadcrumb p-2 border border-light rounded shadow-sm d-flex align-items-center gap-2 mb-0">
+          <li class="breadcrumb-item">
+            <a href="{% url 'main-page-administrator' %}"
+               class="text-decoration-none text-muted d-flex align-items-center gap-1">
+              <i class="ti ti-home"></i>
+              <span class="d-none d-sm-inline">Bosh sahifa</span>
+            </a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'learning-lines' %}" class="text-decoration-none text-muted d-flex align-items-center gap-1">
+              <i class="ti ti-directions"></i>
+              <span class="d-none d-sm-inline">Yo'nalishlar</span>
+            </a>
+          </li>
+          <li class="breadcrumb-item active text-dark d-flex align-items-center gap-1" aria-current="page">
+            <i class="ti ti-info-circle"></i>
+            <span>{{ yonalish.nomi }}</span>
+          </li>
+        </ol>
+      </nav>
+    </div>
+
+<div class="container row gx-3 gy-4 border border-secondary m-3 p-3">
+  <!-- Markaz -->
+  <div class="col-md-6">
+    <div class=" border-0 shadow" style=" backdrop-filter: blur(10px);">
+      <div class="card-header border-bottom-0">
+        <h5 class="fw-bold text-dark mb-0">
+          <i class="ti ti-home me-2"></i> Markaz
+        </h5>
+      </div>
+      <div class="card-body">
+        <p class="fw-semibold text-muted mb-0">{{ yonalish.center.nomi }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kasb -->
+  <div class="col-md-6">
+    <div class="border-0 shadow" style=" backdrop-filter: blur(10px);">
+      <div class="card-header border-bottom-0">
+        <h5 class="fw-bold text-dark mb-0">
+          <i class="ti ti-briefcase me-2"></i> Kasb
+        </h5>
+      </div>
+      <div class="card-body">
+        <p class="fw-semibold text-muted mb-0">{{ yonalish.kasb.nomi|default:'Biriktirilmagan' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status -->
+  <div class="col-md-6">
+    <div class=" border-0 shadow" style=" backdrop-filter: blur(10px);">
+      <div class="card-header border-bottom-0">
+        <h5 class="fw-bold text-dark mb-0">
+          <i class="ti ti-check me-2"></i> Status
+        </h5>
+      </div>
+      <div class="card-body">
+        <p class="fw-semibold text-muted mb-0">{{ yonalish.is_active|yesno:"Faol,Faol emas" }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kurslar -->
+  <div class="col-md-6">
+    <div class="border-0 shadow" style=" backdrop-filter: blur(10px);">
+      <div class="card-header border-bottom-0">
+        <h5 class="fw-bold text-dark mb-0">
+          <i class="ti ti-book me-2"></i> Kurslar
+        </h5>
+      </div>
+      <div class="card-body">
+        <p class="fw-semibold text-muted mb-0">{{ yonalish.kurslar.count }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guruhlar -->
+  <div class="col-md-6">
+    <div class="border-0 shadow" style="backdrop-filter: blur(10px);">
+      <div class="card-header border-bottom-0">
+        <h5 class="fw-bold text-dark mb-0">
+          <i class="ti ti-users me-2"></i> Guruhlar
+        </h5>
+      </div>
+      <div class="card-body">
+        <p class="fw-semibold text-muted mb-0">{{ yonalish.guruh_count|default:"Ma'lumot yo'q" }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Yaratilgan -->
+  <div class="col-md-6">
+    <div class=" border-0 shadow" style="backdrop-filter: blur(10px);">
+      <div class="card-header border-bottom-0">
+        <h5 class="fw-bold text-dark mb-0">
+          <i class="ti ti-calendar-event me-2"></i> Yaratilgan
+        </h5>
+      </div>
+      <div class="card-body">
+        <p class="fw-semibold text-muted mb-0">{{ yonalish.created_at|date:"d-m-Y" }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Yangilangan -->
+  <div class="col-md-6">
+    <div class="border-0 shadow" style="backdrop-filter: blur(10px);">
+      <div class="card-header border-bottom-0">
+        <h5 class="fw-bold text-dark mb-0">
+          <i class="ti ti-clock me-2"></i> Yangilangan
+        </h5>
+      </div>
+      <div class="card-body">
+        <p class="fw-semibold text-muted mb-0">{{ yonalish.updated_at|date:"d-m-Y" }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="row">
+  <!-- Birikmagan kurslar -->
+  <div class="col-md-6">
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-header bg-light py-2 px-3">
+        <h6 class="mb-0">Birikmagan Kurslar ({{ birikmagan_kurslar_count }})</h6>
+      </div>
+      <div class="card-body py-2 px-3">
+        {% if birikmagan_kurslar %}
+          <ul class="list-group list-group-flush" id="unlinked-courses-list">
+            {% for kurs in birikmagan_kurslar %}
+              <li class="list-group-item d-flex justify-content-between align-items-center p-2">
+                <span class="small">{{ kurs.nomi }}</span>
+                <button class="btn btn-outline-success btn-sm py-0 px-2" title="Qo'shish"
+                        onclick="updateCourseAssociation({{ kurs.id }}, 'add')">
+                  <i class="ti ti-plus"></i>
+                </button>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="text-center py-2">
+            <p class="text-muted small mb-0">
+              <i class="ti ti-info-circle me-1"></i> Birikmagan kurslar mavjud emas.
+            </p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Birikkan kurslar -->
+  <div class="col-md-6">
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-header bg-light py-2 px-3">
+        <h6 class="mb-0">Birikkan Kurslar ({{ birikkan_kurslar_count }})</h6>
+      </div>
+      <div class="card-body py-2 px-3">
+        {% if birikkan_kurslar %}
+          <ul class="list-group list-group-flush" id="linked-courses-list">
+            {% for kurs in birikkan_kurslar %}
+              <li class="list-group-item d-flex justify-content-between align-items-center p-2">
+                <div>
+                  <span class="small fw-bold">{{ kurs.nomi }}</span><br>
+                  <small class="text-muted">Guruhlar: {{ kurs.group_count }}, O'quvchilar: {{ kurs.student_count }}</small>
+                </div>
+                <button class="btn btn-outline-danger btn-sm py-0 px-2" title="Olib tashlash"
+                        onclick="updateCourseAssociation({{ kurs.id }}, 'remove')">
+                  <i class="ti ti-trash"></i>
+                </button>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="text-center py-2">
+            <p class="text-muted small mb-0">
+              <i class="ti ti-info-circle me-1"></i> Birikkan kurslar mavjud emas.
+            </p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+
+    <!-- Talabalar Ro'yxati -->
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-light py-2 px-3">
+        <h6 class="mb-0">Talabalar</h6>
+      </div>
+      <div class="card-body py-2 px-3">
+        {% if students %}
+          <table class="table table-sm table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>#</th>
+                <th>Ismi</th>
+                <th>Telefon</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for student in students %}
+                <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td>{{ student.first_name }} {{ student.last_name }}</td>
+                  <td>{{ student.phone_number }}</td>
+                  <td>{{ student.status }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div class="text-center py-2">
+            <p class="text-muted small mb-0">
+              <i class="ti ti-info-circle me-1"></i> Talabalar mavjud emas.
+            </p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
+
+
