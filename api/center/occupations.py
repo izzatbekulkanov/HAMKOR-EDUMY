@@ -307,17 +307,19 @@ class GetKasbAndYonalishView(View):
 
     def get(self, request, *args, **kwargs):
         try:
-            # Barcha Kasblarni olish
+            # Barcha faol kasblarni olish
             kasb_list = Kasb.objects.filter(is_active=True)
 
             # Kasb ma'lumotlarini tayyorlash
             kasb_data = []
             for kasb in kasb_list:
+                # Ushbu kasbga tegishli faol yo'nalishlarni olish
                 yonalish_data = []
                 yonalish_list = Yonalish.objects.filter(kasb=kasb, is_active=True)
 
                 for yonalish in yonalish_list:
-                    kurs_data = Kurs.objects.filter(yonalish=yonalish, is_active=True).values(
+                    # Yo'nalishga tegishli faol kurslarni olish
+                    kurs_data = Kurs.objects.filter(yonalishlar=yonalish, is_active=True).values(
                         'id', 'nomi', 'narxi'
                     )
 
@@ -339,6 +341,7 @@ class GetKasbAndYonalishView(View):
             }, status=200)
         except Exception as e:
             return JsonResponse({"success": False, "message": f"Xatolik yuz berdi: {str(e)}"}, status=500)
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class KursUpdateView(View):

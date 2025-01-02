@@ -1,4 +1,6 @@
 import json
+from collections import defaultdict
+
 from django.utils.formats import number_format
 
 from django.contrib import messages
@@ -832,7 +834,8 @@ class LearningGroupView(TemplateView):
                 'error': "Sizga biriktirilgan markaz mavjud emas.",
                 'guruhlar': [],
                 'kurslar': [],
-                'statistics': {}
+                'statistics': {},
+                'days_of_week': [],
             })
             return context
 
@@ -869,11 +872,15 @@ class LearningGroupView(TemplateView):
                 "is_active": group.is_active,
             })
 
+        # Add days of week mapping
+        days_of_week = E_groups.DAYS_OF_WEEK
+
         # Add all data to the context
         context.update({
             'guruhlar': groups_data,
             'kurslar': kurslar_data,
             'guruhlar_count': total_groups,
+            'days_of_week': days_of_week,  # Full week days list
             'statistics': {
                 'total_groups': total_groups,
                 'active_groups': active_groups,
@@ -946,28 +953,230 @@ class LearningGroupView(TemplateView):
     def patch(self, request, *args, **kwargs):
         try:
             group_id = kwargs.get('pk')
+            print(f"[DEBUG] Group ID: {group_id}")
+
             group = E_groups.objects.get(id=group_id)
+            print(f"[DEBUG] Retrieved Group: {group}")
 
             data = json.loads(request.body)
+            print(f"[DEBUG] Received Data: {data}")
+
             group_name = data.get('group_name', '').strip()
             kurs_id = data.get('kurs')
-            days_of_week = data.get('days_of_week', [])
 
-            if not group_name or not kurs_id or not days_of_week:
+            print(f"[DEBUG] Parsed Data - Group Name: {group_name}, Kurs ID: {kurs_id}")
+
+            if not group_name or not kurs_id:
+                print("[DEBUG] Missing required fields")
                 return JsonResponse({"success": False, "message": "Barcha maydonlar to'ldirilishi shart."}, status=400)
 
             kurs = Kurs.objects.filter(id=kurs_id, center=group.center).first()
             if not kurs:
+                print("[DEBUG] Kurs not found or unauthorized access")
                 return JsonResponse({"success": False, "message": "Kurs topilmadi yoki ruxsat yo'q."}, status=403)
 
+            # Yangi tanlangan kunlar asosida yangilash
             group.group_name = group_name
             group.kurs = kurs
-            group.days_of_week = days_of_week  # Faqat tanlangan kunlar
             group.save()
 
+            print(f"[DEBUG] Group Updated Successfully: {group}")
             return JsonResponse({"success": True, "message": f"Guruh '{group.group_name}' muvaffaqiyatli yangilandi."})
 
         except E_groups.DoesNotExist:
+            print("[DEBUG] Group not found")
             return JsonResponse({"success": False, "message": "Guruh topilmadi."}, status=404)
+        except Exception as e:
+            print(f"[DEBUG] Exception Occurred: {str(e)}")
+            return JsonResponse({"success": False, "message": f"Xatolik yuz berdi: {str(e)}"}, status=500)
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            group_id = kwargs.get('pk')  # URL dan guruh ID sini olish
+            print(f"[DEBUG] Delete Group ID: {group_id}")
+
+            group = E_groups.objects.get(id=group_id)  # Guruhni topish
+            print(f"[DEBUG] Retrieved Group for Deletion: {group}")
+
+            # Guruhda o‘quvchilar borligini tekshirish
+            if group.students.exists():
+                print("[DEBUG] Group has students. Deletion denied.")
+                return JsonResponse(
+                    {"success": False, "message": "Guruhga o'quvchilar biriktirilganligi sababli o'chirib bo'lmaydi."},
+                    status=400)
+
+            # Guruhni o‘chirish
+            group.delete()
+
+            print(f"[DEBUG] Group Deleted Successfully: {group_id}")
+            return JsonResponse({"success": True, "message": f"Guruh muvaffaqiyatli o'chirildi."})
+
+        except E_groups.DoesNotExist:
+            print("[DEBUG] Group not found")
+            return JsonResponse({"success": False, "message": "Guruh topilmadi."}, status=404)
+
+        except Exception as e:
+            print(f"[DEBUG] Exception Occurred: {str(e)}")
+            return JsonResponse({"success": False, "message": f"Xatolik yuz berdi: {str(e)}"}, status=500)
+
+
+@csrf_exempt
+def add_or_remove_day(request, group_id):
+    if request.method == 'PATCH':
+        try:
+            data = json.loads(request.body)
+            day = data.get('day')
+
+            if not day:
+                return JsonResponse({'success': False, 'message': 'Hafta kuni ko\'rsatilmagan.'}, status=400)
+
+            group = E_groups.objects.get(id=group_id)
+
+            if day in group.days_of_week:
+                group.days_of_week.remove(day)
+                action = 'guruhdan olib tashlandi'
+            else:
+                group.days_of_week.append(day)
+                action = 'guruhga qo\'shildi'
+
+            group.save()
+
+            return JsonResponse({
+                'success': True,
+                'message': f"'{day}' hafta kuni  {action} ."
+            })
+
+        except E_groups.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Guruh topilmadi.'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f"Xatolik yuz berdi: {str(e)}"}, status=500)
+
+    return JsonResponse({'success': False, 'message': 'Faoliyat turi noto\'g\'ri.'}, status=405)
+
+
+
+class TeacherView(TemplateView):
+
+    def get_context_data(self, **kwargs):
+        # Initialize the base context using TemplateLayout
+        context = TemplateLayout.init(self, super().get_context_data(**kwargs))
+
+        # Viloyat, Tuman va Maktabni guruhlash
+        viloyatlar = defaultdict(lambda: defaultdict(list))
+        maktablar = Maktab.objects.filter(is_active=True)
+        for maktab in maktablar:
+            viloyatlar[maktab.viloyat][maktab.tuman].append({
+                'id': maktab.id,
+                'nomi': maktab.nomi,
+                'maktab_raqami': maktab.maktab_raqami
+            })
+
+        # Markaz va Filiallarni guruhlash
+        centers_data = []
+        centers = Center.objects.filter(is_active=True)
+        for center in centers:
+            filials = center.filial_set.filter(is_active=True).values('id', 'location', 'contact')
+            centers_data.append({
+                'id': center.id,
+                'nomi': center.nomi,
+                'rahbari': center.rahbari.get_full_name() if center.rahbari else None,
+                'filials': list(filials),
+            })
+
+        # Kasb, Yo'nalish va Kurslarni guruhlash
+        kasb_data = []
+        kasblar = Kasb.objects.filter(is_active=True)
+        for kasb in kasblar:
+            yonalish_data = []
+            yonalishlar = kasb.yonalishlar.filter(is_active=True)
+            for yonalish in yonalishlar:
+                kurslar = yonalish.kurslar.filter(is_active=True).values('id', 'nomi', 'narxi')
+                yonalish_data.append({
+                    'id': yonalish.id,
+                    'nomi': yonalish.nomi,
+                    'kurslar': list(kurslar),
+                })
+            kasb_data.append({
+                'id': kasb.id,
+                'nomi': kasb.nomi,
+                'yonalishlar': yonalish_data,
+            })
+
+        # Sinf va Belgilar
+        sinflar = Sinf.objects.filter(is_active=True).select_related('maktab', 'belgisi')
+        sinflar_data = []
+        for sinf in sinflar:
+            sinflar_data.append({
+                'id': sinf.id,
+                'sinf_raqami': sinf.sinf_raqami,
+                'belgisi': sinf.belgisi.nomi if sinf.belgisi else None,
+                'maktab': sinf.maktab.nomi if sinf.maktab else None,
+            })
+
+        # Context ma'lumotlarini yangilash
+        context.update({
+            'viloyatlar': dict(viloyatlar),
+            'centers': centers_data,
+            'kasblar': kasb_data,
+            'sinflar': sinflar_data,
+            'grades': range(1, 12),  # 1-dan 11-gacha sinflar
+        })
+
+        return context
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        try:
+            # Foydalanuvchi tomonidan yuborilgan ma'lumotlarni olish
+            data = json.loads(request.body)
+
+            # Zarur maydonlarni olish
+            first_name = data.get('first_name', '').strip()
+            last_name = data.get('last_name', '').strip()
+            phone_number = data.get('phone_number', '').strip()
+            sinf_id = data.get('sinf')
+            kasb_id = data.get('kasb')
+            yonalish_id = data.get('yonalish')
+            kurs_ids = data.get('kurslar', [])
+            belgisi = data.get('belgisi', '').strip()
+
+            # Zarur ma'lumotlarni tekshirish
+            if not first_name or not last_name or not phone_number:
+                return JsonResponse({"success": False, "message": "Ism, familiya va telefon raqami kiritilishi shart."}, status=400)
+
+            # Sinf, kasb va yo'nalishlarni topish
+            sinf = Sinf.objects.filter(id=sinf_id).first()
+            kasb = Kasb.objects.filter(id=kasb_id).first()
+            yonalish = Yonalish.objects.filter(id=yonalish_id).first()
+            kurslar = Kurs.objects.filter(id__in=kurs_ids)
+
+            # Yangi SubmittedStudent yaratish
+            submitted_student = SubmittedStudent.objects.create(
+                first_name=first_name,
+                last_name=last_name,
+                phone_number=phone_number,
+                sinf=sinf,
+                kasb=kasb,
+                yonalish=yonalish,
+                belgisi=belgisi,
+                added_by=request.user
+            )
+
+            # Kurslarni bog'lash
+            if kurslar.exists():
+                submitted_student.kurslar.set(kurslar)
+
+            return JsonResponse({"success": True, "message": "Talaba muvaffaqiyatli qo'shildi."}, status=201)
+
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "message": "Yaroqli JSON yuborilmadi."}, status=400)
+
         except Exception as e:
             return JsonResponse({"success": False, "message": f"Xatolik yuz berdi: {str(e)}"}, status=500)

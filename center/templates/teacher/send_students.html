@@ -33,184 +33,46 @@
 
 {% block page_js %}
 {{ block.super }}
+  <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const regionSelect = document.getElementById("studentRegion");
+    const districtSelect = document.getElementById("studentDistrict");
+    const schoolSelect = document.getElementById("studentSchool");
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const elements = {
-        phoneInput: document.getElementById('studentPhone'),
-        region: document.getElementById('studentRegion'),
-        district: document.getElementById('studentDistrict'),
-        school: document.getElementById('studentSchool'),
-        center: document.getElementById('studentCenter'),
-        branch: document.getElementById('studentBranch'),
-        profession: document.getElementById('studentProfession'),
-        field: document.getElementById('studentField'),
-        course: $('#studentCourse'), // Use jQuery for Select2 initialization
-    };
+    const viloyatlar = {{ viloyatlar|safe }}; // Rendered from Django context
 
-    // Utility: Fetch wrapper with error handling
-    const fetchData = async (url, options = {}) => {
-        try {
-            const response = await fetch(url, options);
-            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-            return await response.json();
-        } catch (error) {
-            console.error('Fetch error:', error);
-            toastr.error('Ma\'lumotlarni olishda xatolik yuz berdi.');
-        }
-    };
+    regionSelect.addEventListener("change", function () {
+        const selectedRegion = this.value;
 
-    // Utility: Populate select dropdown
-    const populateSelect = (element, data, placeholder = 'Tanlang', valueField = 'id', textField = 'name') => {
-        element.innerHTML = `<option value="" selected disabled>${placeholder}</option>`;
-        data.forEach(item => {
-            const option = document.createElement('option');
-            option.value = item[valueField];
-            option.textContent = item[textField];
-            element.appendChild(option);
-        });
-        element.disabled = data.length === 0;
-    };
+        // Populate Tumans
+        districtSelect.innerHTML = '<option value="" selected disabled>Tumanni tanlang</option>';
+        schoolSelect.innerHTML = '<option value="" selected disabled>Maktabni tanlang</option>';
+        schoolSelect.disabled = true;
 
-    // Initialize Select2 for multi-select
-    const initializeSelect2 = (element, options = {}) => {
-        element.select2({
-            placeholder: options.placeholder || "Tanlang",
-            closeOnSelect: options.closeOnSelect || false,
-            width: options.width || "100%",
-        });
-    };
-
-    // Phone number formatting
-    const formatPhoneNumber = (value) => {
-        const cleanValue = value.replace(/\D/g, '').slice(0, 12); // Clean up non-numeric characters and limit to 12 digits
-        if (cleanValue.startsWith('998')) {
-            const formatted = `+998 (${cleanValue.slice(3, 5)}) ${cleanValue.slice(5, 8)}-${cleanValue.slice(8, 10)}-${cleanValue.slice(10)}`;
-            return formatted.trim();
-        }
-        return value;
-    };
-
-    // Function to handle input formatting
-    const handleInput = (event) => {
-        const cursorPosition = event.target.selectionStart;
-        const originalLength = event.target.value.length;
-
-        event.target.value = formatPhoneNumber(event.target.value);
-
-        const updatedLength = event.target.value.length;
-        const diff = updatedLength - originalLength;
-
-        // Adjust cursor position after formatting
-        event.target.setSelectionRange(cursorPosition + diff, cursorPosition + diff);
-    };
-
-    // Function to handle deletion
-    const handleKeydown = (event) => {
-        if (event.key === 'Backspace' || event.key === 'Delete') {
-            const cursorPosition = event.target.selectionStart;
-            const value = event.target.value;
-
-            // If deleting special characters, adjust the cursor position
-            if (cursorPosition > 0 && /[\s()-]/.test(value[cursorPosition - 1])) {
-                event.preventDefault();
-
-                const newValue = value.slice(0, cursorPosition - 1) + value.slice(cursorPosition);
-                event.target.value = formatPhoneNumber(newValue);
-
-                event.target.setSelectionRange(cursorPosition - 1, cursorPosition - 1);
+        if (viloyatlar[selectedRegion]) {
+            districtSelect.disabled = false;
+            for (const district in viloyatlar[selectedRegion]) {
+                districtSelect.innerHTML += `<option value="${district}">${district}</option>`;
             }
         }
-    };
-
-    // Attach event listeners
-    elements.phoneInput.addEventListener('input', handleInput);
-    elements.phoneInput.addEventListener('keydown', handleKeydown);
-
-    // Load and populate regions
-    fetchData('/api/schools/grouped/').then(data => {
-        if (data) populateSelect(elements.region, Object.keys(data.data).map(region => ({ id: region, name: region })), 'Viloyatni tanlang');
     });
 
-    elements.region.addEventListener('change', function () {
-        const regionId = this.value;
-        if (regionId) {
-            fetchData(`/api/schools/grouped/?region=${regionId}`).then(data => {
-                if (data) {
-                    const districts = Object.keys(data.data[regionId]).map(district => ({ id: district, name: district }));
-                    populateSelect(elements.district, districts, 'Tumanni tanlang');
-                }
+    districtSelect.addEventListener("change", function () {
+        const selectedRegion = regionSelect.value;
+        const selectedDistrict = this.value;
+
+        // Populate Maktabs
+        schoolSelect.innerHTML = '<option value="" selected disabled>Maktabni tanlang</option>';
+        if (viloyatlar[selectedRegion] && viloyatlar[selectedRegion][selectedDistrict]) {
+            schoolSelect.disabled = false;
+            viloyatlar[selectedRegion][selectedDistrict].forEach((school) => {
+                schoolSelect.innerHTML += `<option value="${school.id}">${school.maktab_raqami} - ${school.nomi}</option>`;
             });
         }
-    });
-
-    elements.district.addEventListener('change', function () {
-        const regionId = elements.region.value;
-        const districtId = this.value;
-        if (regionId && districtId) {
-            fetchData(`/api/schools/grouped/?region=${regionId}&district=${districtId}`).then(data => {
-                if (data) {
-                    const schools = data.data[regionId][districtId].maktablar;
-                    populateSelect(elements.school, schools, 'Maktabni tanlang', 'id', 'nomi');
-                }
-            });
-        }
-    });
-
-    // Load and populate centers
-    fetchData('/api/get-centers-teacher/').then(data => {
-        if (data && data.success) {
-            populateSelect(elements.center, data.data, 'O\'quv markazini tanlang', 'center_id', 'center_name');
-        }
-    });
-
-    elements.center.addEventListener('change', function () {
-        const centerId = this.value;
-        if (centerId) {
-            fetchData(`/api/get-center-details/${centerId}/`).then(data => {
-                if (data && data.success) {
-                    populateSelect(elements.branch, data.data.filials, 'Filialni tanlang', 'id', 'location');
-                }
-            });
-        }
-    });
-
-    // Load and populate professions, fields, and courses
-    fetchData('/api/get-kasb-yonalish/').then(data => {
-        if (data && data.success) {
-            populateSelect(elements.profession, data.kasb, 'Kasbni tanlang');
-
-            elements.profession.addEventListener('change', function () {
-                const selectedKasbId = this.value;
-                const kasb = data.kasb.find(k => k.id == selectedKasbId);
-                if (kasb) {
-                    populateSelect(elements.field, kasb.yonalishlar, 'Yo\'nalishni tanlang');
-
-                    elements.field.addEventListener('change', function () {
-                        const selectedFieldId = this.value;
-                        const yonalish = kasb.yonalishlar.find(y => y.id == selectedFieldId);
-                        if (yonalish) {
-                            elements.course.empty(); // Clear existing options in Select2
-                            yonalish.kurslar.forEach(kurs => {
-                                const option = new Option(`${kurs.nomi} (${kurs.narxi} so'm)`, kurs.id, false, false);
-                                elements.course.append(option);
-                            });
-                            elements.course.prop("disabled", false).trigger("change");
-                        }
-                    });
-                }
-            });
-        }
-    });
-
-    // Initialize Select2 for the course multi-select
-    initializeSelect2(elements.course, {
-        placeholder: "Kurslarni tanlang",
-        closeOnSelect: false,
-        width: "100%",
     });
 });
-</script>
+
+  </script>
 {% endblock page_js %}
 
 {% block content %}
@@ -354,63 +216,10 @@ document.addEventListener('DOMContentLoaded', function () {
     </div>
   </form>
 </div>
-<script>
-document.getElementById('submit-student-form').addEventListener('submit', function(event) {
-    event.preventDefault(); // Prevent default form submission
-
-    // Get selected course IDs from the multi-select dropdown
-    const selectedCourses = Array.from(document.getElementById('studentCourse').selectedOptions)
-        .map(option => option.value);
-
-    // Collect form data
-    const formData = {
-        first_name: document.getElementById('studentFirstName').value,
-        last_name: document.getElementById('studentLastName').value,
-        phone: document.getElementById('studentPhone').value,
-        region: document.getElementById('studentRegion').value,
-        district: document.getElementById('studentDistrict').value,
-        school: document.getElementById('studentSchool').value,
-        grade: document.getElementById('studentGrade').value,
-        section: document.getElementById('studentSection').value,
-        center: document.getElementById('studentCenter').value,
-        branch: document.getElementById('studentBranch').value,
-        profession: document.getElementById('studentProfession').value,
-        field: document.getElementById('studentField').value,
-        courses: selectedCourses // Include selected course IDs
-    };
-
-    console.log(formData); // Log form data for debugging
-
-    // Send form data to the server
-    fetch("{% url 'submit_student' %}", {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json', // Send as JSON
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value // CSRF token
-        },
-        body: JSON.stringify(formData) // Convert form data to JSON
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            // Show SweetAlert success message
-
-        } else {
-            toastr.error('Xatolik yuz berdi: ' + data.message); // Show error toastr
-        }
-    })
-    .catch(error => {
-        console.error('Xatolik:', error);
-        toastr.error('So\'rov yuborishda xatolik yuz berdi');
-    });
-});
-</script>
-
 
 
 
 {% endblock %}
-
 
 
 

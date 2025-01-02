@@ -2,7 +2,7 @@
 
 {% load static %}
 {% load i18n %}
-
+{% load custom_filters %}
 {% block title %}Guruhlar{% endblock %}
 
 {% block vendor_css %}
@@ -145,226 +145,354 @@
   </script>
 
   <!-- JavaScript for Handling Edit Modal -->
-<script>
-// JavaScript kod: Guruh ma'lumotlarini tahrirlash modaliga yuklash
+  <script>
+    // JavaScript kod: Guruh ma'lumotlarini tahrirlash modaliga yuklash
+    document.addEventListener('DOMContentLoaded', () => {
+      // Tahrirlash tugmasi bosilganda modalni to'ldirish
+      document.querySelectorAll('.edit-group').forEach(button => {
+        button.addEventListener('click', () => {
+          const groupId = button.getAttribute('data-id');
+          const groupName = button.getAttribute('data-name');
+          const kursId = button.getAttribute('data-kurs');
 
-document.addEventListener("DOMContentLoaded", () => {
-  // Tahrirlash tugmasi bosilganda modalni to'ldirish
-  document.querySelectorAll(".edit-group").forEach(button => {
-    button.addEventListener("click", () => {
-      const groupId = button.getAttribute("data-id");
-      const groupName = button.getAttribute("data-name");
-      const kursId = button.getAttribute("data-kurs");
-      const daysOfWeek = button.getAttribute("data-days").split(","); // Haftaning tanlangan kunlari
+          // Guruh nomini o'rnatish
+          document.getElementById('editGroupName').value = groupName;
 
-      // Guruh nomini o'rnatish
-      document.getElementById("editGroupName").value = groupName;
+          // Kurs tanlashni o'rnatish
+          const kursSelect = document.getElementById('editKursSelect');
+          kursSelect.value = kursId;
 
-      // Kurs tanlashni o'rnatish
-      const kursSelect = document.getElementById("editKursSelect");
-      kursSelect.value = kursId;
+          // Modalda form IDni o'rnatish (Guruh ID si uchun)
+          document.getElementById('editGroupForm').setAttribute('data-id', groupId);
 
-      // Haftaning kunlarini o'rnatish
-      document.querySelectorAll('input[name="days_of_week"]').forEach(input => {
-        input.checked = daysOfWeek.includes(input.value); // Tanlangan kunlarni belgilang
-      });
-
-      // Modalda form IDni o'rnatish (Guruh ID si uchun)
-      document.getElementById("editGroupForm").setAttribute("data-id", groupId);
-
-      // Modalni ochish
-      const editModal = new bootstrap.Modal(document.getElementById("editGroupModal"));
-      editModal.show();
-    });
-  });
-
-  // Form yuborish jarayonini boshqarish
-  document.getElementById("editGroupForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    const form = e.target;
-    const groupId = form.getAttribute("data-id");
-    const groupName = document.getElementById("editGroupName").value.trim();
-    const kursId = document.getElementById("editKursSelect").value;
-    const daysOfWeek = Array.from(document.querySelectorAll('input[name="days_of_week"]:checked')).map(input => input.value);
-
-    // AJAX so'rovi orqali tahrirlash
-    fetch(`/learning/learning-groups/${groupId}/edit/`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
-      },
-      body: JSON.stringify({ group_name: groupName, kurs: kursId, days_of_week: daysOfWeek }),
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          Swal.fire({
-            title: "Muvaffaqiyat!",
-            text: data.message,
-            icon: "success",
-            confirmButtonText: "OK",
-            customClass: { confirmButton: "btn btn-primary" },
-            buttonsStyling: false,
-          }).then(() => location.reload());
-        } else {
-          Swal.fire({
-            title: "Xatolik!",
-            text: data.message,
-            icon: "error",
-            confirmButtonText: "OK",
-            customClass: { confirmButton: "btn btn-danger" },
-            buttonsStyling: false,
-          });
-        }
-      })
-      .catch(error => {
-        Swal.fire({
-          title: "Xatolik!",
-          text: "Tahrirlashda xatolik yuz berdi.",
-          icon: "error",
-          confirmButtonText: "OK",
-          customClass: { confirmButton: "btn btn-danger" },
-          buttonsStyling: false,
+          // Modalni ochish
+          const editModal = new bootstrap.Modal(document.getElementById('editGroupModal'));
+          editModal.show();
         });
       });
-  });
-});
+      // Form yuborish jarayonini boshqarish
+      document.getElementById('editGroupForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const groupId = form.getAttribute('data-id');
+        const groupName = document.getElementById('editGroupName').value.trim();
+        const kursId = document.getElementById('editKursSelect').value;
 
-document.addEventListener("DOMContentLoaded", function () {
-    // Haftaning kunlari uchun tarjimalar
-    const daysTranslation = {
-        Monday: "Dushanba",
-        Tuesday: "Seshanba",
-        Wednesday: "Chorshanba",
-        Thursday: "Payshanba",
-        Friday: "Juma",
-        Saturday: "Shanba",
-        Sunday: "Yakshanba",
-    };
-
-    // Har bir guruhning kunlarini tarjima qilish
-    document.querySelectorAll("td.days-of-week").forEach(td => {
-        const daysArray = td.getAttribute("data-days").split(","); // data-days atributidan kunlarni olish
-        const translatedDays = daysArray.map(day => daysTranslation[day.trim()] || day); // Tarjima qilish
-        td.textContent = translatedDays.join(", "); // Tarjima qilingan kunlarni qo'shish
+        // Tanlangan kunlar o'rniga boshqa ma'lumotlar yuboriladi
+        // AJAX so'rovi orqali faqat guruh nomi va kursni yuborish
+        fetch(`/learning/learning-groups/${groupId}/edit/`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+          },
+          body: JSON.stringify({
+            group_name: groupName,
+            kurs: kursId
+          })
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              Swal.fire({
+                title: 'Muvaffaqiyat!',
+                text: data.message,
+                icon: 'success',
+                confirmButtonText: 'OK',
+                customClass: { confirmButton: 'btn btn-primary' },
+                buttonsStyling: false
+              }).then(() => location.reload());
+            } else {
+              Swal.fire({
+                title: 'Xatolik!',
+                text: data.message,
+                icon: 'error',
+                confirmButtonText: 'OK',
+                customClass: { confirmButton: 'btn btn-danger' },
+                buttonsStyling: false
+              });
+            }
+          })
+          .catch(error => {
+            Swal.fire({
+              title: 'Xatolik!',
+              text: 'Tahrirlashda xatolik yuz berdi.',
+              icon: 'error',
+              confirmButtonText: 'OK',
+              customClass: { confirmButton: 'btn btn-danger' },
+              buttonsStyling: false
+            });
+          });
+      });
     });
-});
-</script>
+      // Haftaning kunlari tugmalari uchun ishlovchi
+      document.addEventListener("DOMContentLoaded", function () {
+        // Faqat id="day-in-weeks" tugmachalariga ishlovchi
+        const dayButtons = document.querySelectorAll("#day-in-weeks");
+
+        dayButtons.forEach(button => {
+          button.addEventListener("click", function () {
+            const groupId = this.getAttribute("data-group-id");
+            const day = this.getAttribute("data-day");
+            const isCurrentlyAdded = this.classList.contains("border-success");
+
+            // Rozilikni so'rash
+            Swal.fire({
+              title: isCurrentlyAdded ? "Hafta kunini o'chirishga rozimisiz?" : "Hafta kunini qo'shishga rozimisiz?",
+              text: isCurrentlyAdded
+                ? `${day} haftalik kunini ushbu guruhdan olib tashlashni istaysizmi?`
+                : `${day} haftalik kunini ushbu guruhga qo'shishni istaysizmi?`,
+              icon: "warning",
+              showCancelButton: true,
+              confirmButtonText: "Ha, davom et",
+              cancelButtonText: "Bekor qilish",
+              customClass: {
+                confirmButton: "btn btn-primary",
+                cancelButton: "btn btn-danger"
+              },
+              buttonsStyling: false
+            }).then(result => {
+              if (result.isConfirmed) {
+                // AJAX so'rovni yuborish
+                fetch(`/learning/groups/${groupId}/add_or_remove_day/`, {
+                  method: "PATCH",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+                  },
+                  body: JSON.stringify({ day })
+                })
+                  .then(response => response.json())
+                  .then(data => {
+                    if (data.success) {
+                      // Tugmachaning rangini yangilash
+                      if (isCurrentlyAdded) {
+                        this.classList.remove("border-success", "text-success");
+                        this.classList.add("border-danger", "text-danger");
+                      } else {
+                        this.classList.remove("border-danger", "text-danger");
+                        this.classList.add("border-success", "text-success");
+                      }
+
+                      // Muvaffaqiyatli xabar
+                      Swal.fire({
+                        title: "Muvaffaqiyat!",
+                        text: data.message,
+                        icon: "success",
+                        confirmButtonText: "OK",
+                        customClass: { confirmButton: "btn btn-primary" },
+                        buttonsStyling: false
+                      });
+                    } else {
+                      // Xato xabar
+                      Swal.fire({
+                        title: "Xatolik!",
+                        text: data.message,
+                        icon: "error",
+                        confirmButtonText: "OK",
+                        customClass: { confirmButton: "btn btn-danger" },
+                        buttonsStyling: false
+                      });
+                    }
+                  })
+                  .catch(error => {
+                    console.error("Error:", error);
+                    Swal.fire({
+                      title: "Xatolik!",
+                      text: "Server bilan aloqa muvaffaqiyatsiz tugadi.",
+                      icon: "error",
+                      confirmButtonText: "OK",
+                      customClass: { confirmButton: "btn btn-danger" },
+                      buttonsStyling: false
+                    });
+                  });
+              }
+            });
+          });
+        });
+
+        // Bootstrap Tooltip faollashtirish
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+      });
+    // Delete tugmasi uchun ishlovchi
+    function setupDeleteButtons() {
+      const deleteButtons = document.querySelectorAll('.btn-danger');
+      console.log("delete button")
+
+      deleteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const groupId = this.getAttribute('data-id');
+
+          // Tasdiqlash va o'chirish
+          Swal.fire({
+            title: 'Ishonchingiz komilmi?',
+            text: 'Ushbu guruhni o\'chirishni xohlaysizmi?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ha, o\'chirish',
+            cancelButtonText: 'Bekor qilish',
+            customClass: { confirmButton: 'btn btn-danger', cancelButton: 'btn btn-secondary' },
+            buttonsStyling: false
+          }).then(result => {
+            if (result.isConfirmed) {
+              fetch(`/learning/groups/${groupId}/delete/`, {
+                method: 'DELETE',
+                headers: {
+                  'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+              })
+                .then(response => response.json())
+                .then(data => {
+                  if (data.success) {
+                    Swal.fire({
+                      title: 'Muvaffaqiyat!',
+                      text: data.message,
+                      icon: 'success',
+                      confirmButtonText: 'OK',
+                      customClass: { confirmButton: 'btn btn-primary' },
+                      buttonsStyling: false
+                    }).then(() => location.reload());
+                  } else {
+                    Swal.fire({
+                      title: 'Xatolik!',
+                      text: data.message,
+                      icon: 'error',
+                      confirmButtonText: 'OK',
+                      customClass: { confirmButton: 'btn btn-danger' },
+                      buttonsStyling: false
+                    });
+                  }
+                });
+            }
+          });
+        });
+      });
+    }
+
+    // DOM tayyor bo'lganda barcha ishlovchilarni sozlash
+    document.addEventListener('DOMContentLoaded', function() {
+      setupDeleteButtons();
+    });
+  </script>
 
 {% endblock page_js %}
 
 {% block content %}
   <div class="row mb-6 g-6" id="groupsSection">
-<!-- Guruhlar statistikasi -->
-<div class="col-12">
-  <div class="card border-0 shadow-sm mb-4">
-    <div class="card-body">
-      <h5 class="mb-3 text-primary"><i class="ti ti-bar-chart"></i> Guruhlar Statistikasi</h5>
-      <div class="row g-3">
-        <!-- Umumiy guruhlar -->
-        <div class="col-sm-4 col-lg-3">
-          <div class="d-flex align-items-center">
-            <div class="flex-shrink-0">
-              <div class="badge bg-label-primary rounded-circle p-3">
-                <i class="ti ti-users ti-lg"></i>
+    <!-- Guruhlar statistikasi -->
+    <div class="col-12">
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <h5 class="mb-3 text-primary"><i class="ti ti-bar-chart"></i> Guruhlar Statistikasi</h5>
+          <div class="row g-3">
+            <!-- Umumiy guruhlar -->
+            <div class="col-sm-4 col-lg-3">
+              <div class="d-flex align-items-center">
+                <div class="flex-shrink-0">
+                  <div class="badge bg-label-primary rounded-circle p-3">
+                    <i class="ti ti-users ti-lg"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <h6 class="mb-0">Umumiy Guruhlar</h6>
+                  <p class="mb-0 text-muted"><span id="totalGroupsCount">{{ statistics.total_groups }}</span> ta</p>
+                </div>
               </div>
             </div>
-            <div class="flex-grow-1 ms-3">
-              <h6 class="mb-0">Umumiy Guruhlar</h6>
-              <p class="mb-0 text-muted"><span id="totalGroupsCount">{{ statistics.total_groups }}</span> ta</p>
-            </div>
-          </div>
-        </div>
-        <!-- Faol guruhlar -->
-        <div class="col-sm-4 col-lg-3">
-          <div class="d-flex align-items-center">
-            <div class="flex-shrink-0">
-              <div class="badge bg-label-success rounded-circle p-3">
-                <i class="ti ti-user-check ti-lg"></i>
+            <!-- Faol guruhlar -->
+            <div class="col-sm-4 col-lg-3">
+              <div class="d-flex align-items-center">
+                <div class="flex-shrink-0">
+                  <div class="badge bg-label-success rounded-circle p-3">
+                    <i class="ti ti-user-check ti-lg"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <h6 class="mb-0">Faol Guruhlar</h6>
+                  <p class="mb-0 text-muted"><span id="activeGroupsCount">{{ statistics.active_groups }}</span> ta</p>
+                </div>
               </div>
             </div>
-            <div class="flex-grow-1 ms-3">
-              <h6 class="mb-0">Faol Guruhlar</h6>
-              <p class="mb-0 text-muted"><span id="activeGroupsCount">{{ statistics.active_groups }}</span> ta</p>
-            </div>
-          </div>
-        </div>
-        <!-- Nofaol guruhlar -->
-        <div class="col-sm-4 col-lg-3">
-          <div class="d-flex align-items-center">
-            <div class="flex-shrink-0">
-              <div class="badge bg-label-warning rounded-circle p-3">
-                <i class="ti ti-user-exclamation ti-lg"></i>
+            <!-- Nofaol guruhlar -->
+            <div class="col-sm-4 col-lg-3">
+              <div class="d-flex align-items-center">
+                <div class="flex-shrink-0">
+                  <div class="badge bg-label-warning rounded-circle p-3">
+                    <i class="ti ti-user-exclamation ti-lg"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <h6 class="mb-0">Nofaol Guruhlar</h6>
+                  <p class="mb-0 text-muted"><span id="inactiveGroupsCount">{{ statistics.inactive_groups }}</span> ta
+                  </p>
+                </div>
               </div>
             </div>
-            <div class="flex-grow-1 ms-3">
-              <h6 class="mb-0">Nofaol Guruhlar</h6>
-              <p class="mb-0 text-muted"><span id="inactiveGroupsCount">{{ statistics.inactive_groups }}</span> ta</p>
-            </div>
-          </div>
-        </div>
-        <!-- O'quvchilar soni -->
-        <div class="col-sm-4 col-lg-3">
-          <div class="d-flex align-items-center">
-            <div class="flex-shrink-0">
-              <div class="badge bg-label-info rounded-circle p-3">
-                <i class="ti ti-school ti-lg"></i>
+            <!-- O'quvchilar soni -->
+            <div class="col-sm-4 col-lg-3">
+              <div class="d-flex align-items-center">
+                <div class="flex-shrink-0">
+                  <div class="badge bg-label-info rounded-circle p-3">
+                    <i class="ti ti-school ti-lg"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <h6 class="mb-0">O'quvchilar soni</h6>
+                  <p class="mb-0 text-muted"><span id="totalStudentsCount">{{ statistics.total_students }}</span> nafar
+                  </p>
+                </div>
               </div>
             </div>
-            <div class="flex-grow-1 ms-3">
-              <h6 class="mb-0">O'quvchilar soni</h6>
-              <p class="mb-0 text-muted"><span id="totalStudentsCount">{{ statistics.total_students }}</span> nafar</p>
-            </div>
-          </div>
-        </div>
-        <!-- Kurslarga birikkan guruhlar -->
-        <div class="col-sm-4 col-lg-3">
-          <div class="d-flex align-items-center">
-            <div class="flex-shrink-0">
-              <div class="badge bg-label-secondary rounded-circle p-3">
-                <i class="ti ti-book ti-lg"></i>
+            <!-- Kurslarga birikkan guruhlar -->
+            <div class="col-sm-4 col-lg-3">
+              <div class="d-flex align-items-center">
+                <div class="flex-shrink-0">
+                  <div class="badge bg-label-secondary rounded-circle p-3">
+                    <i class="ti ti-book ti-lg"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <h6 class="mb-0">Kurslarga birikkan guruhlar</h6>
+                  <p class="mb-0 text-muted"><span id="linkedGroupsCount">{{ statistics.linked_groups }}</span> ta</p>
+                </div>
               </div>
             </div>
-            <div class="flex-grow-1 ms-3">
-              <h6 class="mb-0">Kurslarga birikkan guruhlar</h6>
-              <p class="mb-0 text-muted"><span id="linkedGroupsCount">{{ statistics.linked_groups }}</span> ta</p>
-            </div>
-          </div>
-        </div>
-        <!-- Kurslarsiz guruhlar -->
-        <div class="col-sm-4 col-lg-3">
-          <div class="d-flex align-items-center">
-            <div class="flex-shrink-0">
-              <div class="badge bg-label-danger rounded-circle p-3">
-                <i class="ti ti-alert-circle ti-lg"></i>
+            <!-- Kurslarsiz guruhlar -->
+            <div class="col-sm-4 col-lg-3">
+              <div class="d-flex align-items-center">
+                <div class="flex-shrink-0">
+                  <div class="badge bg-label-danger rounded-circle p-3">
+                    <i class="ti ti-alert-circle ti-lg"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <h6 class="mb-0">Kurslarsiz Guruhlar</h6>
+                  <p class="mb-0 text-muted"><span id="unlinkedGroupsCount">{{ statistics.unlinked_groups }}</span> ta
+                  </p>
+                </div>
               </div>
             </div>
-            <div class="flex-grow-1 ms-3">
-              <h6 class="mb-0">Kurslarsiz Guruhlar</h6>
-              <p class="mb-0 text-muted"><span id="unlinkedGroupsCount">{{ statistics.unlinked_groups }}</span> ta</p>
-            </div>
-          </div>
-        </div>
-        <!-- Haftalik dars kunlari -->
-        <div class="col-sm-4 col-lg-3">
-          <div class="d-flex align-items-center">
-            <div class="flex-shrink-0">
-              <div class="badge bg-label-dark rounded-circle p-3">
-                <i class="ti ti-calendar ti-lg"></i>
+            <!-- Haftalik dars kunlari -->
+            <div class="col-sm-4 col-lg-3">
+              <div class="d-flex align-items-center">
+                <div class="flex-shrink-0">
+                  <div class="badge bg-label-dark rounded-circle p-3">
+                    <i class="ti ti-calendar ti-lg"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <h6 class="mb-0">Haftalik darslar</h6>
+                  <p class="mb-0 text-muted"><span id="weeklyClassesCount">0</span> soat</p>
+                </div>
               </div>
-            </div>
-            <div class="flex-grow-1 ms-3">
-              <h6 class="mb-0">Haftalik darslar</h6>
-              <p class="mb-0 text-muted"><span id="weeklyClassesCount">0</span> soat</p>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
 
     <!-- Ajratuvchi chiziq -->
     <hr class="bg-primary border border-primary">
@@ -519,7 +647,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 <th>#</th>
                 <th>Guruh nomi</th>
                 <th>Kurs</th>
-                <th>Dars kunlari</th>
+                <th>Hafta kunlari</th>
                 <th>Yaratilgan</th>
                 <th>Faollik</th>
                 <th>Amallar</th>
@@ -531,36 +659,49 @@ document.addEventListener("DOMContentLoaded", function () {
                   <td>{{ forloop.counter }}</td>
                   <td class="text-truncate" title="{{ group.group_name }}">{{ group.group_name }}</td>
                   <td class="text-truncate" title="{{ group.kurs_name }}">{{ group.kurs_name }}</td>
-                  <td class="text-truncate days-of-week" data-days="{{ group.days_of_week }}">
-                    <!-- JavaScript bu joyni o'zgartiradi -->
+                  <td class="col-2">
+                    <div class="d-flex gap-1">
+                      {% for day, verbose_day in days_of_week %}
+                        <div
+                          class="btn btn-sm rounded-circle {% if day in group.days_of_week %}border-success border-2 text-success{% else %}border-danger border-2 text-danger{% endif %}"
+                          style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer;"
+                          data-bs-toggle="tooltip"
+                          data-group-id="{{ group.id }}"
+                          data-day="{{ day }}"
+                          title="{{ verbose_day }}"
+                          id="day-in-weeks"
+                        >
+                          {{ verbose_day|slice:":1" }}
+                        </div>
+                      {% endfor %}
+                    </div>
                   </td>
-
                   <td>{{ group.created_at|date:"d-m-Y" }}</td>
                   <td>
                     <label class="switch switch-success switch-square">
                       <input type="checkbox" class="switch-input is-active-toggle" data-id="{{ group.id }}"
                              {% if group.is_active %}checked{% endif %}>
                       <span class="switch-toggle-slider">
-                        <span class="switch-on">
-                          <i class="ti ti-check"></i>
+                          <span class="switch-on">
+                            <i class="ti ti-check"></i>
+                          </span>
+                          <span class="switch-off">
+                            <i class="ti ti-x"></i>
+                          </span>
                         </span>
-                        <span class="switch-off">
-                          <i class="ti ti-x"></i>
-                        </span>
-                      </span>
                       <span class="switch-label"></span>
                     </label>
                   </td>
                   <td>
                     <div class="d-flex gap-1">
-                  <button class="btn btn-sm btn-primary edit-group"
-                          data-id="{{ group.id }}"
-                          data-name="{{ group.group_name }}"
-                          data-kurs="{{ group.kurs_id }}"
-                          data-days="{{ group.days_of_week|join:',' }}">
-                      <i class="ti ti-pencil"></i>
-                  </button>
-                      <button class="btn btn-sm btn-danger" title="O'chirish">
+                      <button class="btn btn-sm btn-primary edit-group"
+                              data-id="{{ group.id }}"
+                              data-name="{{ group.group_name }}"
+                              data-kurs="{{ group.kurs_id }}"
+                              data-days="{{ group.days_of_week|join:',' }}">
+                        <i class="ti ti-pencil"></i>
+                      </button>
+                      <button class="btn btn-sm btn-danger" data-id="{{ group.id }}" title="O'chirish">
                         <i class="ti ti-trash"></i>
                       </button>
                     </div>
@@ -583,124 +724,42 @@ document.addEventListener("DOMContentLoaded", function () {
   </div>
 
 
- <div class="modal fade" id="editGroupModal" tabindex="-1" aria-labelledby="editGroupModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="editGroupModalLabel">Guruhni Tahrirlash</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Yopish"></button>
-      </div>
-      <form id="editGroupForm">
-        {% csrf_token %}
-        <div class="modal-body">
-          <!-- Guruh nomi -->
-          <div class="mb-3">
-            <label for="editGroupName" class="form-label">Guruh nomi</label>
-            <input type="text" id="editGroupName" name="group_name" class="form-control" required placeholder="Guruh nomini kiriting">
-          </div>
+  <div class="modal fade" id="editGroupModal" tabindex="-1" aria-labelledby="editGroupModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editGroupModalLabel">Guruhni Tahrirlash</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Yopish"></button>
+        </div>
+        <form id="editGroupForm">
+          {% csrf_token %}
+          <div class="modal-body">
+            <!-- Guruh nomi -->
+            <div class="mb-3">
+              <label for="editGroupName" class="form-label">Guruh nomi</label>
+              <input type="text" id="editGroupName" name="group_name" class="form-control" required
+                     placeholder="Guruh nomini kiriting">
+            </div>
 
-          <!-- Kurs tanlash -->
-          <div class="mb-3">
-            <label for="editKursSelect" class="form-label">Kursni tanlang</label>
-            <select id="editKursSelect" name="kurs" class="form-select" required>
-              {% for kurs in kurslar %}
-                <option value="{{ kurs.id }}">{{ kurs.nomi }}</option>
-              {% endfor %}
-            </select>
-          </div>
-
-          <!-- Dars kunlari -->
-          <div class="">
-            <label class="form-label fw-bold"><i class="ti ti-calendar-event"></i> Dars kunlari</label>
-            <div class="row gy-3">
-              <div class="col">
-                <div class="form-check custom-option custom-option-icon text-center">
-                  <label class="form-check-label custom-option-content text-truncate" for="editDayMonday" style="max-width: 80px;">
-                    <span class="custom-option-body">
-                      <i class="ti ti-calendar mb-1"></i>
-                      <span class="custom-option-title text-muted text-nowrap">Dushanba</span>
-                    </span>
-                    <input class="form-check-input" type="checkbox" name="days_of_week" value="Monday" id="editDayMonday" />
-                  </label>
-                </div>
-              </div>
-              <div class="col">
-                <div class="form-check custom-option custom-option-icon text-center">
-                  <label class="form-check-label custom-option-content text-truncate" for="editDayTuesday" style="max-width: 80px;">
-                    <span class="custom-option-body">
-                      <i class="ti ti-calendar mb-1"></i>
-                      <span class="custom-option-title text-muted text-nowrap">Seshanba</span>
-                    </span>
-                    <input class="form-check-input" type="checkbox" name="days_of_week" value="Tuesday" id="editDayTuesday" />
-                  </label>
-                </div>
-              </div>
-              <div class="col">
-                <div class="form-check custom-option custom-option-icon text-center">
-                  <label class="form-check-label custom-option-content text-truncate" for="editDayWednesday" style="max-width: 80px;">
-                    <span class="custom-option-body">
-                      <i class="ti ti-calendar mb-1"></i>
-                      <span class="custom-option-title text-muted text-nowrap">Chorshanba</span>
-                    </span>
-                    <input class="form-check-input" type="checkbox" name="days_of_week" value="Wednesday" id="editDayWednesday" />
-                  </label>
-                </div>
-              </div>
-              <div class="col">
-                <div class="form-check custom-option custom-option-icon text-center">
-                  <label class="form-check-label custom-option-content text-truncate" for="editDayThursday" style="max-width: 80px;">
-                    <span class="custom-option-body">
-                      <i class="ti ti-calendar mb-1"></i>
-                      <span class="custom-option-title text-muted text-nowrap">Payshanba</span>
-                    </span>
-                    <input class="form-check-input" type="checkbox" name="days_of_week" value="Thursday" id="editDayThursday" />
-                  </label>
-                </div>
-              </div>
-              <div class="col">
-                <div class="form-check custom-option custom-option-icon text-center">
-                  <label class="form-check-label custom-option-content text-truncate" for="editDayFriday" style="max-width: 80px;">
-                    <span class="custom-option-body">
-                      <i class="ti ti-calendar mb-1"></i>
-                      <span class="custom-option-title text-muted text-nowrap">Juma</span>
-                    </span>
-                    <input class="form-check-input" type="checkbox" name="days_of_week" value="Friday" id="editDayFriday" />
-                  </label>
-                </div>
-              </div>
-              <div class="col">
-                <div class="form-check custom-option custom-option-icon text-center">
-                  <label class="form-check-label custom-option-content text-truncate" for="editDaySaturday" style="max-width: 80px;">
-                    <span class="custom-option-body">
-                      <i class="ti ti-calendar mb-1"></i>
-                      <span class="custom-option-title text-muted text-nowrap">Shanba</span>
-                    </span>
-                    <input class="form-check-input" type="checkbox" name="days_of_week" value="Saturday" id="editDaySaturday" />
-                  </label>
-                </div>
-              </div>
-              <div class="col">
-                <div class="form-check custom-option custom-option-icon text-center">
-                  <label class="form-check-label custom-option-content text-truncate" for="editDaySunday" style="max-width: 80px;">
-                    <span class="custom-option-body">
-                      <i class="ti ti-calendar mb-1"></i>
-                      <span class="custom-option-title text-muted text-nowrap">Yakshanba</span>
-                    </span>
-                    <input class="form-check-input" type="checkbox" name="days_of_week" value="Sunday" id="editDaySunday" />
-                  </label>
-                </div>
-              </div>
+            <!-- Kurs tanlash -->
+            <div class="mb-3">
+              <label for="editKursSelect" class="form-label">Kursni tanlang</label>
+              <select id="editKursSelect" name="kurs" class="form-select" required>
+                {% for kurs in kurslar %}
+                  <option value="{{ kurs.id }}">{{ kurs.nomi }}</option>
+                {% endfor %}
+              </select>
             </div>
           </div>
-        </div>
 
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bekor qilish</button>
-          <button type="submit" class="btn btn-primary">Saqlash</button>
-        </div>
-      </form>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bekor qilish</button>
+            <button type="submit" class="btn btn-primary">Saqlash</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
-</div>
+
 
 {% endblock %}

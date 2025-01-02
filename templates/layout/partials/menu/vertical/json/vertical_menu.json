@@ -40,6 +40,10 @@
       "name": "Kasblar & yo'nalishlar",
       "icon": "menu-icon tf-icons ti ti-briefcase",
       "slug": "layouts",
+      "allowed_roles": [
+            "5",
+            "4"
+          ],
       "submenu": [
         {
           "url": "occupations",

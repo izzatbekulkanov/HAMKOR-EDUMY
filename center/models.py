@@ -55,7 +55,7 @@ class Filial(models.Model):
     images = models.ManyToManyField('Images', blank=True, verbose_name="Qo'shimcha rasmlar")
     admins = models.ManyToManyField(CustomUser, blank=True, related_name="administered_filials", verbose_name="Administratorlar")  # Adminlar maydoni
     created_at = models.DateTimeField(default=now, verbose_name="Qo'shilgan vaqt")  # Qo'shilgan vaqt maydoni
-
+    is_active = models.BooleanField(default=True, verbose_name="Faolmi")
     def __str__(self):
         return self.location or "Filial"
 

@@ -1,7 +1,7 @@
 from django.urls import path
 from config.decorators import verified_required
 from .views import CenterView, FilialDetailUpdateView, CenterDetailView, OccupationsView, OccupationsDetailView, \
-    LinesView, CoursesView, LinesDetailView, LearningGroupView
+    LinesView, CoursesView, LinesDetailView, LearningGroupView, add_or_remove_day, TeacherView
 
 urlpatterns = [
     path("learning-center/", verified_required(CenterView.as_view(template_name="learning_center.html")),name="learning-center"),
@@ -16,15 +16,20 @@ urlpatterns = [
 
     path("learning-groups/", verified_required(LearningGroupView.as_view(template_name="learning_groups.html")),name="learning-groups"),
     path("learning-groups/<int:pk>/edit/", verified_required(LearningGroupView.as_view(template_name="learning_groups.html")),name="learning-groups"),
+    path('groups/<int:group_id>/add_or_remove_day/', add_or_remove_day, name='add_or_remove_day'),
+    path("groups/<int:pk>/delete/",verified_required(LearningGroupView.as_view(template_name="learning_groups.html")), name="learning-delete_group"),
 
     path("learning-courses/", verified_required(CoursesView.as_view(template_name="courses.html")),name="learning-courses"),
     path("learning-courses/<int:pk>/edit/", verified_required(CoursesView.as_view(template_name="courses.html")),name="learning-courses"),
     path("learning-courses/<int:pk>/delete/", verified_required(CoursesView.as_view(template_name="courses.html")),name="learning-courses"),
 
-    path("accept_students/", verified_required(CenterView.as_view(template_name="accept_students.html")), name="accept-students"),
-    path("teacher_cashback/", verified_required(CenterView.as_view(template_name="teacher/cashback.html")), name="teacher-cashback"),
-    path("teacher_send_student/", verified_required(CenterView.as_view(template_name="teacher/send_students.html")), name="teacher-send-student" ),
-    path("teacher_students_list/", verified_required(CenterView.as_view(template_name="teacher/students_list.html")), name="teacher-student-list" ),
+    path("accept_students/", verified_required(TeacherView.as_view(template_name="accept_students.html")), name="accept-students"),
+    path("teacher_cashback/", verified_required(TeacherView.as_view(template_name="teacher/cashback.html")), name="teacher-cashback"),
+    path("teacher_send_student/", verified_required(TeacherView.as_view(template_name="teacher/send_students.html")), name="teacher-send-student" ),
+    path("teacher_students_list/", verified_required(TeacherView.as_view(template_name="teacher/students_list.html")), name="teacher-student-list" ),
+
+
+
     # New URL pattern for Filial Detail View
     path("filial-detail/<int:pk>/", verified_required(FilialDetailUpdateView.as_view(template_name="fillial_details.html")), name="filial-detail" ),
     path("center-detail/<int:pk>/", verified_required(CenterDetailView.as_view(template_name="center_detail.html")), name="center-detail" ),
