@@ -16,7 +16,7 @@ SECRET_KEY = config('SECRET_KEY', default='fallback-secret-key')
 
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1", "ref.edumy.uz", "inihub.namspi.uz"]
+ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1", "ref.edumy.uz", "updatehub.namspi.uz"]
 
 ENVIRONMENT = config('DJANGO_ENVIRONMENT', default='local')
 
@@ -259,7 +259,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
     "https://ref.edumy.uz",
-    "https://inihub.namspi.uz",
+    "https://updatehub.namspi.uz",
     "https://www.ref.edumy.uz",
 ]
 
