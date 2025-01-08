@@ -13,12 +13,6 @@
 <link rel="stylesheet" href="{% static 'vendor/libs/select2/select2.css' %}" />
 <link rel="stylesheet" href="{% static 'vendor/libs/toastr/toastr.css' %}" />
 <link rel="stylesheet" href="{% static 'vendor/libs/sweetalert2/sweetalert2.css' %}" />
-<style>
-  #studentsTable .badge {
-    font-size: 0.75rem; /* Kichikroq badge */
-    padding: 0.4em 0.6em; /* Kichikroq padding */
-  }
-</style>
 {% endblock vendor_css %}
 
 {% block vendor_js %}
@@ -33,46 +27,7 @@
 
 {% block page_js %}
 {{ block.super }}
-  <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const regionSelect = document.getElementById("studentRegion");
-    const districtSelect = document.getElementById("studentDistrict");
-    const schoolSelect = document.getElementById("studentSchool");
 
-    const viloyatlar = {{ viloyatlar|safe }}; // Rendered from Django context
-
-    regionSelect.addEventListener("change", function () {
-        const selectedRegion = this.value;
-
-        // Populate Tumans
-        districtSelect.innerHTML = '<option value="" selected disabled>Tumanni tanlang</option>';
-        schoolSelect.innerHTML = '<option value="" selected disabled>Maktabni tanlang</option>';
-        schoolSelect.disabled = true;
-
-        if (viloyatlar[selectedRegion]) {
-            districtSelect.disabled = false;
-            for (const district in viloyatlar[selectedRegion]) {
-                districtSelect.innerHTML += `<option value="${district}">${district}</option>`;
-            }
-        }
-    });
-
-    districtSelect.addEventListener("change", function () {
-        const selectedRegion = regionSelect.value;
-        const selectedDistrict = this.value;
-
-        // Populate Maktabs
-        schoolSelect.innerHTML = '<option value="" selected disabled>Maktabni tanlang</option>';
-        if (viloyatlar[selectedRegion] && viloyatlar[selectedRegion][selectedDistrict]) {
-            schoolSelect.disabled = false;
-            viloyatlar[selectedRegion][selectedDistrict].forEach((school) => {
-                schoolSelect.innerHTML += `<option value="${school.id}">${school.maktab_raqami} - ${school.nomi}</option>`;
-            });
-        }
-    });
-});
-
-  </script>
 {% endblock page_js %}
 
 {% block content %}
@@ -103,34 +58,31 @@
     </div>
 
     <div class="row g-3 mt-3">
-      <!-- Viloyat, Tuman va Maktab -->
-      <div class="col-md-4">
-        <label for="studentRegion" class="form-label">
-          <i class="ti ti-map-pin"></i> Viloyat
-        </label>
-        <select class="form-select" id="studentRegion" required>
-          <option value="" selected disabled>Viloyatni tanlang</option>
-          <!-- Dynamically populated -->
-        </select>
-      </div>
-      <div class="col-md-4">
-        <label for="studentDistrict" class="form-label">
-          <i class="ti ti-map-pin"></i> Tuman
-        </label>
-        <select class="form-select" id="studentDistrict" required>
-          <option value="" selected disabled>Tumanni tanlang</option>
-          <!-- Dynamically populated -->
-        </select>
-      </div>
-      <div class="col-md-4">
-        <label for="studentSchool" class="form-label">
-          <i class="ti ti-building"></i> Maktab
-        </label>
-        <select class="form-select" id="studentSchool" required>
-          <option value="" selected disabled>Maktabni tanlang</option>
-          <!-- Dynamically populated -->
-        </select>
-      </div>
+        <!-- Viloyat, Tuman va Maktab -->
+        <div class="col-md-4">
+            <label for="studentRegion" class="form-label">
+                <i class="ti ti-map-pin"></i> Viloyat
+            </label>
+            <select class="form-select" id="studentRegion" required>
+                <option value="" selected disabled>Viloyatni tanlang</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label for="studentDistrict" class="form-label">
+                <i class="ti ti-map-pin"></i> Tuman
+            </label>
+            <select class="form-select" id="studentDistrict" required>
+                <option value="" selected disabled>Tumanni tanlang</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label for="studentSchool" class="form-label">
+                <i class="ti ti-building"></i> Maktab
+            </label>
+            <select class="form-select" id="studentSchool" required>
+                <option value="" selected disabled>Maktabni tanlang</option>
+            </select>
+        </div>
     </div>
 
     <div class="row g-3 mt-3">
@@ -155,25 +107,25 @@
     </div>
 
     <div class="row g-3 mt-3">
-      <!-- O'quv markazi va Filial -->
-      <div class="col-md-4">
-        <label for="studentCenter" class="form-label">
-          <i class="ti ti-building-skyscraper"></i> O'quv markazi
-        </label>
-        <select class="form-select select2" id="studentCenter" required>
-          <option value="" selected disabled>Markazni tanlang</option>
-          <!-- Dynamically populated -->
-        </select>
-      </div>
-      <div class="col-md-4">
-        <label for="studentBranch" class="form-label">
-          <i class="ti ti-map"></i> Filial
-        </label>
-        <select class="form-select select2" id="studentBranch" required disabled>
-          <option value="" selected disabled>Filialni tanlang</option>
-          <!-- Dynamically populated -->
-        </select>
-      </div>
+        <!-- O'quv markazi va Filial -->
+        <div class="col-md-4">
+            <label for="studentCenter" class="form-label">
+                <i class="ti ti-building-skyscraper"></i> O'quv markazi
+            </label>
+            <select class="form-select select2" id="studentCenter" required>
+                <option value="" selected disabled>Markazni tanlang</option>
+                <!-- Dynamically populated -->
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label for="studentBranch" class="form-label">
+                <i class="ti ti-map"></i> Filial
+            </label>
+            <select class="form-select select2" id="studentBranch" required disabled>
+                <option value="" selected disabled>Filialni tanlang</option>
+                <!-- Dynamically populated -->
+            </select>
+        </div>
     </div>
 
     <div class="row g-3 mt-3">
@@ -217,7 +169,166 @@
   </form>
 </div>
 
+  <script>
+document.addEventListener("DOMContentLoaded", function () {
+    const regionSelect = document.getElementById("studentRegion");
+    const districtSelect = document.getElementById("studentDistrict");
+    const schoolSelect = document.getElementById("studentSchool");
 
+    // Viloyatlarni yuklash
+    function loadRegions() {
+        fetch("/api/fetch-schools/")
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success && data.regions) {
+                    regionSelect.innerHTML = '<option value="" selected disabled>Viloyatni tanlang</option>';
+                    data.regions.forEach((region) => {
+                        const option = document.createElement("option");
+                        option.value = region;
+                        option.textContent = region;
+                        regionSelect.appendChild(option);
+                    });
+                    districtSelect.disabled = true; // Disable district select initially
+                    schoolSelect.disabled = true;  // Disable school select initially
+                }
+            })
+            .catch((error) => console.error("Viloyatlarni yuklashda xatolik:", error));
+    }
+
+    // Tumanni yuklash
+    function loadDistricts(region) {
+        fetch(`/api/fetch-schools/?region=${encodeURIComponent(region)}`)
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success && data.districts) {
+                    districtSelect.innerHTML = '<option value="" selected disabled>Tumanni tanlang</option>';
+                    data.districts.forEach((district) => {
+                        const option = document.createElement("option");
+                        option.value = district;
+                        option.textContent = district;
+                        districtSelect.appendChild(option);
+                    });
+                    districtSelect.disabled = false; // Enable district select when region is selected
+                    schoolSelect.disabled = true;  // Disable school select initially
+                }
+            })
+            .catch((error) => console.error("Tumanlarni yuklashda xatolik:", error));
+    }
+
+    // Maktablarni yuklash
+    function loadSchools(region, district) {
+        fetch(`/api/fetch-schools/?region=${encodeURIComponent(region)}&district=${encodeURIComponent(district)}`)
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success && data.all_schools) {
+                    schoolSelect.innerHTML = '<option value="" selected disabled>Maktabni tanlang</option>';
+                    data.all_schools.forEach((school) => {
+                        const option = document.createElement("option");
+                        option.value = school.id;
+                        option.textContent = `${school.school_number} - ${school.name}`;
+                        schoolSelect.appendChild(option);
+                    });
+                    schoolSelect.disabled = false; // Enable school select when district is selected
+                }
+            })
+            .catch((error) => console.error("Maktablarni yuklashda xatolik:", error));
+    }
+
+    // Viloyat o'zgartirilganda tumanni yuklash
+    regionSelect.addEventListener("change", function () {
+        const selectedRegion = this.value;
+
+        districtSelect.innerHTML = '<option value="" selected disabled>Tumanni tanlang</option>';
+        schoolSelect.innerHTML = '<option value="" selected disabled>Maktabni tanlang</option>';
+
+        if (selectedRegion) {
+            loadDistricts(selectedRegion);
+        }
+    });
+
+    // Tuman o'zgartirilganda maktablarni yuklash
+    districtSelect.addEventListener("change", function () {
+        const selectedRegion = regionSelect.value;
+        const selectedDistrict = this.value;
+
+        schoolSelect.innerHTML = '<option value="" selected disabled>Maktabni tanlang</option>';
+
+        if (selectedRegion && selectedDistrict) {
+            loadSchools(selectedRegion, selectedDistrict);
+        }
+    });
+
+    // Sahifa yuklanishi bilan viloyatlarni yuklash
+    loadRegions();
+});
+  </script>
+
+  <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const centerSelect = document.getElementById("studentCenter");
+    const branchSelect = document.getElementById("studentBranch");
+
+    // O'quv markazlarini yuklash
+    function loadCenters() {
+        fetch("/api/get-centers-teacher/")
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success && data.data) {
+                    centerSelect.innerHTML = '<option value="" selected disabled>Markazni tanlang</option>';
+                    data.data.forEach((center) => {
+                        const option = document.createElement("option");
+                        option.value = center.center_id;
+                        option.textContent = center.center_name;
+                        centerSelect.appendChild(option);
+                    });
+
+                    // Filiallar uchun selectni disabled qilib qo'yamiz
+                    branchSelect.disabled = true;
+                    branchSelect.innerHTML = '<option value="" selected disabled>Filialni tanlang</option>';
+                }
+            })
+            .catch((error) => console.error("Markazlarni yuklashda xatolik:", error));
+    }
+
+    // Filiallarni yuklash
+    function loadBranches(centerId) {
+        fetch(`/api/get-centers-teacher/?center_id=${encodeURIComponent(centerId)}`)
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(data);
+                if (data.success && data.data) {
+                    branchSelect.innerHTML = '<option value="" selected disabled>Filialni tanlang</option>';
+                    data.data.forEach((branch) => {
+                        const option = document.createElement("option");
+                        option.value = branch.branch_id;
+                        option.textContent = branch.branch_name;
+                        branchSelect.appendChild(option);
+                    });
+
+                    // Filiallar selectni faollashtiramiz
+                    branchSelect.disabled = false;
+                }
+            })
+            .catch((error) => console.error("Filiallarni yuklashda xatolik:", error));
+    }
+
+    // Markaz o'zgartirilganda filiallarni yuklash
+    centerSelect.addEventListener("change", function () {
+        const selectedCenter = this.value;
+
+        // Filiallarni tozalash
+        branchSelect.innerHTML = '<option value="" selected disabled>Filialni tanlang</option>';
+
+        // Filiallar faollashadi
+        if (selectedCenter) {
+            loadBranches(selectedCenter);
+        }
+    });
+
+    // Sahifa yuklanishi bilan markazlarni yuklash
+    loadCenters();
+});
+  </script>
 
 {% endblock %}
 

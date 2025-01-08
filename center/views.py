@@ -1064,65 +1064,8 @@ class TeacherView(TemplateView):
     def get_context_data(self, **kwargs):
         # Initialize the base context using TemplateLayout
         context = TemplateLayout.init(self, super().get_context_data(**kwargs))
-
-        # Viloyat, Tuman va Maktabni guruhlash
-        viloyatlar = defaultdict(lambda: defaultdict(list))
-        maktablar = Maktab.objects.filter(is_active=True)
-        for maktab in maktablar:
-            viloyatlar[maktab.viloyat][maktab.tuman].append({
-                'id': maktab.id,
-                'nomi': maktab.nomi,
-                'maktab_raqami': maktab.maktab_raqami
-            })
-
-        # Markaz va Filiallarni guruhlash
-        centers_data = []
-        centers = Center.objects.filter(is_active=True)
-        for center in centers:
-            filials = center.filial_set.filter(is_active=True).values('id', 'location', 'contact')
-            centers_data.append({
-                'id': center.id,
-                'nomi': center.nomi,
-                'rahbari': center.rahbari.get_full_name() if center.rahbari else None,
-                'filials': list(filials),
-            })
-
-        # Kasb, Yo'nalish va Kurslarni guruhlash
-        kasb_data = []
-        kasblar = Kasb.objects.filter(is_active=True)
-        for kasb in kasblar:
-            yonalish_data = []
-            yonalishlar = kasb.yonalishlar.filter(is_active=True)
-            for yonalish in yonalishlar:
-                kurslar = yonalish.kurslar.filter(is_active=True).values('id', 'nomi', 'narxi')
-                yonalish_data.append({
-                    'id': yonalish.id,
-                    'nomi': yonalish.nomi,
-                    'kurslar': list(kurslar),
-                })
-            kasb_data.append({
-                'id': kasb.id,
-                'nomi': kasb.nomi,
-                'yonalishlar': yonalish_data,
-            })
-
-        # Sinf va Belgilar
-        sinflar = Sinf.objects.filter(is_active=True).select_related('maktab', 'belgisi')
-        sinflar_data = []
-        for sinf in sinflar:
-            sinflar_data.append({
-                'id': sinf.id,
-                'sinf_raqami': sinf.sinf_raqami,
-                'belgisi': sinf.belgisi.nomi if sinf.belgisi else None,
-                'maktab': sinf.maktab.nomi if sinf.maktab else None,
-            })
-
         # Context ma'lumotlarini yangilash
         context.update({
-            'viloyatlar': dict(viloyatlar),
-            'centers': centers_data,
-            'kasblar': kasb_data,
-            'sinflar': sinflar_data,
             'grades': range(1, 12),  # 1-dan 11-gacha sinflar
         })
 
