@@ -263,13 +263,17 @@
     <!-- Yo'nalish qo'shish formasi -->
     <div class="col-12">
       <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between">
-        <!-- Yo'nalish qo'shish formasi -->
         <form method="post" class="d-flex gap-2 flex-grow-1" id="add-yonalish-form" onsubmit="submitForm(event)">
           {% csrf_token %}
           <input type="text" name="nomi" class="form-control form-control-sm" placeholder="Yo'nalish nomi" required>
+          <select name="kasb" class="form-select form-select-sm" required>
+            <option value="" disabled selected>Kasbni tanlang</option>
+            {% for kasb in kasblar %}
+              <option value="{{ kasb.id }}">{{ kasb.nomi }}</option>
+            {% endfor %}
+          </select>
           <button type="submit" class="btn btn-primary btn-sm">
-            <i class="ti ti-plus me-1"></i> Qo'shish
-          </button>
+            <i class="ti ti-plus me-1"></i></button>
         </form>
 
         <!-- Qidirish formasi -->
@@ -287,56 +291,57 @@
 
     <hr class="my-4 border-top border-2 border-primary">
     {% if yonalishlar %}
-
       <div class="table-responsive card my-5">
         <table class="table table-striped table-hover table-sm">
           <thead>
-          <tr>
-            <th>#</th>
-            <th>Yo'nalish nomi</th>
-            <th>Kurslar</th>
-            <th>Guruhlar</th>
-            <th>Faollik</th>
-            <th>Yaratilgan</th>
-            <th>Yangilangan</th>
-            <th>Harakatlar</th>
-          </tr>
+            <tr>
+              <th>#</th>
+              <th>Yo'nalish nomi</th>
+              <th>Kasb</th> <!-- Yangi ustun -->
+              <th>Kurslar</th>
+              <th>Guruhlar</th>
+              <th>Faollik</th>
+              <th>Yaratilgan</th>
+              <th>Yangilangan</th>
+              <th>Harakatlar</th>
+            </tr>
           </thead>
           <tbody>
-          {% for item in yonalishlar %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td class="text-truncate" style="max-width: 150px;">{{ item.nomi }}</td>
-              <td>{{ item.kurs_count }}</td>
-              <td>{{ item.guruh_count }}</td>
-              <td>
-                <label class="switch switch-success switch-square">
-                  <input type="checkbox" class="switch-input is-active-toggle" data-id="{{ item.id }}"
-                         {% if item.is_active %}checked{% endif %}>
-                  <span class="switch-toggle-slider">
-                    <span class="switch-on">
-                      <i class="ti ti-check"></i>
+            {% for item in yonalishlar %}
+              <tr>
+                <td>{{ forloop.counter }}</td>
+                <td class="text-truncate" style="max-width: 150px;">{{ item.nomi }}</td>
+                <td>{{ item.kasb_nomi }}</td> <!-- Kasb nomi qo'shildi -->
+                <td>{{ item.kurs_count }}</td>
+                <td>{{ item.guruh_count }}</td>
+                <td>
+                  <label class="switch switch-success switch-square">
+                    <input type="checkbox" class="switch-input is-active-toggle" data-id="{{ item.id }}"
+                           {% if item.is_active %}checked{% endif %}>
+                    <span class="switch-toggle-slider">
+                      <span class="switch-on">
+                        <i class="ti ti-check"></i>
+                      </span>
+                      <span class="switch-off">
+                        <i class="ti ti-x"></i>
+                      </span>
                     </span>
-                    <span class="switch-off">
-                      <i class="ti ti-x"></i>
-                    </span>
-                  </span>
-                  <span class="switch-label"></span>
-                </label>
-              </td>
-              <td><i class="ti ti-calendar-event"></i> {{ item.created_at|date:"d-m-Y" }}</td>
-              <td><i class="ti ti-clock"></i> {{ item.updated_at|date:"d-m-Y" }}</td>
-              <td>
-                <button class="btn btn-sm btn-primary" title="Tahrirlash"
-                        onclick="location.href='{% url 'lines-detail' item.id %}'">
-                  <i class="ti ti-pencil"></i>
-                </button>
-                <button class="btn btn-sm btn-danger delete-yonalish" data-id="{{ item.id }}" title="O'chirish">
-                  <i class="ti ti-trash"></i>
-                </button>
-              </td>
-            </tr>
-          {% endfor %}
+                    <span class="switch-label"></span>
+                  </label>
+                </td>
+                <td><i class="ti ti-calendar-event"></i> {{ item.created_at|date:"d-m-Y" }}</td>
+                <td><i class="ti ti-clock"></i> {{ item.updated_at|date:"d-m-Y" }}</td>
+                <td>
+                  <button class="btn btn-sm btn-primary" title="Tahrirlash"
+                          onclick="location.href='{% url 'lines-detail' item.id %}'">
+                    <i class="ti ti-pencil"></i>
+                  </button>
+                  <button class="btn btn-sm btn-danger delete-yonalish" data-id="{{ item.id }}" title="O'chirish">
+                    <i class="ti ti-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            {% endfor %}
           </tbody>
         </table>
       </div>

@@ -302,37 +302,40 @@ class KursListView(View):
 
 class GetKasbAndYonalishView(View):
     """
-    Kasb, Yo'nalish va Kurslarni olish uchun API.
+    Faol kasb, yo'nalish va kurslarni bog'langan holda qaytaruvchi API.
     """
 
     def get(self, request, *args, **kwargs):
         try:
-            # Barcha faol kasblarni olish
-            kasb_list = Kasb.objects.filter(is_active=True)
+            # Faqat faol kasblarni olish (ularda yo'nalishlar mavjud bo'lishi kerak)
+            kasb_list = Kasb.objects.filter(is_active=True, yonalishlar__isnull=False).distinct()
 
             # Kasb ma'lumotlarini tayyorlash
             kasb_data = []
             for kasb in kasb_list:
                 # Ushbu kasbga tegishli faol yo'nalishlarni olish
                 yonalish_data = []
-                yonalish_list = Yonalish.objects.filter(kasb=kasb, is_active=True)
+                yonalish_list = Yonalish.objects.filter(
+                    kasb=kasb, is_active=True, kurslar__isnull=False
+                ).distinct()
 
                 for yonalish in yonalish_list:
                     # Yo'nalishga tegishli faol kurslarni olish
-                    kurs_data = Kurs.objects.filter(yonalishlar=yonalish, is_active=True).values(
-                        'id', 'nomi', 'narxi'
-                    )
+                    kurs_list = Kurs.objects.filter(
+                        yonalishlar=yonalish, is_active=True
+                    ).values('id', 'nomi', 'narxi')
 
                     yonalish_data.append({
                         "id": yonalish.id,
                         "name": yonalish.nomi,
-                        "kurslar": list(kurs_data),
+                        "kurslar": list(kurs_list),  # Kurslar ro'yxati
                     })
 
+                # Kasb va tegishli yo'nalishlarni qo'shish
                 kasb_data.append({
                     "id": kasb.id,
                     "name": kasb.nomi,
-                    "yonalishlar": yonalish_data
+                    "yonalishlar": yonalish_data  # Yo'nalishlar ro'yxati
                 })
 
             return JsonResponse({
@@ -341,6 +344,7 @@ class GetKasbAndYonalishView(View):
             }, status=200)
         except Exception as e:
             return JsonResponse({"success": False, "message": f"Xatolik yuz berdi: {str(e)}"}, status=500)
+
 
 
 @method_decorator(csrf_exempt, name='dispatch')

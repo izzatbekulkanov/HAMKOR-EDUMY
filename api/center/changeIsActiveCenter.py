@@ -10,20 +10,32 @@ from django.views import View
 def change_center_is_active(request, pk):
     if request.method == "POST":
         try:
-            data = json.loads(request.body)
-            is_verified = data.get("is_active", False)
+            print(f"POST so'rovi qabul qilindi. PK: {pk}")  # Debug
+            print(f"request.body: {request.body}")  # Debug
 
-            # Center obyektini topish
-            center = Center.objects.get(pk=pk)
-            center.is_verified = is_verified
+            try:
+                center = Center.objects.get(pk=pk)
+                print(f"Topilgan center: {center}")  # Debug
+            except Center.DoesNotExist:
+                print(f"Center topilmadi: PK = {pk}")  # Debug
+                return JsonResponse({"success": False, "message": "Markaz topilmadi."}, status=404)
+
+            # Hozirgi holatni almashtirish
+            center.is_verified = not center.is_verified
             center.save()
 
-            return JsonResponse({"success": True, "message": "Faollik holati o'zgartirildi."})
-        except Center.DoesNotExist:
-            return JsonResponse({"success": False, "message": "Markaz topilmadi."}, status=404)
+            print(f"Center saqlandi: is_verified = {center.is_verified}")  # Debug
+
+            return JsonResponse({
+                "success": True,
+                "message": f"Faollik holati muvaffaqiyatli {('faol' if center.is_verified else 'noaktif')} holatga o'zgartirildi.",
+                "is_verified": center.is_verified
+            })
         except Exception as e:
+            print(f"Xatolik yuz berdi: {e}")  # Debug
             return JsonResponse({"success": False, "message": str(e)}, status=500)
 
+    print("Noto'g'ri so'rov turi.")  # Debug
     return JsonResponse({"success": False, "message": "Faqat POST so'rovi qabul qilinadi."}, status=400)
 
 

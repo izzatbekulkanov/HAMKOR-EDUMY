@@ -175,7 +175,6 @@ class GroupMembership(models.Model):
         return f"{self.student} - {self.group.group_name} - {'Faol' if self.is_active else 'Nofaol'}"
 
 
-# Main Model for Storing Submitted Students
 class SubmittedStudent(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Kutilmoqda'),
@@ -184,17 +183,23 @@ class SubmittedStudent(models.Model):
         ('rejected', 'Rad etilgan'),
     ]
 
-    # Student Personal Information
+    # Shaxsiy ma'lumotlar
     first_name = models.CharField(max_length=100, verbose_name="Ismi")
     last_name = models.CharField(max_length=100, verbose_name="Familiyasi")
+    phone_number = models.CharField(
+        max_length=13,
+        verbose_name="Telefon raqami",
+        validators=[RegexValidator(
+            regex=r'^\+998\d{9}$',
+            message="Telefon raqami +998 bilan boshlanishi va 9 ta raqamdan iborat bo'lishi kerak."
+        )]
+    )
 
-    # Foreign Keys
+    # Bog‘langan modellar
     sinf = models.ForeignKey(Sinf, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Sinf")
     kasb = models.ForeignKey(Kasb, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Kasb")
     yonalish = models.ForeignKey(Yonalish, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Yo'nalish")
-    filial = models.ForeignKey(Filial, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Filial")  # Added Filial field
-
-    # Many-to-Many Field for Kurs
+    filial = models.ForeignKey(Filial, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Filial")
     kurslar = models.ManyToManyField(
         Kurs,
         blank=True,
@@ -204,19 +209,7 @@ class SubmittedStudent(models.Model):
 
     belgisi = models.CharField(max_length=100, verbose_name="Sinf Belgisi")
 
-    # Phone Number (added field)
-    phone_number = models.CharField(
-        max_length=13,
-        verbose_name="Telefon raqami",
-        validators=[
-            RegexValidator(
-                regex=r'^\+998\d{9}$',
-                message="Telefon raqami +998 bilan boshlanishi va 9 raqamdan iborat bo'lishi kerak."
-            )
-        ]
-    )
-
-    # Status
+    # Holat
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='pending', verbose_name="Holati")
 
     # Metadata
@@ -226,3 +219,68 @@ class SubmittedStudent(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {self.status}"
+
+
+class StudentDetails(models.Model):
+    student = models.OneToOneField(
+        'SubmittedStudent',
+        on_delete=models.CASCADE,
+        related_name="details",
+        verbose_name="O'quvchi"
+    )
+    # Shaxsiy ma'lumotlar
+    birth_date = models.DateField(verbose_name="Tug'ilgan sana", blank=True, null=True)
+    gender = models.CharField(
+        max_length=10,
+        choices=[('male', 'Erkak'), ('female', 'Ayol')],
+        verbose_name="Jinsi",
+        blank=True,
+        null=True
+    )
+    address = models.TextField(verbose_name="Manzili", blank=True, null=True)
+    region = models.CharField(max_length=100, verbose_name="Viloyat", blank=True, null=True)
+    district = models.CharField(max_length=100, verbose_name="Tuman", blank=True, null=True)
+
+    # Ota-ona ma'lumotlari
+    parent_name = models.CharField(max_length=200, verbose_name="Ota-onaning ismi", blank=True, null=True)
+    parent_phone = models.CharField(
+        max_length=13,
+        verbose_name="Ota-onaning telefon raqami",
+        blank=True,
+        null=True,
+        validators=[RegexValidator(
+            regex=r'^\+998\d{9}$',
+            message="Telefon raqami +998 bilan boshlanishi va 9 ta raqamdan iborat bo'lishi kerak."
+        )]
+    )
+    relationship_to_student = models.CharField(
+        max_length=50,
+        verbose_name="Ota-onaning o'quvchiga munosabati",
+        blank=True,
+        null=True
+    )  # Masalan, "Ota", "Ona", "Bobo", va hokazo.
+
+    # Qo'shimcha o'quv ma'lumotlari
+    previous_school = models.CharField(max_length=200, verbose_name="Oldingi maktab", blank=True, null=True)
+    medical_conditions = models.TextField(verbose_name="Tibbiy holatlar", blank=True, null=True)
+    hobbies = models.TextField(verbose_name="Xobbilari", blank=True, null=True)
+
+    # Ijtimoiy ma'lumotlar
+    social_media_link = models.URLField(verbose_name="Ijtimoiy tarmoq havolasi", blank=True, null=True)
+    photo = models.ImageField(
+        upload_to='students/photos/',
+        verbose_name="O'quvchining rasmi",
+        blank=True,
+        null=True
+    )
+
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaratilgan vaqti")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Yangilangan vaqti")
+
+    def __str__(self):
+        return f"Qo'shimcha ma'lumot: {self.student.first_name} {self.student.last_name}"
+
+    class Meta:
+        verbose_name = "O'quvchining batafsil ma'lumotlari"
+        verbose_name_plural = "O'quvchilarni batafsil ma'lumotlari"

@@ -32,6 +32,7 @@
 {% endblock page_js %}
 
 {% block content %}
+<input type="hidden" id="csrf-token" value="{{ csrf_token }}">
 <div class="container mt-4">
 
   <!-- Breadcrumb -->
@@ -471,51 +472,60 @@
 
 <script>
   function toggleCenterStatus(centerId, apiUrl, successMessage, errorMessage) {
-    const csrfToken = "{{ csrf_token }}"; // CSRF token
-    fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": csrfToken,
-      },
+  const csrfToken = document.getElementById("csrf-token").value; // Input'dan CSRF tokenni olish
+  console.log(`toggleCenterStatus chaqirildi. Center ID: ${centerId}, API URL: ${apiUrl}`); // Debug
+
+  const requestBody = JSON.stringify({ is_active: true }); // Faollik qiymati
+  console.log(`Yuborilayotgan ma'lumot: ${requestBody}`); // Debug
+
+  fetch(apiUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": csrfToken, // CSRF tokenni yuborish
+    },
+    body: requestBody,
+  })
+    .then(response => {
+      console.log(`Server javobi statusi: ${response.status}`); // Debug
+      if (!response.ok) {
+        throw new Error(`Xato status kodi: ${response.status}`);
+      }
+      return response.json();
     })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          // Dinamik muvaffaqiyat xabari
-          const message = data.message || successMessage;
-          toastr.success(message, "Muvaffaqiyatli");
+    .then(data => {
+      console.log("Serverdan kelgan ma'lumotlar:", data); // Debug
+      if (data.success) {
+        const message = data.message || successMessage;
+        toastr.success(message, "Muvaffaqiyatli");
+        setTimeout(() => location.reload(), 500); // Sahifani yangilash
+      } else {
+        toastr.error(data.message || errorMessage, "Hatolik");
+      }
+    })
+    .catch(error => {
+      console.error("Xatolik:", error); // Debug
+      toastr.error(errorMessage, "Hatolik");
+    });
+}
 
-          if (apiUrl.includes("change-center-is-active")) {
-            setTimeout(() => {
-              location.reload(); // Sahifani yangilash faqat "is_active" uchun
-            }, 500);
-          }
-        } else {
-          toastr.error(errorMessage, "Hatolik");
-        }
-      })
-      .catch(error => {
-        console.error("Xatolik:", error);
-        toastr.error("Xatolik yuz berdi", "Hatolik");
-      });
-  }
+// Faollik holatini o'zgartirish
+function toggleCenterIsActive(centerId) {
+  const apiUrl = `/api/change-center-is-active/${centerId}/`;
+  const successMessage = "Faollik holati muvaffaqiyatli o'zgartirildi!";
+  const errorMessage = "Xato sodir bo'ldi. Iltimos, qayta urinib ko'ring";
+  console.log(`toggleCenterIsActive chaqirildi. Center ID: ${centerId}`); // Debug
+  toggleCenterStatus(centerId, apiUrl, successMessage, errorMessage);
+}
 
-  // Faollik holatini o'zgartirish
-  function toggleCenterIsActive(centerId) {
-    const apiUrl = `/api/change-center-is-active/${centerId}/`;
-    const successMessage = "Faollik holati muvaffaqiyatli o'zgartirildi!";
-    const errorMessage = "Xato sodir bo'ldi. Iltimos, qayta urinib ko'ring";
-    toggleCenterStatus(centerId, apiUrl, successMessage, errorMessage);
-  }
-
-  // Barchaga ko'rinish holatini o'zgartirish
-  function toggleCenterAllViews(centerId) {
-    const apiUrl = `/api/toggle-center-all-views/${centerId}/`;
-    const successMessage = "Barchaga ko'rinish holati muvaffaqiyatli o'zgartirildi!";
-    const errorMessage = "Xato sodir bo'ldi. Iltimos, qayta urinib ko'ring";
-    toggleCenterStatus(centerId, apiUrl, successMessage, errorMessage);
-  }
+// Barchaga ko'rinish holatini o'zgartirish
+function toggleCenterAllViews(centerId) {
+  const apiUrl = `/api/toggle-center-all-views/${centerId}/`;
+  const successMessage = "Barchaga ko'rinish holati muvaffaqiyatli o'zgartirildi!";
+  const errorMessage = "Xato sodir bo'ldi. Iltimos, qayta urinib ko'ring";
+  console.log(`toggleCenterAllViews chaqirildi. Center ID: ${centerId}`); // Debug
+  toggleCenterStatus(centerId, apiUrl, successMessage, errorMessage);
+}
 </script>
 
 

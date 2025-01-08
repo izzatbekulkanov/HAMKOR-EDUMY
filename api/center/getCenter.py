@@ -80,7 +80,21 @@ class GetCentersForTeacherView(View):
 
             # Markaz ma'lumotlarini shakllantirish
             for center in centers:
-                filials_count = Filial.objects.filter(center=center).count()
+                filials = Filial.objects.filter(center=center)
+
+                # Filial ma'lumotlari
+                filials_data = [
+                    {
+                        "branch_id": filial.id,
+                        "branch_name": filial.location or "Noma'lum joylashuv",
+                        "branch_contact": filial.contact or "Noma'lum aloqa",
+                        "branch_admins": [
+                            {"admin_id": admin.id, "admin_name": admin.get_full_name()}
+                            for admin in filial.admins.all()
+                        ],
+                    }
+                    for filial in filials
+                ]
 
                 # Admin ma'lumotlarini olish
                 if center.rahbari:
@@ -94,6 +108,7 @@ class GetCentersForTeacherView(View):
                     admin_full_name = "Belgilanmagan"
                     admin_phone = "Noma'lum"
 
+                # Markaz va filiallarni ma'lumotlariga qo'shish
                 data.append({
                     "center_id": center.id,
                     "center_name": center.nomi,
@@ -101,14 +116,13 @@ class GetCentersForTeacherView(View):
                     "admin_last_name": admin_last_name,
                     "admin_full_name": admin_full_name,
                     "admin_phone": admin_phone,
-                    "filials_count": filials_count,
+                    "filials": filials_data,  # Filial ma'lumotlari
                 })
 
             return JsonResponse({"success": True, "data": data}, status=200)
 
         except Exception as e:
             return JsonResponse({"success": False, "message": f"Xatolik yuz berdi: {str(e)}"}, status=500)
-
 
 
 

@@ -3,7 +3,9 @@ from django import forms
 from django.forms.widgets import CheckboxSelectMultiple
 from django.utils.html import format_html
 
-from .models import Center, Images, Filial, Kasb, Yonalish, Kurs, E_groups, GroupMembership, SubmittedStudent
+from .models import Center, Images, Filial, Kasb, Yonalish, Kurs, E_groups, GroupMembership, SubmittedStudent, \
+    StudentDetails
+
 
 @admin.register(Center)
 class CenterAdmin(admin.ModelAdmin):
@@ -229,3 +231,73 @@ class SubmittedStudentAdmin(admin.ModelAdmin):
         """Display a comma-separated list of courses."""
         return ", ".join([kurs.nomi for kurs in obj.kurslar.all()])
     display_kurslar.short_description = 'Kurslar'
+
+
+@admin.register(StudentDetails)
+class StudentDetailsAdmin(admin.ModelAdmin):
+    # Jadvalda ko'rinadigan ustunlar
+    list_display = (
+        'student', 'student_status', 'birth_date', 'gender', 'region', 'district',
+        'parent_name', 'parent_phone', 'previous_school', 'created_at'
+    )
+
+    # Filtrlash imkoniyatlari
+    list_filter = (
+        'gender', 'region', 'district', 'created_at', 'student__status',
+    )
+
+    # Qidiruv maydonlari
+    search_fields = (
+        'student__first_name', 'student__last_name', 'student__phone_number',
+        'parent_name', 'region', 'district', 'previous_school'
+    )
+
+    # Har bir yozuvni tartibga solish bo'yicha sozlamalar
+    ordering = ('-created_at',)
+
+    # Bir sahifadagi yozuvlar sonini cheklash
+    list_per_page = 20
+
+    # Qo'shimcha ma'lumot maydoni
+    readonly_fields = ('created_at', 'updated_at', 'student_status', 'student_phone')
+
+    # Inline tahrirlash imkoniyatlari
+    list_editable = ('gender', 'region', 'district')
+
+    # Forma tahriri
+    fieldsets = (
+        ('Shaxsiy ma’lumotlar', {
+            'fields': ('student', 'student_status', 'student_phone', 'birth_date', 'gender', 'address', 'region', 'district')
+        }),
+        ('Ota-ona ma’lumotlari', {
+            'fields': ('parent_name', 'parent_phone', 'relationship_to_student')
+        }),
+        ('Qo‘shimcha ma’lumotlar', {
+            'fields': ('previous_school', 'medical_conditions', 'hobbies', 'social_media_link', 'photo')
+        }),
+        ('Holat va Meta', {
+            'fields': ('created_at', 'updated_at')
+        }),
+    )
+
+    # Tasdiqlash (Save) paytida qo‘shimcha validatsiya
+    def save_model(self, request, obj, form, change):
+        if obj.parent_phone and not obj.parent_phone.startswith('+998'):
+            raise ValueError("Telefon raqami +998 bilan boshlanishi kerak.")
+        super().save_model(request, obj, form, change)
+
+    # Qo'shimcha SubmittedStudent ma'lumotlari
+    def student_status(self, obj):
+        """SubmittedStudent holatini ko'rsatadi."""
+        return obj.student.get_status_display()
+    student_status.short_description = "Holati"
+
+    def student_phone(self, obj):
+        """SubmittedStudent telefon raqamini ko'rsatadi."""
+        return obj.student.phone_number
+    student_phone.short_description = "Telefon raqami"
+
+    # O'quvchining ismi bilan ko'rsatish
+    def student(self, obj):
+        return f"{obj.student.first_name} {obj.student.last_name}"
+    student.short_description = "O'quvchi"

@@ -1,0 +1,87 @@
+{% load static %}
+
+<div class="d-flex justify-content-start align-items-center mb-3">
+    <!-- O'quvchilarni qabul qilish Menyusi -->
+    <div class="me-2">
+      <a class="btn btn-sm btn-outline-primary text-primary active-tab" type="button" id="studentsMenu"
+         href="{% url 'accept-students' %}">
+        <i class="ti ti-users"></i> O'quvchilarni qabul qilish
+      </a>
+    </div>
+
+    <!-- O'quvchilarni guruhga qabul qilish Menyusi -->
+    <div class="me-2">
+      <a class="btn btn-sm btn-outline-secondary text-secondary active-tab" type="button" id="teachersMenu"
+         href="{% url 'add-group-students' %}">
+        <i class="ti ti-user-plus"></i> O'quvchilarni guruhga qo'shish
+      </a>
+    </div>
+
+    <!-- To'lov bo'limi Menyusi -->
+    <div class="me-2">
+      <a class="btn btn-sm btn-outline-info text-info active-tab" type="button" id="paymentMenu"
+         href="{% url 'pay-students' %}">
+        <i class="ti ti-wallet"></i> To'lov bo'limi
+      </a>
+    </div>
+
+    <!-- Taqiqlangan o'quvchilar Menyusi -->
+    <div class="me-2">
+      <a class="btn btn-sm btn-outline-warning text-warning active-tab" type="button" id="blockMenu"
+         href="{% url 'block-students' %}">
+        <i class="ti ti-ban"></i> Taqiqlangan o'quvchilar
+      </a>
+    </div>
+
+    <!-- Statistika Menyusi -->
+    <div class="me-2">
+      <a class="btn btn-sm btn-outline-dark text-dark active-tab" type="button" id="statisticsMenu"
+         href="{% url 'statistics-students' %}">
+        <i class="ti ti-layout-grid"></i> Statistika
+      </a>
+    </div>
+</div>
+
+<style>
+  .active-tab {
+      position: relative;
+      padding-bottom: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease-in-out;
+  }
+
+  .active-tab:hover {
+      color: #0d6efd;
+  }
+
+  .active-tab.active {
+      border-bottom: 3px solid #0d6efd;
+      font-weight: bold;
+      color: #0d6efd;
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const tabs = document.querySelectorAll(".active-tab");
+
+    tabs.forEach(tab => {
+      tab.addEventListener("click", function () {
+        // Barcha menyulardan "active" sinfini olib tashlash
+        tabs.forEach(item => item.classList.remove("active"));
+
+        // Faol menyuga "active" sinfini qo'shish
+        this.classList.add("active");
+      });
+    });
+
+    // Bosilganda faollashtirishni saqlash
+    const currentUrl = window.location.href;
+    tabs.forEach(tab => {
+      if (tab.href === currentUrl) {
+        tab.classList.add("active");
+      }
+    });
+  });
+</script>

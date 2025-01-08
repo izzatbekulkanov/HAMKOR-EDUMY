@@ -319,10 +319,12 @@
           <!--/ Notification -->
 
           <!-- User -->
-         <li class="nav-item navbar-dropdown dropdown-user dropdown">
+          <li class="nav-item navbar-dropdown dropdown-user dropdown">
             <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);" data-bs-toggle="dropdown">
               <div class="avatar avatar-online">
-                <img src="{{ request.user.imageFile.url}}" alt class="h-auto rounded-circle">
+                <img src="{{ request.user.imageFile.url }}" alt="User Image"
+                     class="rounded-circle img-fluid"
+                     style="width: 40px; height: 40px; object-fit: cover;">
               </div>
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
@@ -331,13 +333,15 @@
                   <div class="d-flex align-items-center">
                     <div class="flex-shrink-0 me-2">
                       <div class="avatar avatar-online">
-                      <img src="{{ request.user.imageFile.url}}" alt class="h-auto rounded-circle">
+                        <img src="{{ request.user.imageFile.url }}" alt="User Image"
+                             class="rounded-circle img-fluid"
+                             style="width: 40px; height: 40px; object-fit: cover;">
                       </div>
                     </div>
                     <div class="flex-grow-1">
                       <h6 class="mb-0">{{ request.user.first_name }} {{ request.user.second_name }}</h6>
                       {% for group in request.user.groups.all %}
-                      <small class="text-muted">{{ group.name }}</small>
+                        <small class="text-muted">{{ group.name }}</small>
                       {% endfor %}
                     </div>
                   </div>
@@ -347,27 +351,27 @@
                 <div class="dropdown-divider my-1 mx-n2"></div>
               </li>
               <li>
-              {% if request.user.now_role == "5" %}
-                <a class="dropdown-item {% if request.resolver_match.url_name == 'main-administrator' %}active{% endif %}" href="{% url 'main-administrator' %}">
-                  <i class="ti ti-shield-half me-3 ti-md"></i><span class="align-middle">Administrator | CEO</span>
-                </a>
-              {% elif request.user.now_role == "4" %}
-                <a class="dropdown-item {% if request.resolver_match.url_name == 'main-manager' %}active{% endif %}" href="{% url 'main-manager' %}">
-                  <i class="ti ti-user-cog me-3 ti-md"></i><span class="align-middle">Menejer</span>
-                </a>
-              {% elif request.user.now_role == "3" %}
-                <a class="dropdown-item {% if request.resolver_match.url_name == 'main-director' %}active{% endif %}" href="{% url 'main-director' %}">
-                  <i class="ti ti-user-up me-3 ti-md"></i><span class="align-middle">Direktor</span>
-                </a>
-              {% elif request.user.now_role == "2" %}
-                <a class="dropdown-item {% if request.resolver_match.url_name == 'main-teacher' %}active{% endif %}" href="{% url 'main-teacher' %}">
-                  <i class="ti ti-user-screen me-3 ti-md"></i><span class="align-middle">O'qituvchi</span>
-                </a>
-              {% elif request.user.now_role == "1" %}
-                <a class="dropdown-item {% if request.resolver_match.url_name == 'main-student' %}active{% endif %}" href="{% url 'main-student' %}">
-                  <i class="ti ti-user me-3 ti-md"></i><span class="align-middle">O'quvchi</span>
-                </a>
-              {% endif %}
+                {% if request.user.now_role == "5" %}
+                  <a class="dropdown-item {% if request.resolver_match.url_name == 'main-administrator' %}active{% endif %}" href="{% url 'main-administrator' %}">
+                    <i class="ti ti-shield-half me-3 ti-md"></i><span class="align-middle">Administrator | CEO</span>
+                  </a>
+                {% elif request.user.now_role == "4" %}
+                  <a class="dropdown-item {% if request.resolver_match.url_name == 'main-manager' %}active{% endif %}" href="{% url 'main-manager' %}">
+                    <i class="ti ti-user-cog me-3 ti-md"></i><span class="align-middle">Menejer</span>
+                  </a>
+                {% elif request.user.now_role == "3" %}
+                  <a class="dropdown-item {% if request.resolver_match.url_name == 'main-director' %}active{% endif %}" href="{% url 'main-director' %}">
+                    <i class="ti ti-user-up me-3 ti-md"></i><span class="align-middle">Direktor</span>
+                  </a>
+                {% elif request.user.now_role == "2" %}
+                  <a class="dropdown-item {% if request.resolver_match.url_name == 'main-teacher' %}active{% endif %}" href="{% url 'main-teacher' %}">
+                    <i class="ti ti-user-screen me-3 ti-md"></i><span class="align-middle">O'qituvchi</span>
+                  </a>
+                {% elif request.user.now_role == "1" %}
+                  <a class="dropdown-item {% if request.resolver_match.url_name == 'main-student' %}active{% endif %}" href="{% url 'main-student' %}">
+                    <i class="ti ti-user me-3 ti-md"></i><span class="align-middle">O'quvchi</span>
+                  </a>
+                {% endif %}
               </li>
               <li>
                 <div class="dropdown-divider my-1 mx-n2"></div>
@@ -387,21 +391,21 @@
               </li>
               <li>
                 {% if request.user.is_authenticated and request.user.is_verified %}
-                <span class="dropdown-item d-flex justify-content-between align-content-center">
-                  <span>
-                    <i class='ti ti-user-circle me-2 ti-md'></i>
-                    <span class="align-middle">Tasdiqlangan</span>
+                  <span class="dropdown-item d-flex justify-content-between align-content-center">
+                    <span>
+                      <i class='ti ti-user-circle me-2 ti-md'></i>
+                      <span class="align-middle">Tasdiqlangan</span>
+                    </span>
+                    <span class="text-success"><i class='ti ti-circle-check ti-md'></i></span>
                   </span>
-                  <span class="text-success"><i class='ti ti-circle-check ti-md'></i></span>
-                </span>
                 {% else %}
-                <a class="dropdown-item d-flex justify-content-between align-content-center" href="">
-                  <span>
-                    <i class='ti ti-user-circle me-2 ti-md'></i>
-                    <span class="align-middle">Tasdiqlanmagan</span>
-                  </span>
-                  <span class="text-danger"><i class='ti ti-circle-x ti-md'></i></span>
-                </a>
+                  <a class="dropdown-item d-flex justify-content-between align-content-center" href="">
+                    <span>
+                      <i class='ti ti-user-circle me-2 ti-md'></i>
+                      <span class="align-middle">Tasdiqlanmagan</span>
+                    </span>
+                    <span class="text-danger"><i class='ti ti-circle-x ti-md'></i></span>
+                  </a>
                 {% endif %}
               </li>
               <li class="mt-1">
@@ -416,6 +420,7 @@
             </ul>
           </li>
           <!--/ User -->
+
         </ul>
       </div>
 
