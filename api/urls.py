@@ -19,6 +19,7 @@ from api.settings.cashback import AddCashbackAPIView, CashbackListAPIView, UserT
 from api.settings.log import UserActivityLogView
 from api.settings.regions import LocationAPIView, GetLocationsView
 from api.settings.role import SaveRolesView, RolesWithUsersView
+from api.teacher.notification import GetNotificationsView
 from api.user.addAdministrator import AddAdministratorView
 from api.user.getAdministrator import GetAdministratorsView, GetAdminsView
 from api.user.updateAdministrator import UpdateActivityView
@@ -98,5 +99,6 @@ settings_patterns = [
 
 teacher_patterns = [
     path('submit-student/', submit_student, name='submit_student'),
+    path("notifications/", GetNotificationsView.as_view(), name="teacher-notifications"),
 ]
 urlpatterns = role_patterns + location_patterns + user_patterns + center_patterns + schools_patterns + settings_patterns + teacher_patterns

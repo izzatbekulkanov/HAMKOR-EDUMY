@@ -196,12 +196,12 @@ class SubmittedStudent(models.Model):
     )
 
     # Bog‘langan modellar
-    sinf = models.ForeignKey(Sinf, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Sinf")
-    kasb = models.ForeignKey(Kasb, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Kasb")
-    yonalish = models.ForeignKey(Yonalish, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Yo'nalish")
-    filial = models.ForeignKey(Filial, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Filial")
+    sinf = models.ForeignKey('school.Sinf', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Sinf")
+    kasb = models.ForeignKey('center.Kasb', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Kasb")
+    yonalish = models.ForeignKey('center.Yonalish', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Yo'nalish")
+    filial = models.ForeignKey('center.Filial', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Filial")
     kurslar = models.ManyToManyField(
-        Kurs,
+        'center.Kurs',
         blank=True,
         related_name='submitted_students',
         verbose_name="Kurslar"
@@ -212,10 +212,12 @@ class SubmittedStudent(models.Model):
     # Holat
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='pending', verbose_name="Holati")
 
+    # Qo'shgan foydalanuvchi
+    added_by = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Qo'shgan foydalanuvchi")
+
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaratilgan vaqti")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Yangilangan vaqti")
-    added_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Qo'shgan foydalanuvchi")
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {self.status}"

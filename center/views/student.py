@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView, DetailView, UpdateView
 import base64
-from account.models import CustomUser
+from account.models import CustomUser, Cashback, CashbackRecord
 from center.models import Center, Filial, Images, SubmittedStudent, Kasb, Yonalish, Kurs, E_groups, StudentDetails
 from school.models import Maktab, Sinf
 from web_project import TemplateLayout
@@ -39,8 +39,12 @@ class StudentView(TemplateView):
 
     def post(self, request, *args, **kwargs):
         try:
+            print("POST so'rovi qabul qilindi.")  # Debug
             student_id = request.POST.get('student_id')
+            print(f"Talaba ID: {student_id}")  # Debug
+
             student = get_object_or_404(SubmittedStudent, id=student_id)
+            print(f"Talaba topildi: {student}")  # Debug
 
             # Formadan kelgan ma'lumotlarni olish
             birth_date = request.POST.get('birth_date')
@@ -50,14 +54,27 @@ class StudentView(TemplateView):
             parent_phone = request.POST.get('parent_phone')
             photo_data = request.POST.get('photo_data')  # Kamera orqali yuborilgan rasm
 
-            # Agar kamera orqali yuborilgan rasm mavjud bo'lsa
-            photo_file = None
-            if photo_data:
-                format, imgstr = photo_data.split(';base64,')  # Base64 formatdan dekodlash
-                ext = format.split('/')[-1]  # Fayl kengaytmasi olish
-                photo_file = ContentFile(base64.b64decode(imgstr), name=f"{student_id}.{ext}")
+            print(f"Olingan ma'lumotlar:\nTug'ilgan sana: {birth_date}\nJinsi: {gender}\n"
+                  f"Manzil: {address}\nOta-onasi ismi: {parent_name}\n"
+                  f"Telefon: {parent_phone}\nRasm mavjud: {bool(photo_data)}")  # Debug
+
+            # Rasm mavjudligini tekshirish
+            if not photo_data:
+                print("Rasm topilmadi!")  # Debug
+                return JsonResponse({
+                    'success': False,
+                    'message': "Iltimos, o'quvchining rasmini yuklang."
+                })
+
+            # Kamera orqali yuborilgan rasmni dekodlash
+            print("Rasm dekodlanmoqda...")  # Debug
+            format, imgstr = photo_data.split(';base64,')  # Base64 formatdan dekodlash
+            ext = format.split('/')[-1]  # Fayl kengaytmasi olish
+            photo_file = ContentFile(base64.b64decode(imgstr), name=f"{student_id}.{ext}")
+            print(f"Rasm yaratildi: {photo_file}")  # Debug
 
             # Yaratilgan yoki mavjud StudentDetails obyektini yangilash
+            print("StudentDetails yangilanmoqda yoki yaratilmoqda...")  # Debug
             student_details, created = StudentDetails.objects.update_or_create(
                 student=student,
                 defaults={
@@ -69,10 +86,36 @@ class StudentView(TemplateView):
                     'photo': photo_file,
                 }
             )
+            print(f"StudentDetails yaratildi: {created}, Ma'lumotlar: {student_details}")  # Debug
 
             # Talabaning holatini "accepted" deb belgilash
             student.status = 'accepted'
             student.save()
+            print("Talabaning holati 'accepted' deb belgilandi.")  # Debug
+
+            # O'qituvchiga cashback biriktirish
+            teacher = student.added_by
+            if teacher and teacher.user_type == "2":  # Faqat o'qituvchilar uchun
+                # Asosiy cashbackni topish
+                cashback = Cashback.objects.filter(type="2", user_type="2", is_active=True).first()
+
+                if not cashback:
+                    print("Asosiy cashback topilmadi!")  # Debug
+                    return JsonResponse({
+                        'success': False,
+                        'message': "Asosiy cashback topilmadi. Iltimos, admin bilan bog'laning."
+                    }, status=400)
+
+                # Individual cashback yozuvi yaratish
+                cashback_record, created = CashbackRecord.objects.get_or_create(
+                    cashback=cashback,
+                    teacher=teacher,
+                    student=student,
+                )
+                if created:
+                    print(f"CashbackRecord yaratildi: {cashback_record}")  # Debug
+                else:
+                    print(f"CashbackRecord allaqachon mavjud: {cashback_record}")  # Debug
 
             return JsonResponse({
                 'success': True,
@@ -80,6 +123,7 @@ class StudentView(TemplateView):
             })
 
         except Exception as e:
+            print(f"Xatolik yuz berdi: {str(e)}")  # Debug
             return JsonResponse({
                 'success': False,
                 'message': f"Xatolik yuz berdi: {str(e)}"

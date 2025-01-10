@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser, BaseUserManager, Group, Permission
 from django.db import models
 from django.utils import timezone
@@ -144,7 +145,7 @@ class CustomUser(AbstractUser):
     instagram = models.URLField(null=True, blank=True, verbose_name="Instagram profil havolasi")
     facebook = models.URLField(null=True, blank=True, verbose_name="Facebook profil havolasi")
 
-    cashback = models.ManyToManyField('Cashback', blank=True, verbose_name="Cashback turlari")
+    cashback = models.ManyToManyField('CashbackRecord', blank=True, verbose_name="Cashback turlari")
     e_groups = models.ManyToManyField('center.E_groups', blank=True, verbose_name="Kurslar")
 
     is_verified = models.BooleanField(default=False, verbose_name="Tasdiqlangan")
@@ -161,6 +162,22 @@ class CustomUser(AbstractUser):
     USERNAME_FIELD = 'email'  # Users log in with their email
     REQUIRED_FIELDS = ['username']
 
+    @property
+    def total_cashback_sum(self):
+        """
+        Jami cashback summasini hisoblash.
+        """
+        return self.cashback.aggregate(total_sum=models.Sum('cashback__summasi'))['total_sum'] or 0
+
+    @property
+    def paid_cashback_sum(self):
+        """
+        To'langan cashback summasini hisoblash.
+        """
+        return self.cashback.filter(is_paid=True).aggregate(total_sum=models.Sum('cashback__summasi'))['total_sum'] or 0
+
+
+
 
 
 
@@ -171,26 +188,54 @@ class Cashback(models.Model):
         ("3", "Kurs uchun to'lov"),
         ("4", "Referal tizim"),
         ("5", "Direktor uchun"),
-
-        # Additional types if necessary
+        ("6", "Guruhga qo'shilish"),  # Yangi tanlov
     )
 
-    # Filtered type_choice for user_type, excluding "Administrator" and "CEO_Administrator"
-    filtered_user_type_choices = [choice for choice in CustomUser.type_choice if choice[0] not in ["4", "5"]]
+    User = get_user_model()  # Foydalanuvchi modelini olish
+    user_type_choices = User.type_choice  # Foydalanuvchi turlari uchun choices
 
     name = models.CharField(max_length=255, verbose_name="Cashback turi")
     summasi = models.BigIntegerField(verbose_name="Cashback summa", default=0)
     parent_summ = models.BigIntegerField(verbose_name="Parent uchun summa", default=0)
     type = models.CharField(max_length=20, choices=type_choices, verbose_name="Turi", null=True, blank=True)
-    user_type = models.CharField(max_length=20, choices=filtered_user_type_choices, verbose_name="Foydalanuvchi turi")  # New field with filtered user type choices
+    user_type = models.CharField(max_length=20, choices=user_type_choices, verbose_name="Foydalanuvchi turi")
+    submitted_student = models.ForeignKey(
+        'center.SubmittedStudent', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="SubmittedStudent"
+    )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaratilgan vaqti")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="O'zgartirilgan vaqti")
     is_active = models.BooleanField(default=True, verbose_name="Faolmi")
     center = models.ForeignKey('center.Center', on_delete=models.CASCADE, null=True, blank=True, verbose_name="O'quv markazi")
 
+    @staticmethod
+    def get_filtered_user_type_choices():
+        """
+        CustomUser.type_choice dan faqat ruxsat etilgan turlarni olish uchun.
+        """
+        User = get_user_model()
+        return [choice for choice in User.type_choice if choice[0] not in ["4", "5"]]
+
+    @property
+    def filtered_user_type_choices(self):
+        """
+        Foydalanuvchi turlarini olish uchun property sifatida foydalaniladi.
+        """
+        return self.get_filtered_user_type_choices()
+
     def __str__(self):
         return self.name
 
+class CashbackRecord(models.Model):
+    cashback = models.ForeignKey(Cashback, on_delete=models.CASCADE, verbose_name="Asosiy Cashback")
+    teacher = models.ForeignKey('account.CustomUser', on_delete=models.CASCADE, verbose_name="O'qituvchi")
+    student = models.ForeignKey('center.SubmittedStudent', on_delete=models.CASCADE, verbose_name="O'quvchi")
+    is_viewed = models.BooleanField(default=False, verbose_name="Ko'rilganmi")
+    is_paid = models.BooleanField(default=False, verbose_name="To'langanmi")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaratilgan vaqti")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Yangilangan vaqti")  # Yangilandi
+
+    def __str__(self):
+        return f"{self.cashback.name} - {self.teacher.first_name} {self.teacher.second_name} uchun"
 
 class UserActivity(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="activities", verbose_name="Foydalanuvchi")

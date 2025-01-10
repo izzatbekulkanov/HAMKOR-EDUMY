@@ -46,8 +46,6 @@
       .btn-sm {
           padding: 0.4rem 0.75rem; /* Tugma o'lchami */
       }
-
-
   </style>
 {% endblock page_css %}
 
@@ -220,7 +218,11 @@
             <td class="teacher-name" data-phone="{{ student.added_by.phone_number }}">
               {{ student.added_by.first_name|lower|capfirst }} {{ student.added_by.second_name|lower|capfirst }}
             </td>
-            <td>{{ student.first_name|lower|capfirst }} {{ student.last_name|lower|capfirst }}</td>
+            <td data-student-id="{{ student.id }}"
+                data-first-name="{{ student.first_name }}"
+                data-last-name="{{ student.last_name }}">
+              {{ student.first_name|lower|capfirst }} {{ student.last_name|lower|capfirst }}
+            </td>
             <td>{{ student.sinf.maktab.maktab_raqami|default:"-" }} - {{ student.sinf.maktab.nomi|default:"-" }}</td>
             <td>{{ student.sinf.sinf_raqami }}-{{ student.belgisi }} Sinf</td>
             <td>{{ student.kasb.nomi|default:"-" }}</td>
@@ -238,18 +240,22 @@
             </td>
             <td>
               {% if student.status == "pending" %}
-                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#acceptModal">
-                  Qabul qilish
-                </button>
-              {% else %}
                 <button
-                  class="btn btn-primary btn-sm"
+                  class="btn btn-primary btn-sm accept-student"
                   data-bs-toggle="modal"
                   data-bs-target="#acceptModal"
                   data-student-id="{{ student.id }}"
                   data-first-name="{{ student.first_name }}"
                   data-last-name="{{ student.last_name }}">
                   Qabul qilish
+                </button>
+              {% else %}
+                <button
+                  class="btn btn-success btn-sm accept-student"
+                  data-student-id="{{ student.id }}"
+                  data-first-name="{{ student.first_name }}"
+                  data-last-name="{{ student.last_name }}">
+                  <i class="tf-icons ti ti-check" disabled></i>
                 </button>
               {% endif %}
             </td>
@@ -293,6 +299,7 @@
               <!-- Ma'lumotlar kiritish qismi -->
               <div class="col-md-6">
                 <input type="hidden" id="studentId" name="student_id">
+
                 <div class="mb-3">
                   <label for="studentFirstName" class="form-label">Ismi</label>
                   <input type="text" id="studentFirstName" class="form-control" disabled>
@@ -343,222 +350,191 @@
   </div>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Filter elementlarini aniqlaymiz
-      const filters = {
-        teacher: document.getElementById('teacherFilter'),
-        school: document.getElementById('schoolFilter'),
-        class: document.getElementById('classFilter'),
-        occupation: document.getElementById('occupationFilter'),
-        direction: document.getElementById('directionFilter'),
-        status: document.getElementById('statusFilter'),
-        studentSearch: document.getElementById('studentSearch')
+      // ** Filter funksiyasi **
+      const initFilters = () => {
+        const filters = {
+          teacher: document.getElementById('teacherFilter'),
+          school: document.getElementById('schoolFilter'),
+          class: document.getElementById('classFilter'),
+          occupation: document.getElementById('occupationFilter'),
+          direction: document.getElementById('directionFilter'),
+          status: document.getElementById('statusFilter'),
+          studentSearch: document.getElementById('studentSearch')
+        };
+
+        const rows = document.querySelectorAll('tbody tr');
+
+        const filterTable = () => {
+          const searchValues = Object.fromEntries(
+            Object.entries(filters).map(([key, element]) => [key, element.value.trim().toLowerCase()])
+          );
+
+          rows.forEach((row) => {
+            const cells = Array.from(row.children).map((cell) => cell.textContent.trim().toLowerCase());
+            const matches = [
+              !searchValues.teacher || cells[1].includes(searchValues.teacher),
+              !searchValues.school || cells[3].includes(searchValues.school),
+              !searchValues.class || cells[4].includes(searchValues.class),
+              !searchValues.occupation || cells[5].includes(searchValues.occupation),
+              !searchValues.direction || cells[6].includes(searchValues.direction),
+              !searchValues.status || cells[7].includes(searchValues.status),
+              !searchValues.studentSearch || cells[2].includes(searchValues.studentSearch)
+            ].every(Boolean);
+
+            row.style.display = matches ? '' : 'none';
+          });
+        };
+
+        Object.values(filters).forEach((filter) =>
+          ['input', 'change'].forEach((event) => filter.addEventListener(event, filterTable))
+        );
+
+        document.getElementById('resetFilters').addEventListener('click', () => {
+          Object.values(filters).forEach((filter) => (filter.value = ''));
+          filterTable();
+        });
+
+        filterTable();
       };
 
-      // Jadval satrlarini aniqlaymiz
-      const rows = document.querySelectorAll('tbody tr');
+      // ** O'qituvchi ismiga bosilganda telefon raqamini ko'rsatish **
+      const initTeacherNameClick = () => {
+        document.querySelectorAll('.teacher-name').forEach((cell) => {
+          const originalContent = cell.innerHTML;
+          const phoneNumber = cell.getAttribute('data-phone');
 
-      // Filterlash funksiyasi
-      function filterTable() {
-        rows.forEach((row) => {
-          const teacher = row.children[1]?.textContent.trim().toLowerCase();
-          const student = row.children[2]?.textContent.trim().toLowerCase();
-          const school = row.children[3]?.textContent.trim().toLowerCase();
-          const className = row.children[4]?.textContent.trim().toLowerCase();
-          const occupation = row.children[5]?.textContent.trim().toLowerCase();
-          const direction = row.children[6]?.textContent.trim().toLowerCase();
-          const status = row.children[7]?.textContent.trim().toLowerCase();
-
-          const studentSearchValue = filters.studentSearch.value.trim().toLowerCase();
-
-          // Filter shartlarini tekshiramiz
-          const matches =
-            (filters.teacher.value === '' || teacher.includes(filters.teacher.value.toLowerCase())) &&
-            (filters.school.value === '' || school.includes(filters.school.value.toLowerCase())) &&
-            (filters.class.value === '' || className.includes(filters.class.value.toLowerCase())) &&
-            (filters.occupation.value === '' || occupation.includes(filters.occupation.value.toLowerCase())) &&
-            (filters.direction.value === '' || direction.includes(filters.direction.value.toLowerCase())) &&
-            (filters.status.value === '' || status.includes(filters.status.value.toLowerCase())) &&
-            (studentSearchValue === '' || student.includes(studentSearchValue));
-
-          // Satrni ko'rsatish yoki yashirish
-          row.style.display = matches ? '' : 'none';
-        });
-      }
-
-      // Filter elementlariga event qo'shamiz
-      Object.values(filters).forEach((filter) => {
-        filter.addEventListener('input', filterTable);
-        filter.addEventListener('change', filterTable);
-      });
-
-      // Tozalash tugmasi uchun kod
-      document.getElementById('resetFilters').addEventListener('click', function() {
-        // Barcha filterlarni tozalaymiz
-        Object.values(filters).forEach((filter) => {
-          filter.value = '';
-        });
-
-        // Filterlash funksiyasini qayta ishga tushiramiz
-        filterTable();
-      });
-
-      // Filtrlashni ishga tushiramiz (boshlang'ich holat)
-      filterTable();
-    });
-  </script>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const teacherCells = document.querySelectorAll('.teacher-name');
-
-      teacherCells.forEach((cell) => {
-        const originalContent = cell.innerHTML; // Asl ism va familiya
-        const phoneNumber = cell.getAttribute('data-phone'); // Telefon raqami
-
-        // O'qituvchi ismiga bosilganda
-        cell.addEventListener('click', function() {
-          if (cell.innerHTML === originalContent) {
-            cell.innerHTML = phoneNumber; // Telefon raqamga almashtirish
-          } else {
-            cell.innerHTML = originalContent; // Asl ism va familiyaga qaytarish
-          }
-        });
-      });
-    });
-  </script>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-  const videoPreview = document.getElementById('videoPreview');
-  const canvas = document.getElementById('canvas');
-  const photoPreview = document.getElementById('photoPreview');
-  const cameraSelect = document.getElementById('cameraSelect');
-  const studentDetailsForm = document.getElementById('studentDetailsForm');
-  const hiddenPhotoInput = document.createElement('input');
-  hiddenPhotoInput.type = 'hidden';
-  hiddenPhotoInput.name = 'photo_data';
-  studentDetailsForm.appendChild(hiddenPhotoInput);
-  let stream;
-
-  // Modal ochilganda o'quvchi ma'lumotlarini olish va kamerani boshlash
-  document.querySelectorAll('.btn-primary[data-bs-target="#acceptModal"]').forEach(button => {
-    button.addEventListener('click', function() {
-      const studentId = this.dataset.studentId;
-      const firstName = this.dataset.firstName;
-      const lastName = this.dataset.lastName;
-
-      // Console'ga ma'lumotlarni chiqarish
-      console.log(`Student ID: ${studentId}`);
-      console.log(`First Name: ${firstName}`);
-      console.log(`Last Name: ${lastName}`);
-
-      // Modal ichidagi inputlarga qiymatlarni o'rnatish
-      document.getElementById('studentId').value = studentId;
-      document.getElementById('studentFirstName').value = firstName;
-      document.getElementById('studentLastName').value = lastName;
-
-      // Kameralarni yuklash va boshlash
-      loadCameras();
-    });
-  });
-
-  // Kameralarni yuklash
-  async function loadCameras() {
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    const videoDevices = devices.filter(device => device.kind === 'videoinput');
-    cameraSelect.innerHTML = videoDevices.map((device, index) =>
-      `<option value="${device.deviceId}" ${index === 0 ? 'selected' : ''}>${device.label || `Kamera ${index + 1}`}</option>`
-    ).join('');
-
-    if (videoDevices.length > 0) {
-      startCamera(videoDevices[0].deviceId);
-    }
-  }
-
-  // Kamerani boshlash
-  async function startCamera(deviceId) {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-    }
-
-    stream = await navigator.mediaDevices.getUserMedia({
-      video: { deviceId: deviceId ? { exact: deviceId } : undefined }
-    });
-
-    videoPreview.srcObject = stream;
-  }
-
-  // Kamerani almashtirish
-  cameraSelect.addEventListener('change', function() {
-    startCamera(this.value);
-  });
-
-  // Suratni olish
-  document.getElementById('capturePhoto').addEventListener('click', function() {
-    const context = canvas.getContext('2d');
-    canvas.width = videoPreview.videoWidth;
-    canvas.height = videoPreview.videoHeight;
-    context.drawImage(videoPreview, 0, 0, canvas.width, canvas.height);
-
-    const dataURL = canvas.toDataURL('image/png');
-    photoPreview.src = dataURL;
-    hiddenPhotoInput.value = dataURL; // Yashirin input orqali yuboriladigan rasm
-  });
-
-  // Modal yopilganda kamerani o'chirish
-  document.getElementById('acceptModal').addEventListener('hidden.bs.modal', function() {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-    }
-    videoPreview.srcObject = null;
-  });
-});
-  </script>
-
-  <script>
-    document.getElementById('studentDetailsForm').addEventListener('submit', function(event) {
-      event.preventDefault();
-
-      const formData = new FormData(this);
-
-      fetch('{% url "accept-students" %}', {
-        method: 'POST',
-        body: formData
-      })
-        .then(response => response.json())
-        .then(data => {
-          const status = data.success ? 'success' : 'error';
-          const message = data.message;
-
-          // Swal xabarini chiqarish
-          Swal.fire({
-            title: status === 'success' ? 'Muvaffaqiyatli!' : 'Xatolik!',
-            text: decodeURIComponent(message),
-            icon: status,
-            confirmButtonText: 'OK',
-            customClass: {
-              confirmButton: status === 'success' ? 'btn btn-primary' : 'btn btn-danger'
-            },
-            buttonsStyling: false // Bootstrap tugmalar uslubidan foydalanish
-          }).then(() => {
-            if (status === 'success') {
-              location.reload(); // Muvaffaqiyatli bo'lsa sahifani yangilash
-            }
-          });
-        })
-        .catch(error => {
-          console.error('Xatolik yuz berdi:', error);
-          Swal.fire({
-            title: 'Tizim xatoligi!',
-            text: 'Iltimos, qayta urinib ko‘ring.',
-            icon: 'error',
-            confirmButtonText: 'OK',
-            customClass: {
-              confirmButton: 'btn btn-danger'
-            },
-            buttonsStyling: false
+          cell.addEventListener('click', function() {
+            cell.innerHTML = cell.innerHTML === originalContent ? phoneNumber : originalContent;
           });
         });
+      };
+
+      // ** Kamera va Modal funksionalligi **
+      const initCameraAndModal = () => {
+        const videoPreview = document.getElementById('videoPreview');
+        const canvas = document.getElementById('canvas');
+        const photoPreview = document.getElementById('photoPreview');
+        const cameraSelect = document.getElementById('cameraSelect');
+        const studentDetailsForm = document.getElementById('studentDetailsForm');
+        const hiddenPhotoInput = document.createElement('input');
+        hiddenPhotoInput.type = 'hidden';
+        hiddenPhotoInput.name = 'photo_data';
+        studentDetailsForm.appendChild(hiddenPhotoInput);
+
+        let stream;
+
+        const loadCameras = async () => {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const videoDevices = devices.filter((device) => device.kind === 'videoinput');
+
+          cameraSelect.innerHTML = videoDevices
+            .map(
+              (device, index) =>
+                `<option value="${device.deviceId}" ${index === 0 ? 'selected' : ''}>${
+                  device.label || `Kamera ${index + 1}`
+                }</option>`
+            )
+            .join('');
+
+          if (videoDevices.length > 0) startCamera(videoDevices[0].deviceId);
+        };
+
+        const startCamera = async (deviceId) => {
+          if (stream) stream.getTracks().forEach((track) => track.stop());
+
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { deviceId: deviceId ? { exact: deviceId } : undefined }
+          });
+
+          videoPreview.srcObject = stream;
+        };
+
+        cameraSelect.addEventListener('change', () => startCamera(cameraSelect.value));
+
+        document.getElementById('capturePhoto').addEventListener('click', () => {
+          const context = canvas.getContext('2d');
+          canvas.width = videoPreview.videoWidth;
+          canvas.height = videoPreview.videoHeight;
+          context.drawImage(videoPreview, 0, 0, canvas.width, canvas.height);
+
+          const dataURL = canvas.toDataURL('image/png');
+          photoPreview.src = dataURL;
+          hiddenPhotoInput.value = dataURL;
+        });
+
+        document.getElementById('acceptModal').addEventListener('hidden.bs.modal', () => {
+          if (stream) stream.getTracks().forEach((track) => track.stop());
+          videoPreview.srcObject = null;
+        });
+
+        loadCameras();
+      };
+
+      // ** Modalni To'ldirish **
+      const initModalFill = () => {
+        const modal = document.getElementById('acceptModal');
+
+        modal.addEventListener('show.bs.modal', function(event) {
+          const button = event.relatedTarget;
+          const studentId = button.getAttribute('data-student-id');
+          const firstName = button.getAttribute('data-first-name');
+          const lastName = button.getAttribute('data-last-name');
+
+          modal.querySelector('#studentId').value = studentId || '';
+          modal.querySelector('#studentFirstName').value = firstName || '';
+          modal.querySelector('#studentLastName').value = lastName || '';
+        });
+      };
+
+      // ** Formni Yuborish Funksiyasi **
+      const initFormSubmission = () => {
+        document.getElementById('studentDetailsForm').addEventListener('submit', function(event) {
+          event.preventDefault();
+
+          const formData = new FormData(this);
+
+          fetch('{% url "accept-students" %}', {
+            method: 'POST',
+            body: formData
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              const status = data.success ? 'success' : 'error';
+
+              Swal.fire({
+                title: data.success ? 'Muvaffaqiyatli!' : 'Xatolik!',
+                text: data.message,
+                icon: status,
+                confirmButtonText: 'OK',
+                customClass: { confirmButton: data.success ? 'btn btn-primary' : 'btn btn-danger' },
+                buttonsStyling: false
+              }).then(() => {
+                if (data.success) location.reload();
+              });
+            })
+            .catch((error) => {
+              console.error('Xatolik yuz berdi:', error);
+
+              Swal.fire({
+                title: 'Tizim xatoligi!',
+                text: 'Iltimos, qayta urinib ko‘ring.',
+                icon: 'error',
+                confirmButtonText: 'OK',
+                customClass: { confirmButton: 'btn btn-danger' },
+                buttonsStyling: false
+              });
+            });
+        });
+      };
+
+      // ** Barcha funksiyalarni ishga tushirish **
+      initFilters();
+      initTeacherNameClick();
+      initCameraAndModal();
+      initModalFill();
+      initFormSubmission();
     });
   </script>
+
+
 {% endblock %}

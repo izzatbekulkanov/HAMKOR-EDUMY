@@ -1,9 +1,14 @@
+from django.utils import timezone
+from django.utils.timezone import now, timedelta
+
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 
+from account.models import CashbackRecord
 from apps.main_page.forms import SiteInfoForm, SeasonForm
 from apps.main_page.models import SiteInfo, Season
+from config import settings
 from web_project import TemplateLayout
 from django.shortcuts import render, redirect
 
@@ -13,27 +18,116 @@ class MainView(TemplateView):
         context = TemplateLayout.init(self, super().get_context_data(**kwargs))
 
         cards_data = [
-            {"title": "Foydalanuvchilar", "url_name": "user-administrator", "icon": "ti-users", "bg_color": "bg-primary", "text_color": "text-primary", "now_roles": ["5", "6"]},
-            {"title": "O'quv markaz", "url_name": "learning-center", "icon": "ti-school", "bg_color": "bg-secondary", "text_color": "text-secondary", "now_roles": ["5", "6"]},
-            {"title": "Kasblar", "url_name": "occupations", "icon": "ti-briefcase", "bg_color": "bg-success", "text_color": "text-success", "now_roles": ["4", "5"]},
-            {"title": "Guruhlar", "url_name": "learning-groups", "icon": "ti-users-group", "bg_color": "bg-warning", "text_color": "text-warning", "now_roles": ["4", "5"]},
-            {"title": "Hisobotlar", "url_name": "learning-statistics", "icon": "ti-file-report", "bg_color": "bg-danger", "text_color": "text-danger", "now_roles": ["6"]},
-            {"title": "Qabul qilish", "url_name": "accept-students", "icon": "ti-heart-handshake", "bg_color": "bg-dark", "text_color": "text-dark", "now_roles": ["5", "4"]},
-            {"title": "Maktablar", "url_name": "schools", "icon": "ti-building", "bg_color": "bg-primary", "text_color": "text-primary", "now_roles": ["6"]},
-            {"title": "Sinflar", "url_name": "classes", "icon": "ti-books", "bg_color": "bg-info", "text_color": "text-info", "now_roles": ["5", "6"]},
-            {"title": "Manzillar", "url_name": "setting-regions", "icon": "ti-map-pin", "bg_color": "bg-secondary", "text_color": "text-secondary", "now_roles": ["6"]},
-            {"title": "Cashbeklar", "url_name": "setting-cashback", "icon": "ti-cash", "bg_color": "bg-success", "text_color": "text-success", "now_roles": ["5"]},
-            {"title": "Loglar", "url_name": "setting-log", "icon": "ti-file-text", "bg_color": "bg-warning", "text_color": "text-warning", "now_roles": ["5", "6"]},
-            {"title": "Rollar", "url_name": "setting-role", "icon": "ti-settings", "bg_color": "bg-danger", "text_color": "text-danger", "now_roles": ["6"]},
+            {"title": "Foydalanuvchilar", "url_name": "user-administrator", "icon": "ti-users",
+             "bg_color": "bg-primary", "text_color": "text-primary", "now_roles": ["5", "6"]},
+            {"title": "O'quv markaz", "url_name": "learning-center", "icon": "ti-school", "bg_color": "bg-secondary",
+             "text_color": "text-secondary", "now_roles": ["5", "6"]},
+            {"title": "Kasblar", "url_name": "occupations", "icon": "ti-briefcase", "bg_color": "bg-success",
+             "text_color": "text-success", "now_roles": ["4", "5"]},
+            {"title": "Guruhlar", "url_name": "learning-groups", "icon": "ti-users-group", "bg_color": "bg-warning",
+             "text_color": "text-warning", "now_roles": ["4", "5"]},
+            {"title": "Hisobotlar", "url_name": "learning-statistics", "icon": "ti-file-report",
+             "bg_color": "bg-danger", "text_color": "text-danger", "now_roles": ["6"]},
+            {"title": "Qabul qilish", "url_name": "accept-students", "icon": "ti-heart-handshake",
+             "bg_color": "bg-dark", "text_color": "text-dark", "now_roles": ["5", "4"]},
+            {"title": "Maktablar", "url_name": "schools", "icon": "ti-building", "bg_color": "bg-primary",
+             "text_color": "text-primary", "now_roles": ["6"]},
+            {"title": "Sinflar", "url_name": "classes", "icon": "ti-books", "bg_color": "bg-info",
+             "text_color": "text-info", "now_roles": ["5", "6"]},
+            {"title": "Manzillar", "url_name": "setting-regions", "icon": "ti-map-pin", "bg_color": "bg-secondary",
+             "text_color": "text-secondary", "now_roles": ["6"]},
+            {"title": "Cashbeklar", "url_name": "setting-cashback", "icon": "ti-cash", "bg_color": "bg-success",
+             "text_color": "text-success", "now_roles": ["5"]},
+            {"title": "Loglar", "url_name": "setting-log", "icon": "ti-file-text", "bg_color": "bg-warning",
+             "text_color": "text-warning", "now_roles": ["5", "6"]},
+            {"title": "Rollar", "url_name": "setting-role", "icon": "ti-settings", "bg_color": "bg-danger",
+             "text_color": "text-danger", "now_roles": ["6"]},
 
             # Role 2 uchun
-            {"title": "O'quvchi yuborish", "url_name": "teacher-send-student", "icon": "ti-user-plus", "bg_color": "bg-primary", "text_color": "text-primary", "now_roles": ["2"]},
-            {"title": "Yuborilgan o'quvchilar", "url_name": "teacher-student-list", "icon": "ti-list-check", "bg_color": "bg-success", "text_color": "text-success", "now_roles": ["2"]},
-            {"title": "Keshbeklar", "url_name": "teacher-cashback", "icon": "ti-cash", "bg_color": "bg-warning", "text_color": "text-warning", "now_roles": ["2"]},
-            {"title": "Mening sahifam", "url_name": "main-teacher", "icon": "ti-user-circle", "bg_color": "bg-info", "text_color": "text-info", "now_roles": ["2"]},
+            {"title": "O'quvchi yuborish", "url_name": "teacher-send-student", "icon": "ti-user-plus",
+             "bg_color": "bg-primary", "text_color": "text-primary", "now_roles": ["2"]},
+            {"title": "Yuborilgan o'quvchilar", "url_name": "teacher-student-list", "icon": "ti-list-check",
+             "bg_color": "bg-success", "text_color": "text-success", "now_roles": ["2"]},
+            {"title": "Keshbeklar", "url_name": "teacher-cashback", "icon": "ti-cash", "bg_color": "bg-warning",
+             "text_color": "text-warning", "now_roles": ["2"]},
+            {"title": "Mening sahifam", "url_name": "main-teacher", "icon": "ti-user-circle", "bg_color": "bg-info",
+             "text_color": "text-info", "now_roles": ["2"]},
         ]
         context["cards_data"] = cards_data  # Kartalarni konteksga qo'shamiz
         return context
+
+
+class TeacherView(TemplateView):
+
+    def get_context_data(self, **kwargs):
+        context = TemplateLayout.init(self, super().get_context_data(**kwargs))
+
+        teacher = self.request.user
+
+        # Foydalanuvchi tekshiruvi
+        if teacher.user_type != "2":  # Faqat o'qituvchilar uchun
+            context['error'] = "Sizda statistik ma'lumotlar mavjud emas."
+            return context
+
+        # Cashback yozuvlari
+        cashback_records = CashbackRecord.objects.filter(teacher=teacher)
+
+        # Umumiy statistikalar
+        total_cashback = sum(record.cashback.summasi for record in cashback_records)
+        total_paid = sum(record.cashback.summasi for record in cashback_records if record.is_paid)
+        total_available = total_cashback - total_paid
+        total_students = cashback_records.count()
+
+        # Haftalik o'zgarish statistikasi (misol uchun 7 kun ichida qo'shilgan o'quvchilar)
+        last_week_students = cashback_records.filter(
+            created_at__gte=now() - timedelta(days=7)
+        ).count()
+        weekly_change = (
+            ((last_week_students / total_students) * 100) if total_students > 0 else 0
+        )
+
+        # Faqat oxirgi 1 kun ichida o'zgargan va ko'rilmagan yozuvlarni olish
+        unseen_cashback_records = cashback_records.filter(
+            is_viewed=False,
+            updated_at__gte=now() - timedelta(days=1)
+        ).select_related(
+            'student', 'student__kasb', 'student__yonalish', 'student__filial', 'student__sinf'
+        ).prefetch_related('student__kurslar')  # Kurslar uchun prefetch_related ishlatiladi
+
+        unseen_cashback_data = []
+
+        # Ko'rilmagan yozuvlarni yig'ish
+        for record in unseen_cashback_records:
+            student = record.student
+            unseen_cashback_data.append({
+                "first_name": student.first_name,
+                "last_name": student.last_name,
+                "kasb": student.kasb.nomi if student.kasb else "Noma'lum",
+                "yonalish": student.yonalish.nomi if student.yonalish else "Noma'lum",
+                "kurslar": ", ".join([kurs.nomi for kurs in student.kurslar.all()]),
+                "phone_number": student.phone_number,
+                "status": student.get_status_display(),
+                "created_at": record.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                "updated_at": record.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
+                "photo_url": student.details.photo.url if student.details and student.details.photo else settings.STATIC_URL + 'default/user.png',
+            })
+
+        # Foydalanuvchi tomonidan ko'rilgan yozuvlarni yangilash
+        # unseen_cashback_records.update(is_viewed=True)
+
+        # Contextga qo'shish
+        context.update({
+            'total_cashback': total_cashback,
+            'total_paid': total_paid,
+            'total_available': total_available,
+            'total_students': total_students,
+            'last_week_students': last_week_students,
+            'weekly_change': round(weekly_change, 2),  # Statistikani 2 xonaga yuvarlaydi
+            'unseen_cashback_data': unseen_cashback_data,  # Ko'rilmagan cashback yozuvlari
+        })
+
+        return context
+
 
 @csrf_exempt
 def clear_toastr_session(request):
@@ -44,6 +138,7 @@ def clear_toastr_session(request):
         request.session.pop('show_login_toastr', None)
         return JsonResponse({"status": "success"})
     return JsonResponse({"status": "failed"}, status=400)
+
 
 class SettingView(TemplateView):
     def get_context_data(self, **kwargs):
@@ -112,5 +207,3 @@ class SettingView(TemplateView):
 
         # Default response
         return self.render_to_response(self.get_context_data())
-
-

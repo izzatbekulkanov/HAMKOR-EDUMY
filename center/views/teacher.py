@@ -12,12 +12,91 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView, DetailView, UpdateView
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
-from account.models import CustomUser
+from account.models import CustomUser, CashbackRecord
 from center.models import Center, Filial, Images, SubmittedStudent, Kasb, Yonalish, Kurs, E_groups
 from school.models import Sinf, Maktab, Belgisi
 from web_project import TemplateLayout
 from django.utils.decorators import method_decorator
 from django.urls import reverse
+
+
+
+class TeacherCashbackView(TemplateView):
+
+    def get_context_data(self, **kwargs):
+        context = TemplateLayout.init(self, super().get_context_data(**kwargs))
+        teacher = self.request.user
+
+        # Faqat o'qituvchilar uchun cashback yozuvlarini olish
+        if teacher.user_type != "2":
+            context['error'] = "Sizda cashback yozuvlari yo'q."
+            return context
+
+        # Cashback yozuvlarini olish
+        cashback_records = CashbackRecord.objects.filter(teacher=teacher).select_related(
+            'cashback', 'student', 'student__sinf', 'student__sinf__maktab'
+        )
+
+        # Summalarni hisoblash
+        total_cashback = 0
+        paid_cashback = 0
+        unpaid_cashback = 0
+        total_from_students = 0
+        student_count = 0
+
+        cashback_data = []
+        for record in cashback_records:
+            maktab = record.student.sinf.maktab if record.student.sinf and record.student.sinf.maktab else None
+            cashback_amount = record.cashback.summasi
+
+            # Umumiy summalarni yangilash
+            total_cashback += cashback_amount
+            if record.is_paid:
+                paid_cashback += cashback_amount
+            else:
+                unpaid_cashback += cashback_amount
+                total_from_students += cashback_amount
+                student_count += 1
+
+            cashback_data.append({
+                "maktab_raqami": maktab.maktab_raqami if maktab else "Noma'lum",
+                "maktab_nomi": maktab.nomi if maktab else "Noma'lum",
+                "student": {
+                    "class_number": record.student.sinf.sinf_raqami if record.student.sinf else "Noma'lum",
+                    "belgisi": record.student.belgisi,
+                    "first_name": record.student.first_name,
+                    "last_name": record.student.last_name,
+                    "phone_number": record.student.phone_number,
+                },
+                "cashback_amount": cashback_amount,
+                "is_paid": record.is_paid,
+                "created_at": record.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                "student_status": record.student.get_status_display(),
+                "status_color": self.get_status_color(record.student.status),
+            })
+
+        # Konteksga summalarni qo‘shish
+        context['cashback_data'] = cashback_data
+        context['total_cashback'] = total_cashback
+        context['paid_cashback'] = paid_cashback
+        context['unpaid_cashback'] = unpaid_cashback
+        context['total_from_students'] = total_from_students
+        context['student_count'] = student_count
+
+        return context
+
+    @staticmethod
+    def get_status_color(status):
+        """
+        Qabul holati uchun mos rangni qaytaradi.
+        """
+        color_map = {
+            'pending': 'warning',
+            'accepted': 'success',
+            'accept_group': 'primary',
+            'rejected': 'danger',
+        }
+        return color_map.get(status, 'secondary')  # Default rang: secondary
 
 
 class TeacherView(TemplateView):

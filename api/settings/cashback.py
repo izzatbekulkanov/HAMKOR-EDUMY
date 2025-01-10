@@ -28,6 +28,27 @@ class AddCashbackAPIView(View):
             # Birinchi markazni olish (agar bir nechta bo'lsa, tanlovni kengaytirish mumkin)
             center = user_centers.first()
 
+            # Yangi cashback yaratishdan oldin mavjudligini tekshirish
+            existing_cashback = Cashback.objects.filter(
+                type=cashback_type,
+                user_type=user_type,
+                center=center
+            ).first()
+
+            if existing_cashback:
+                # Agar cashback mavjud bo'lsa, uni yangilaymiz
+                existing_cashback.name = name
+                existing_cashback.summasi = summasi
+                existing_cashback.parent_summ = parent_summasi
+                existing_cashback.save()
+
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Cashback mavjud edi va muvaffaqiyatli yangilandi!',
+                    'cashback': model_to_dict(existing_cashback)
+                })
+
+            # Agar mavjud bo'lmasa, yangi cashback yaratamiz
             cashback = Cashback.objects.create(
                 name=name,
                 summasi=summasi,
@@ -37,8 +58,12 @@ class AddCashbackAPIView(View):
                 center=center,  # Markazni biriktirish
                 is_active=True
             )
-            return JsonResponse({'success': True, 'message': 'Cashback muvaffaqiyatli qo\'shildi!',
-                                 'cashback': model_to_dict(cashback)})
+
+            return JsonResponse({
+                'success': True,
+                'message': 'Cashback muvaffaqiyatli qo\'shildi!',
+                'cashback': model_to_dict(cashback)
+            })
         except Exception as e:
             return JsonResponse({'success': False, 'message': f'Xatolik yuz berdi: {str(e)}'}, status=500)
 
@@ -47,20 +72,40 @@ class AddCashbackAPIView(View):
 class CashbackListAPIView(View):
     def get(self, request, *args, **kwargs):
         try:
-            # Foydalanuvchi superusermi yoki yo'qligini tekshirish
+            print("GET so'rovi qabul qilindi.")  # Debug
+            print(f"Foydalanuvchi: {request.user}, Superuser: {request.user.is_superuser}")  # Debug
+
+            # Superuser uchun barcha cashbacklarni olish
             if request.user.is_superuser:
                 cashbacks = Cashback.objects.all()
+                print(f"Barcha cashbacklar ({cashbacks.count()} ta) olindi.")  # Debug
             else:
-                # Foydalanuvchiga birikkan centerlarni olish
-                user_centers = Center.objects.filter(rahbari=request.user) | Center.objects.filter(maktab__customuser=request.user)
+                # Oddiy foydalanuvchilar uchun markazlar bilan bog‘liq cashbacklar
+                user_centers = (
+                    Center.objects.filter(rahbari=request.user) |
+                    Center.objects.filter(maktab__customuser=request.user)
+                )
+                print(f"Foydalanuvchiga tegishli markazlar: {user_centers.count()} ta.")  # Debug
+
                 cashbacks = Cashback.objects.filter(center__in=user_centers).distinct()
+                print(f"Foydalanuvchiga tegishli cashbacklar: {cashbacks.count()} ta.")  # Debug
 
             cashback_data = []
-
             for cashback in cashbacks:
-                # Foydalanuvchilarni user_type bo'yicha filtrlaymiz
-                users = CustomUser.objects.filter(user_type=cashback.user_type,  cashback__id=cashback.id)
-                user_list = [{"full_name": user.get_full_name(), "email": user.email} for user in users]
+                print(f"Cashback ID: {cashback.id}, Nomi: {cashback.name}")  # Debug
+
+                # Foydalanuvchilarni cashback va user_type bo'yicha filtrlash
+                users = CustomUser.objects.filter(user_type=cashback.user_type, cashback__id=cashback.id)
+                print(f"Cashbackga tegishli foydalanuvchilar soni: {users.count()}")  # Debug
+
+                user_list = [
+                    {
+                        "full_name": f"{user.first_name} {user.second_name}",
+                        "email": user.email or ""
+                    }
+                    for user in users
+                ]
+                print(f"Foydalanuvchilar ro‘yxati: {user_list}")  # Debug
 
                 cashback_data.append({
                     "id": cashback.id,
@@ -74,10 +119,12 @@ class CashbackListAPIView(View):
                     "users": user_list,
                 })
 
-            return JsonResponse({"success": True, "cashbacks": cashback_data})
-        except Exception as e:
-            return JsonResponse({"success": False, "message": f"Xatolik yuz berdi: {str(e)}"}, status=500)
+            print(f"Yakuniy cashback ma'lumotlari: {cashback_data}")  # Debug
+            return JsonResponse({"success": True, "cashbacks": cashback_data}, status=200)
 
+        except Exception as e:
+            print(f"Xatolik yuz berdi: {str(e)}")  # Debug
+            return JsonResponse({"success": False, "message": f"Xatolik yuz berdi: {str(e)}"}, status=500)
 
 class UserTypeAPIView(View):
     def get(self, request, *args, **kwargs):

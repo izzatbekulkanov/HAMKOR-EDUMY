@@ -1,7 +1,7 @@
 from django.urls import path
 
 from config.decorators import verified_required
-from .views import MainView, clear_toastr_session, SettingView
+from .views import MainView, clear_toastr_session, SettingView, TeacherView
 
 urlpatterns = [
     path(
@@ -21,7 +21,7 @@ urlpatterns = [
     ),
     path(
         "teacher/",
-        verified_required(MainView.as_view(template_name="teacher.html")),
+        verified_required(TeacherView.as_view(template_name="teacher.html")),
         name="main-teacher",
     ),
     path(

@@ -2,441 +2,430 @@
 {% load static %}
 <!-- Test Rejimida ishlamoqda banneri -->
 
-{% if navbar_detached  %}
-<nav class="layout-navbar {{container_class}} navbar navbar-expand-xl {{navbar_detached_class}} align-items-center bg-navbar-theme" id="layout-navbar">
+{% if navbar_detached %}
+  <nav
+    class="layout-navbar {{ container_class }} navbar navbar-expand-xl {{ navbar_detached_class }} align-items-center bg-navbar-theme"
+    id="layout-navbar">
 
-  {% endif %}
+{% endif %}
 
-  {# Horizontal layout (navbar not detached) #}
+{# Horizontal layout (navbar not detached) #}
 
-  {% if not navbar_detached %}
-  <nav class="layout-navbar navbar navbar-expand-xl align-items-center bg-navbar-theme" >
-    <div class="{{container_class}}">
+{% if not navbar_detached %}
+  <nav class="layout-navbar navbar navbar-expand-xl align-items-center bg-navbar-theme">
+  <div class="{{ container_class }}">
 
-      {% endif %}
-      <!--  Brand demo (display only for navbar-full and hide on below xl) -->
-      {% if navbar_full %}
-      <div class="navbar-brand app-brand demo d-none d-xl-flex py-0 me-4">
+{% endif %}
+<!--  Brand demo (display only for navbar-full and hide on below xl) -->
+{% if navbar_full %}
+  <div class="navbar-brand app-brand demo d-none d-xl-flex py-0 me-4">
 
-        <a href="{% url 'index' %}" class="app-brand-link">
+    <a href="{% url 'index' %}" class="app-brand-link">
           <span class="app-brand-logo demo">
             {% include 'partials/logo.html' %}
           </span>
-          <span class="app-brand-text demo menu-text fw-bold">{% get_theme_variables 'template_name' %}</span>
-        </a>
+      <span class="app-brand-text demo menu-text fw-bold">{% get_theme_variables 'template_name' %}</span>
+    </a>
 
-        {% if menu_horizontal %}
-        <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-xl-none">
-          <i class="ti ti-x ti-md align-middle"></i>
+    {% if menu_horizontal %}
+      <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-xl-none">
+        <i class="ti ti-x ti-md align-middle"></i>
+      </a>
+    {% endif %}
+  </div>
+{% endif %}
+
+<!-- ! Not required for layout-without-menu -->
+{% if not navbar_hide_toggle %}
+  <div
+    class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 {{ menu_horizontal|yesno:'d-xl-none,' }} {{ content_navbar|yesno:'d-xl-none,' }}">
+    <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+      <i class="ti ti-menu-2 ti-md"></i>
+    </a>
+  </div>
+{% endif %}
+
+<div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+  {% if not menu_horizontal %}
+    {#        <!-- Search -->#}
+    {#        <div class="navbar-nav align-items-center">#}
+    {#          <div class="nav-item navbar-search-wrapper mb-0">#}
+    {#            <a class="nav-item nav-link search-toggler d-flex align-items-center px-0" href="javascript:void(0);">#}
+    {#              <i class="ti ti-search ti-md me-2 me-lg-4 ti-lg"></i>#}
+    {#              <span class="d-none d-md-inline-block text-muted fw-normal">Search (Ctrl+/)</span>#}
+    {#            </a>#}
+    {#          </div>#}
+    {#        </div>#}
+    {#        <!-- /Search -->#}
+  {% endif %}
+  <ul class="navbar-nav flex-row align-items-center ms-auto">
+    <!--/ Language -->
+    {% if menu_horizontal %}
+      <!-- Search -->
+      <li class="nav-item navbar-search-wrapper">
+        <a class="nav-link btn btn-text-secondary btn-icon rounded-pill search-toggler" href="javascript:void(0);">
+          <i class="ti ti-search ti-md"></i>
         </a>
-        {% endif %}
+      </li>
+      <!-- /Search -->
+    {% endif %}
+    <!-- Language -->
+    <li class="nav-item dropdown-language dropdown">
+      <a class="nav-link btn btn-text-secondary btn-icon rounded-pill dropdown-toggle hide-arrow"
+         href="javascript:void(0);" data-bs-toggle="dropdown">
+        <i class='ti ti-language rounded-circle ti-md'></i>
+      </a>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li>
+          <a class="dropdown-item {% if LANGUAGE_CODE == 'en' %}active{% endif %}" href="{% current_url request %}"
+             data-language="en" data-text-direction="ltr">
+            <span class="align-middle">{% trans "English" %}</span>
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item {% if LANGUAGE_CODE == 'fr' %}active{% endif %}" href="{% current_url request %}"
+             data-language="fr" data-text-direction="ltr">
+            <span class="align-middle">{% trans "French" %}</span>
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item {% if LANGUAGE_CODE == 'ar' %}active{% endif %}" href="{% current_url request %}"
+             data-language="ar" data-text-direction="rtl">
+            <span class="align-middle">{% trans "Arabic" %}</span>
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item {% if LANGUAGE_CODE == 'de' %}active{% endif %}" href="{% current_url request %}"
+             data-language="de" data-text-direction="ltr">
+            <span class="align-middle">{% trans "German" %}</span>
+          </a>
+        </li>
+      </ul>
+    </li>
+    <!--/ Language -->
+
+    {% if has_customizer %}
+      <!-- Style Switcher -->
+      <li class="nav-item dropdown-style-switcher dropdown">
+        <a class="nav-link btn btn-text-secondary btn-icon rounded-pill dropdown-toggle hide-arrow"
+           href="javascript:void(0);" data-bs-toggle="dropdown">
+          <i class='ti ti-md'></i>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end dropdown-styles">
+          <li>
+            <a class="dropdown-item" href="javascript:void(0);" data-theme="light">
+              <span class="align-middle"><i class='ti ti-sun ti-md me-3'></i>Light</span>
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="javascript:void(0);" data-theme="dark">
+              <span class="align-middle"><i class="ti ti-moon-stars ti-md me-3"></i>Dark</span>
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="javascript:void(0);" data-theme="system">
+              <span class="align-middle"><i class="ti ti-device-desktop-analytics ti-md me-3"></i>System</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <!--/ Style Switcher -->
+    {% endif %}
+
+<!-- Notification -->
+<li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-2">
+  <a class="nav-link btn btn-text-secondary btn-icon rounded-pill dropdown-toggle hide-arrow"
+     href="javascript:void(0);" id="notificationDropdown" data-bs-toggle="dropdown">
+    <span class="position-relative">
+      <i class="ti ti-bell ti-md"></i>
+      <span id="notificationBadge" class="badge rounded-pill bg-danger badge-dot badge-notifications border"
+            style="display: none;"></span>
+    </span>
+  </a>
+  <ul class="dropdown-menu dropdown-menu-end p-0" id="notificationList">
+    <li class="dropdown-menu-header border-bottom">
+      <div class="dropdown-header d-flex align-items-center py-3">
+        <h6 class="mb-0 me-auto">Bildirishnomalar</h6>
       </div>
-      {% endif %}
-
-      <!-- ! Not required for layout-without-menu -->
-      {% if not navbar_hide_toggle %}
-      <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 {{ menu_horizontal|yesno:'d-xl-none,' }} {{ content_navbar|yesno:'d-xl-none,' }}">
-        <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
-          <i class="ti ti-menu-2 ti-md"></i>
+    </li>
+    <li class="dropdown-notifications-list scrollable-container">
+      <ul class="list-group list-group-flush" id="notifications">
+        <!-- Bildirishnomalar AJAX orqali yuklanadi -->
+      </ul>
+    </li>
+    <li class="border-top">
+      <div class="d-grid p-4">
+        <button id="markAllRead" class="btn btn-primary btn-sm d-flex">
+          <small class="align-middle">Hammasini o'qilgan deb belgilash</small>
+        </button>
+        <a href="{% url 'main-teacher' %}" class="btn btn-success btn-sm d-flex mt-2">
+          <small class="align-middle">Kashbakni Ko'rish</small>
         </a>
       </div>
-      {% endif %}
+    </li>
+  </ul>
+</li>
 
-      <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
-        {% if not menu_horizontal %}
-{#        <!-- Search -->#}
-{#        <div class="navbar-nav align-items-center">#}
-{#          <div class="nav-item navbar-search-wrapper mb-0">#}
-{#            <a class="nav-item nav-link search-toggler d-flex align-items-center px-0" href="javascript:void(0);">#}
-{#              <i class="ti ti-search ti-md me-2 me-lg-4 ti-lg"></i>#}
-{#              <span class="d-none d-md-inline-block text-muted fw-normal">Search (Ctrl+/)</span>#}
-{#            </a>#}
-{#          </div>#}
-{#        </div>#}
-{#        <!-- /Search -->#}
-        {% endif %}
-        <ul class="navbar-nav flex-row align-items-center ms-auto">
-          <!--/ Language -->
-          {% if menu_horizontal %}
-          <!-- Search -->
-          <li class="nav-item navbar-search-wrapper">
-            <a class="nav-link btn btn-text-secondary btn-icon rounded-pill search-toggler" href="javascript:void(0);">
-              <i class="ti ti-search ti-md"></i>
-            </a>
-          </li>
-          <!-- /Search -->
-          {% endif %}
-          <!-- Language -->
-          <li class="nav-item dropdown-language dropdown">
-            <a class="nav-link btn btn-text-secondary btn-icon rounded-pill dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
-              <i class='ti ti-language rounded-circle ti-md'></i>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end">
-              <li>
-                <a class="dropdown-item {% if LANGUAGE_CODE == 'en' %}active{% endif %}" href="{% current_url request %}" data-language="en" data-text-direction="ltr">
-                  <span class="align-middle">{% trans "English"%}</span>
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item {% if LANGUAGE_CODE == 'fr' %}active{% endif %}" href="{% current_url request %}" data-language="fr" data-text-direction="ltr">
-                  <span class="align-middle">{% trans "French"%}</span>
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item {% if LANGUAGE_CODE == 'ar' %}active{% endif %}" href="{% current_url request %}" data-language="ar" data-text-direction="rtl">
-                  <span class="align-middle">{% trans "Arabic"%}</span>
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item {% if LANGUAGE_CODE == 'de' %}active{% endif %}" href="{% current_url request %}" data-language="de" data-text-direction="ltr">
-                  <span class="align-middle">{% trans "German"%}</span>
-                </a>
-              </li>
-            </ul>
-          </li>
-          <!--/ Language -->
-
-          {% if has_customizer %}
-          <!-- Style Switcher -->
-          <li class="nav-item dropdown-style-switcher dropdown">
-            <a class="nav-link btn btn-text-secondary btn-icon rounded-pill dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
-              <i class='ti ti-md'></i>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end dropdown-styles">
-              <li>
-                <a class="dropdown-item" href="javascript:void(0);" data-theme="light">
-                  <span class="align-middle"><i class='ti ti-sun ti-md me-3'></i>Light</span>
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item" href="javascript:void(0);" data-theme="dark">
-                  <span class="align-middle"><i class="ti ti-moon-stars ti-md me-3"></i>Dark</span>
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item" href="javascript:void(0);" data-theme="system">
-                  <span class="align-middle"><i class="ti ti-device-desktop-analytics ti-md me-3"></i>System</span>
-                </a>
-              </li>
-            </ul>
-          </li>
-          <!--/ Style Switcher -->
-          {% endif %}
-
-          <!-- Notification -->
-          <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-2">
-            <a class="nav-link btn btn-text-secondary btn-icon rounded-pill dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
-              <span class="position-relative">
-                <i class="ti ti-bell ti-md"></i>
-                <span class="badge rounded-pill bg-danger badge-dot badge-notifications border"></span>
-              </span>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end p-0">
-              <li class="dropdown-menu-header border-bottom">
-                <div class="dropdown-header d-flex align-items-center py-3">
-                  <h6 class="mb-0 me-auto">Notification</h6>
-                  <div class="d-flex align-items-center h6 mb-0">
-                    <span class="badge bg-label-primary me-2">8 New</span>
-                    <a href="javascript:void(0)" class="btn btn-text-secondary rounded-pill btn-icon dropdown-notifications-all" data-bs-toggle="tooltip" data-bs-placement="top" title="Mark all as read"><i class="ti ti-mail-opened text-heading"></i></a>
-                  </div>
+    <!-- User -->
+    <li class="nav-item navbar-dropdown dropdown-user dropdown">
+      <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);" data-bs-toggle="dropdown">
+        <div class="avatar avatar-online">
+          <img src="{{ request.user.imageFile.url }}" alt="User Image"
+               class="rounded-circle img-fluid"
+               style="width: 40px; height: 40px; object-fit: cover;">
+        </div>
+      </a>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li>
+          <a class="dropdown-item mt-0" href="">
+            <div class="d-flex align-items-center">
+              <div class="flex-shrink-0 me-2">
+                <div class="avatar avatar-online">
+                  <img src="{{ request.user.imageFile.url }}" alt="User Image"
+                       class="rounded-circle img-fluid"
+                       style="width: 40px; height: 40px; object-fit: cover;">
                 </div>
-              </li>
-              <li class="dropdown-notifications-list scrollable-container">
-                <ul class="list-group list-group-flush">
-                  <li class="list-group-item list-group-item-action dropdown-notifications-item">
-                    <div class="d-flex">
-                      <div class="flex-shrink-0 me-3">
-                        <div class="avatar">
-                          <img src="{{ request.user.imageFile.url}}" alt class="rounded-circle">
-                        </div>
-                      </div>
-                      <div class="flex-grow-1">
-                        <h6 class="small mb-1">Congratulation Lettie 🎉</h6>
-                        <small class="mb-1 d-block text-body">Won the monthly best seller gold badge</small>
-                        <small class="text-muted">1h ago</small>
-                      </div>
-                      <div class="flex-shrink-0 dropdown-notifications-actions">
-                        <a href="javascript:void(0)" class="dropdown-notifications-read"><span class="badge badge-dot"></span></a>
-                        <a href="javascript:void(0)" class="dropdown-notifications-archive"><span class="ti ti-x"></span></a>
-                      </div>
-                    </div>
-                  </li>
-                  <li class="list-group-item list-group-item-action dropdown-notifications-item">
-                    <div class="d-flex">
-                      <div class="flex-shrink-0 me-3">
-                        <div class="avatar">
-                          <span class="avatar-initial rounded-circle bg-label-danger">CF</span>
-                        </div>
-                      </div>
-                      <div class="flex-grow-1">
-                        <h6 class="mb-1 small">Charles Franklin</h6>
-                        <small class="mb-1 d-block text-body">Accepted your connection</small>
-                        <small class="text-muted">12hr ago</small>
-                      </div>
-                      <div class="flex-shrink-0 dropdown-notifications-actions">
-                        <a href="javascript:void(0)" class="dropdown-notifications-read"><span class="badge badge-dot"></span></a>
-                        <a href="javascript:void(0)" class="dropdown-notifications-archive"><span class="ti ti-x"></span></a>
-                      </div>
-                    </div>
-                  </li>
-                  <li class="list-group-item list-group-item-action dropdown-notifications-item marked-as-read">
-                    <div class="d-flex">
-                      <div class="flex-shrink-0 me-3">
-                        <div class="avatar">
-                          <img src="{% static 'img/avatars/2.png' %}" alt class="rounded-circle">
-                        </div>
-                      </div>
-                      <div class="flex-grow-1">
-                        <h6 class="mb-1 small">New Message ✉️</h6>
-                        <small class="mb-1 d-block text-body">You have new message from Natalie</small>
-                        <small class="text-muted">1h ago</small>
-                      </div>
-                      <div class="flex-shrink-0 dropdown-notifications-actions">
-                        <a href="javascript:void(0)" class="dropdown-notifications-read"><span class="badge badge-dot"></span></a>
-                        <a href="javascript:void(0)" class="dropdown-notifications-archive"><span class="ti ti-x"></span></a>
-                      </div>
-                    </div>
-                  </li>
-                  <li class="list-group-item list-group-item-action dropdown-notifications-item">
-                    <div class="d-flex">
-                      <div class="flex-shrink-0 me-3">
-                        <div class="avatar">
-                          <span class="avatar-initial rounded-circle bg-label-success"><i class="ti ti-shopping-cart"></i></span>
-                        </div>
-                      </div>
-                      <div class="flex-grow-1">
-                        <h6 class="mb-1 small">Whoo! You have new order 🛒 </h6>
-                        <small class="mb-1 d-block text-body">ACME Inc. made new order $1,154</small>
-                        <small class="text-muted">1 day ago</small>
-                      </div>
-                      <div class="flex-shrink-0 dropdown-notifications-actions">
-                        <a href="javascript:void(0)" class="dropdown-notifications-read"><span class="badge badge-dot"></span></a>
-                        <a href="javascript:void(0)" class="dropdown-notifications-archive"><span class="ti ti-x"></span></a>
-                      </div>
-                    </div>
-                  </li>
-                  <li class="list-group-item list-group-item-action dropdown-notifications-item marked-as-read">
-                    <div class="d-flex">
-                      <div class="flex-shrink-0 me-3">
-                        <div class="avatar">
-                          <img src="{% static 'img/avatars/9.png' %}" alt class="rounded-circle">
-                        </div>
-                      </div>
-                      <div class="flex-grow-1">
-                        <h6 class="mb-1 small">Application has been approved 🚀 </h6>
-                        <small class="mb-1 d-block text-body">Your ABC project application has been approved.</small>
-                        <small class="text-muted">2 days ago</small>
-                      </div>
-                      <div class="flex-shrink-0 dropdown-notifications-actions">
-                        <a href="javascript:void(0)" class="dropdown-notifications-read"><span class="badge badge-dot"></span></a>
-                        <a href="javascript:void(0)" class="dropdown-notifications-archive"><span class="ti ti-x"></span></a>
-                      </div>
-                    </div>
-                  </li>
-                  <li class="list-group-item list-group-item-action dropdown-notifications-item marked-as-read">
-                    <div class="d-flex">
-                      <div class="flex-shrink-0 me-3">
-                        <div class="avatar">
-                          <span class="avatar-initial rounded-circle bg-label-success"><i class="ti ti-chart-pie"></i></span>
-                        </div>
-                      </div>
-                      <div class="flex-grow-1">
-                        <h6 class="mb-1 small">Monthly report is generated</h6>
-                        <small class="mb-1 d-block text-body">July monthly financial report is generated </small>
-                        <small class="text-muted">3 days ago</small>
-                      </div>
-                      <div class="flex-shrink-0 dropdown-notifications-actions">
-                        <a href="javascript:void(0)" class="dropdown-notifications-read"><span class="badge badge-dot"></span></a>
-                        <a href="javascript:void(0)" class="dropdown-notifications-archive"><span class="ti ti-x"></span></a>
-                      </div>
-                    </div>
-                  </li>
-                  <li class="list-group-item list-group-item-action dropdown-notifications-item marked-as-read">
-                    <div class="d-flex">
-                      <div class="flex-shrink-0 me-3">
-                        <div class="avatar">
-                          <img src="{% static 'img/avatars/5.png' %}" alt class="rounded-circle">
-                        </div>
-                      </div>
-                      <div class="flex-grow-1">
-                        <h6 class="mb-1 small">Send connection request</h6>
-                        <small class="mb-1 d-block text-body">Peter sent you connection request</small>
-                        <small class="text-muted">4 days ago</small>
-                      </div>
-                      <div class="flex-shrink-0 dropdown-notifications-actions">
-                        <a href="javascript:void(0)" class="dropdown-notifications-read"><span class="badge badge-dot"></span></a>
-                        <a href="javascript:void(0)" class="dropdown-notifications-archive"><span class="ti ti-x"></span></a>
-                      </div>
-                    </div>
-                  </li>
-                  <li class="list-group-item list-group-item-action dropdown-notifications-item">
-                    <div class="d-flex">
-                      <div class="flex-shrink-0 me-3">
-                        <div class="avatar">
-                          <img src="{% static 'img/avatars/6.png' %}" alt class="rounded-circle">
-                        </div>
-                      </div>
-                      <div class="flex-grow-1">
-                        <h6 class="mb-1 small">New message from Jane</h6>
-                        <small class="mb-1 d-block text-body">Your have new message from Jane</small>
-                        <small class="text-muted">5 days ago</small>
-                      </div>
-                      <div class="flex-shrink-0 dropdown-notifications-actions">
-                        <a href="javascript:void(0)" class="dropdown-notifications-read"><span class="badge badge-dot"></span></a>
-                        <a href="javascript:void(0)" class="dropdown-notifications-archive"><span class="ti ti-x"></span></a>
-                      </div>
-                    </div>
-                  </li>
-                  <li class="list-group-item list-group-item-action dropdown-notifications-item marked-as-read">
-                    <div class="d-flex">
-                      <div class="flex-shrink-0 me-3">
-                        <div class="avatar">
-                          <span class="avatar-initial rounded-circle bg-label-warning"><i class="ti ti-alert-triangle"></i></span>
-                        </div>
-                      </div>
-                      <div class="flex-grow-1">
-                        <h6 class="mb-1 small">CPU is running high</h6>
-                        <small class="mb-1 d-block text-body">CPU Utilization Percent is currently at 88.63%,</small>
-                        <small class="text-muted">5 days ago</small>
-                      </div>
-                      <div class="flex-shrink-0 dropdown-notifications-actions">
-                        <a href="javascript:void(0)" class="dropdown-notifications-read"><span class="badge badge-dot"></span></a>
-                        <a href="javascript:void(0)" class="dropdown-notifications-archive"><span class="ti ti-x"></span></a>
-                      </div>
-                    </div>
-                  </li>
-                </ul>
-              </li>
-              <li class="border-top">
-                <div class="d-grid p-4">
-                  <a class="btn btn-primary btn-sm d-flex" href="javascript:void(0);">
-                    <small class="align-middle">View all notifications</small>
-                  </a>
-                </div>
-              </li>
-            </ul>
-          </li>
-          <!--/ Notification -->
-
-          <!-- User -->
-          <li class="nav-item navbar-dropdown dropdown-user dropdown">
-            <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);" data-bs-toggle="dropdown">
-              <div class="avatar avatar-online">
-                <img src="{{ request.user.imageFile.url }}" alt="User Image"
-                     class="rounded-circle img-fluid"
-                     style="width: 40px; height: 40px; object-fit: cover;">
               </div>
+              <div class="flex-grow-1">
+                <h6 class="mb-0">{{ request.user.first_name }} {{ request.user.second_name }}</h6>
+                {% for group in request.user.groups.all %}
+                  <small class="text-muted">{{ group.name }}</small>
+                {% endfor %}
+              </div>
+            </div>
+          </a>
+        </li>
+        <li>
+          <div class="dropdown-divider my-1 mx-n2"></div>
+        </li>
+        <li>
+          {% if request.user.now_role == "5" %}
+            <a class="dropdown-item {% if request.resolver_match.url_name == 'main-administrator' %}active{% endif %}"
+               href="{% url 'main-administrator' %}">
+              <i class="ti ti-shield-half me-3 ti-md"></i><span class="align-middle">Administrator | CEO</span>
             </a>
-            <ul class="dropdown-menu dropdown-menu-end">
-              <li>
-                <a class="dropdown-item mt-0" href="">
-                  <div class="d-flex align-items-center">
-                    <div class="flex-shrink-0 me-2">
-                      <div class="avatar avatar-online">
-                        <img src="{{ request.user.imageFile.url }}" alt="User Image"
-                             class="rounded-circle img-fluid"
-                             style="width: 40px; height: 40px; object-fit: cover;">
-                      </div>
-                    </div>
-                    <div class="flex-grow-1">
-                      <h6 class="mb-0">{{ request.user.first_name }} {{ request.user.second_name }}</h6>
-                      {% for group in request.user.groups.all %}
-                        <small class="text-muted">{{ group.name }}</small>
-                      {% endfor %}
-                    </div>
-                  </div>
-                </a>
-              </li>
-              <li>
-                <div class="dropdown-divider my-1 mx-n2"></div>
-              </li>
-              <li>
-                {% if request.user.now_role == "5" %}
-                  <a class="dropdown-item {% if request.resolver_match.url_name == 'main-administrator' %}active{% endif %}" href="{% url 'main-administrator' %}">
-                    <i class="ti ti-shield-half me-3 ti-md"></i><span class="align-middle">Administrator | CEO</span>
-                  </a>
-                {% elif request.user.now_role == "4" %}
-                  <a class="dropdown-item {% if request.resolver_match.url_name == 'main-manager' %}active{% endif %}" href="{% url 'main-manager' %}">
-                    <i class="ti ti-user-cog me-3 ti-md"></i><span class="align-middle">Menejer</span>
-                  </a>
-                {% elif request.user.now_role == "3" %}
-                  <a class="dropdown-item {% if request.resolver_match.url_name == 'main-director' %}active{% endif %}" href="{% url 'main-director' %}">
-                    <i class="ti ti-user-up me-3 ti-md"></i><span class="align-middle">Direktor</span>
-                  </a>
-                {% elif request.user.now_role == "2" %}
-                  <a class="dropdown-item {% if request.resolver_match.url_name == 'main-teacher' %}active{% endif %}" href="{% url 'main-teacher' %}">
-                    <i class="ti ti-user-screen me-3 ti-md"></i><span class="align-middle">O'qituvchi</span>
-                  </a>
-                {% elif request.user.now_role == "1" %}
-                  <a class="dropdown-item {% if request.resolver_match.url_name == 'main-student' %}active{% endif %}" href="{% url 'main-student' %}">
-                    <i class="ti ti-user me-3 ti-md"></i><span class="align-middle">O'quvchi</span>
-                  </a>
-                {% endif %}
-              </li>
-              <li>
-                <div class="dropdown-divider my-1 mx-n2"></div>
-              </li>
-              <li>
-                <a class="dropdown-item" href="">
-                  <i class="ti ti-user-bolt me-3 ti-md"></i><span class="align-middle">Mening sahifam</span>
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item" href="">
-                  <i class="ti ti-question-mark me-3 ti-md"></i><span class="align-middle">FAQ</span>
-                </a>
-              </li>
-              <li>
-                <div class="dropdown-divider"></div>
-              </li>
-              <li>
-                {% if request.user.is_authenticated and request.user.is_verified %}
-                  <span class="dropdown-item d-flex justify-content-between align-content-center">
+          {% elif request.user.now_role == "4" %}
+            <a class="dropdown-item {% if request.resolver_match.url_name == 'main-manager' %}active{% endif %}"
+               href="{% url 'main-manager' %}">
+              <i class="ti ti-user-cog me-3 ti-md"></i><span class="align-middle">Menejer</span>
+            </a>
+          {% elif request.user.now_role == "3" %}
+            <a class="dropdown-item {% if request.resolver_match.url_name == 'main-director' %}active{% endif %}"
+               href="{% url 'main-director' %}">
+              <i class="ti ti-user-up me-3 ti-md"></i><span class="align-middle">Direktor</span>
+            </a>
+          {% elif request.user.now_role == "2" %}
+            <a class="dropdown-item {% if request.resolver_match.url_name == 'main-teacher' %}active{% endif %}"
+               href="{% url 'main-teacher' %}">
+              <i class="ti ti-user-screen me-3 ti-md"></i><span class="align-middle">O'qituvchi</span>
+            </a>
+          {% elif request.user.now_role == "1" %}
+            <a class="dropdown-item {% if request.resolver_match.url_name == 'main-student' %}active{% endif %}"
+               href="{% url 'main-student' %}">
+              <i class="ti ti-user me-3 ti-md"></i><span class="align-middle">O'quvchi</span>
+            </a>
+          {% endif %}
+        </li>
+        <li>
+          <div class="dropdown-divider my-1 mx-n2"></div>
+        </li>
+        <li>
+          <a class="dropdown-item" href="">
+            <i class="ti ti-user-bolt me-3 ti-md"></i><span class="align-middle">Mening sahifam</span>
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item" href="">
+            <i class="ti ti-question-mark me-3 ti-md"></i><span class="align-middle">FAQ</span>
+          </a>
+        </li>
+        <li>
+          <div class="dropdown-divider"></div>
+        </li>
+        <li>
+          {% if request.user.is_authenticated and request.user.is_verified %}
+            <span class="dropdown-item d-flex justify-content-between align-content-center">
                     <span>
                       <i class='ti ti-user-circle me-2 ti-md'></i>
                       <span class="align-middle">Tasdiqlangan</span>
                     </span>
                     <span class="text-success"><i class='ti ti-circle-check ti-md'></i></span>
                   </span>
-                {% else %}
-                  <a class="dropdown-item d-flex justify-content-between align-content-center" href="">
+          {% else %}
+            <a class="dropdown-item d-flex justify-content-between align-content-center" href="">
                     <span>
                       <i class='ti ti-user-circle me-2 ti-md'></i>
                       <span class="align-middle">Tasdiqlanmagan</span>
                     </span>
-                    <span class="text-danger"><i class='ti ti-circle-x ti-md'></i></span>
-                  </a>
-                {% endif %}
-              </li>
-              <li class="mt-1">
-                <form action="{% url 'logout' %}" method="post">
-                  {% csrf_token %}
-                  <button type="submit" class="btn btn-sm btn-danger d-flex w-100">
-                    <span class="align-middle">Chiqish</span>
-                    <i class="ti ti-logout ms-2 ti-14px"></i>
-                  </button>
-                </form>
-              </li>
-            </ul>
-          </li>
-          <!--/ User -->
+              <span class="text-danger"><i class='ti ti-circle-x ti-md'></i></span>
+            </a>
+          {% endif %}
+        </li>
+        <li class="mt-1">
+          <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-danger d-flex w-100">
+              <span class="align-middle">Chiqish</span>
+              <i class="ti ti-logout ms-2 ti-14px"></i>
+            </button>
+          </form>
+        </li>
+      </ul>
+    </li>
+    <!--/ User -->
 
-        </ul>
-      </div>
+  </ul>
+</div>
 
-      <!-- Search Small Screens -->
-      <div class="navbar-search-wrapper search-input-wrapper {% if menu_horizontal %}{{container_class}}{% endif %} d-none">
-        <input type="text" class="form-control search-input {% if not menu_horizontal %}{{container_class}}{% endif %} border-0" placeholder="Search..." aria-label="Search...">
-        <i class="ti ti-x search-toggler cursor-pointer"></i>
-      </div>
+<!-- Search Small Screens -->
+<div class="navbar-search-wrapper search-input-wrapper {% if menu_horizontal %}{{ container_class }}{% endif %} d-none">
+  <input type="text"
+         class="form-control search-input {% if not menu_horizontal %}{{ container_class }}{% endif %} border-0"
+         placeholder="Search..." aria-label="Search...">
+  <i class="ti ti-x search-toggler cursor-pointer"></i>
+</div>
 
-      {% if not navbar_detached %}
-    </div>
+{% if not navbar_detached %}
+  </div>
 
   </nav>
 
-  {% endif %}
-  {% if navbar_detached %}
-</nav>
+{% endif %}
+{% if navbar_detached %}
+  </nav>
+
 
 {% endif %}
+
+<!-- Canvas container -->
+<div id="notificationCanvas" class="position-fixed top-0 end-0 p-3" style="z-index: 1050; display: none;">
+  <div class="toast align-items-center text-white bg-primary border-0" role="alert" aria-live="assertive"
+       aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">
+        Sizga yangi cashback summasi tushdi!
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+              aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+  const csrftoken = "{{ csrf_token }}";
+
+  // Mushaklar va tabriklash
+  function celebrateWithFireworks() {
+    const end = Date.now() + 2 * 1000; // Mushaklar 2 soniya davom etadi
+    const colors = ['#bb0000', '#ffffff', '#00bb00', '#0000bb'];
+
+    const celebrationText = document.createElement('div');
+    celebrationText.innerHTML = `
+      🎉 Biz bilan hamkorlik qilganingizdan mamnunmiz! 🎉<br>
+      Tez orada hamkorligingiz pul mukofoti bilan taqdirlanadi!
+    `;
+    celebrationText.style.position = 'fixed';
+    celebrationText.style.top = '50%';
+    celebrationText.style.left = '50%';
+    celebrationText.style.transform = 'translate(-50%, -50%)';
+    celebrationText.style.fontSize = '24px';
+    celebrationText.style.color = '#333';
+    celebrationText.style.backgroundColor = '#fff';
+    celebrationText.style.padding = '20px';
+    celebrationText.style.borderRadius = '10px';
+    celebrationText.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+    celebrationText.style.textAlign = 'center';
+    celebrationText.style.zIndex = '9999';
+    document.body.appendChild(celebrationText);
+
+    (function frame() {
+      confetti({
+        particleCount: 4,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0 },
+        colors: colors,
+      });
+      confetti({
+        particleCount: 4,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1 },
+        colors: colors,
+      });
+
+      if (Date.now() < end) {
+        requestAnimationFrame(frame);
+      }
+    })();
+  }
+
+  // Bildirishnomalarni yuklash
+  function loadNotifications() {
+    $.ajax({
+      url: "{% url 'teacher-notifications' %}",
+      method: "GET",
+      success: function (response) {
+        if (response.success) {
+          const notifications = response.notifications;
+          const notificationList = document.getElementById('notifications');
+          const notificationBadge = document.getElementById('notificationBadge');
+
+          notificationList.innerHTML = ''; // Eski bildirishnomalarni tozalash
+
+          if (notifications.length > 0) {
+            notificationBadge.style.display = 'inline-block'; // Belgini ko'rsatish
+            notifications.forEach((notification) => {
+              notificationList.innerHTML += `
+                <li class="list-group-item list-group-item-action dropdown-notifications-item">
+                  <div class="d-flex">
+                    <div class="flex-grow-1">
+                      <h6 class="mb-1 small">${notification.student_name}</h6>
+                      <small class="mb-1 d-block text-body">
+                        Sizga ${notification.cashback_amount.toLocaleString()} so'm cashback tushdi.
+                      </small>
+                      <small class="text-muted">${notification.created_at}</small>
+                    </div>
+                  </div>
+                </li>
+              `;
+            });
+          } else {
+            notificationBadge.style.display = 'none'; // Belgini yashirish
+            notificationList.innerHTML = `
+              <li class="list-group-item text-center">Hozircha bildirishnomalar yo'q.</li>
+            `;
+          }
+        }
+      },
+      error: function () {
+        console.error('Bildirishnomalarni yuklashda xatolik yuz berdi.');
+      },
+    });
+  }
+
+  // Hammasini o'qilgan deb belgilash
+  document.getElementById('markAllRead').addEventListener('click', function () {
+    $.ajax({
+      url: "{% url 'teacher-notifications' %}",
+      method: "POST",
+      headers: {
+        "X-CSRFToken": csrftoken, // CSRF tokenni yuborish
+      },
+      success: function (response) {
+        if (response.success) {
+          loadNotifications(); // Bildirishnomalarni qayta yuklash
+          celebrateWithFireworks(); // Mushaklar bilan tabriklash
+        }
+      },
+      error: function () {
+        console.error("Bildirishnomalarni yangilashda xatolik yuz berdi.");
+      },
+    });
+  });
+
+  // Tizimga kirganda bildirishnomalarni yuklash
+  loadNotifications();
+});
+</script>

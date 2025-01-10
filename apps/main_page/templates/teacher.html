@@ -1,189 +1,148 @@
 {% extends layout_path %}
-
+{% load humanize %}
 {% load static %}
 {% load i18n %}
 
 {% block title %}Academy - Dashboard - App{% endblock %}
 
 {% block vendor_css %}
-{{ block.super }}
-<link rel="stylesheet" href="{% static 'vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
-<link rel="stylesheet" href="{% static 'vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css' %}" />
-<link rel="stylesheet" href="{% static 'vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css' %}" />
-<link rel="stylesheet" href="{% static 'vendor/libs/apex-charts/apex-charts.css' %}" />
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/sweetalert2/sweetalert2.css' %}" />
 {% endblock vendor_css %}
 
 {% block vendor_js %}
-{{ block.super }}
-<script src="{% static 'vendor/libs/moment/moment.js' %}"></script>
-<script src="{% static 'vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
-<script src="{% static 'vendor/libs/apex-charts/apexcharts.js' %}"></script>
+  {{ block.super }}
+  <script src="{% static 'vendor/libs/moment/moment.js' %}"></script>
+  <script src="{% static 'vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
+  <script src="{% static 'vendor/libs/sweetalert2/sweetalert2.js' %}"></script>
 {% endblock vendor_js %}
 
 {% block page_css %}
-{{ block.super }}
-  .text-uppercase {
-    text-transform: uppercase;
-  }
+  {{ block.super }}
+  <style>
+      .text-uppercase {
+          text-transform: uppercase;
+      }
+
+
+  </style>
 {% endblock page_css %}
 
 {% block page_js %}
-{{ block.super }}
-<script src="{% static 'js/app-academy-dashboard.js' %}"></script>
+  {{ block.super }}
+  <script src="{% static 'js/app-academy-dashboard.js' %}"></script>
 {% endblock page_js %}
 
 {% block content %}
 
-<!-- O'qituvchi Statistikalari -->
-<div class="card bg-transparent shadow-none my-6 border-0">
-  <div class="card-body row p-0 pb-6 g-6">
-    <div class="col-12 col-lg-8 card-separator">
-      <h5 class="mb-2">
-        Xush kelibsiz,
-        <span class="h4 text-uppercase">{{ request.user.first_name }} {{ request.user.second_name }} 👋🏻</span>
-      </h5>
-      <div class="col-12 col-lg-5">
-        <p>Sizning umumiy cashback daromadingiz <strong>1,500,000 so'm</strong>. Muvaffaqiyatlaringizni davom ettiring va yanada ko‘proq mukofotlarga erishing!</p>
+  <!-- O'qituvchi Statistikalari -->
+  <div class="card bg-transparent shadow-none my-6 border-0">
+    <div class="card-body row p-0 pb-6 g-6">
+      <div class="col-12 col-lg-8 card-separator">
+        <h5 class="mb-2">
+          Xush kelibsiz,
+          <span class="h4 text-uppercase">{{ request.user.first_name }} {{ request.user.second_name }} 👋🏻</span>
+        </h5>
+        <div class="col-12 col-lg-5">
+          <p>Sizning umumiy cashback daromadingiz <strong>{{ total_cashback|intcomma }} so'm</strong>.
+            Muvaffaqiyatlaringizni davom ettiring va yanada ko‘proq mukofotlarga erishing!</p>
+        </div>
+        <div class="d-flex justify-content-between flex-wrap gap-4 me-12">
+          <div class="d-flex align-items-center gap-4 me-6 me-sm-0">
+            <div class="avatar avatar-lg">
+              <div class="avatar-initial bg-label-primary rounded">
+                <i class="ti ti-wallet ti-lg text-white"></i>
+              </div>
+            </div>
+            <div class="content-right">
+              <p class="mb-0 fw-medium">Jami Cashback</p>
+              <h4 class="text-primary mb-0">{{ total_cashback|intcomma }} so'm</h4>
+            </div>
+          </div>
+          <div class="d-flex align-items-center gap-4">
+            <div class="avatar avatar-lg">
+              <div class="avatar-initial bg-label-info rounded">
+                <i class="ti ti-coin ti-lg text-white"></i>
+              </div>
+            </div>
+            <div class="content-right">
+              <p class="mb-0 fw-medium">Yechilgan Pul</p>
+              <h4 class="text-info mb-0">{{ total_paid|intcomma }} so'm</h4>
+            </div>
+          </div>
+          <div class="d-flex align-items-center gap-4">
+            <div class="avatar avatar-lg">
+              <div class="avatar-initial bg-label-warning rounded">
+                <i class="ti ti-cash ti-lg text-white"></i>
+              </div>
+            </div>
+            <div class="content-right">
+              <p class="mb-0 fw-medium">Mavjud Pul</p>
+              <h4 class="text-warning mb-0">{{ total_available|intcomma }} so'm</h4>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="d-flex justify-content-between flex-wrap gap-4 me-12">
-        <div class="d-flex align-items-center gap-4 me-6 me-sm-0">
-          <div class="avatar avatar-lg">
-            <div class="avatar-initial bg-label-primary rounded">
-              <i class="ti ti-wallet ti-lg text-white"></i>
-            </div>
+      <div class="col-12 col-lg-4 ps-md-4 ps-lg-6">
+        <div>
+          <h5 class="mb-1">O'qituvchi Ko'rsatkichlari</h5>
+          <p class="mb-9">Haftalik ma'lumotlar</p>
+          <div class="time-spending-chart">
+            <h4 class="mb-2">{{ total_students|intcomma }} <span class="text-body">o‘quvchi</span></h4>
+            <span class="badge bg-label-success">+{{ weekly_change }}%</span>
           </div>
-          <div class="content-right">
-            <p class="mb-0 fw-medium">Jami Cashback</p>
-            <h4 class="text-primary mb-0">1,500,000 so'm</h4>
-          </div>
-        </div>
-        <div class="d-flex align-items-center gap-4">
-          <div class="avatar avatar-lg">
-            <div class="avatar-initial bg-label-info rounded">
-              <i class="ti ti-coin ti-lg text-white"></i>
-            </div>
-          </div>
-          <div class="content-right">
-            <p class="mb-0 fw-medium">Yechilgan Pul</p>
-            <h4 class="text-info mb-0">500,000 so'm</h4>
-          </div>
-        </div>
-        <div class="d-flex align-items-center gap-4">
-          <div class="avatar avatar-lg">
-            <div class="avatar-initial bg-label-warning rounded">
-              <i class="ti ti-cash ti-lg text-white"></i>
-            </div>
-          </div>
-          <div class="content-right">
-            <p class="mb-0 fw-medium">Mavjud Pul</p>
-            <h4 class="text-warning mb-0">1,000,000 so'm</h4>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-12 col-lg-4 ps-md-4 ps-lg-6">
-      <div>
-        <h5 class="mb-1">O'qituvchi Ko'rsatkichlari</h5>
-        <p class="mb-9">Haftalik ma'lumotlar</p>
-        <div class="time-spending-chart">
-          <h4 class="mb-2">35 <span class="text-body">o‘quvchi</span></h4>
-          <span class="badge bg-label-success">+25%</span>
         </div>
       </div>
     </div>
   </div>
-</div>
-<!-- O'qituvchi Statistikalari End -->
+  <!-- O'qituvchi Statistikalari End -->
 
-<!-- Teacher's Accepted Students -->
-<div class="card shadow-lg rounded-3 mb-5">
-  <div class="card-header d-flex align-items-center justify-content-between">
-    <h5 class="m-0 fw-semibold text-dark">Qabul qilingan o‘quvchilar</h5>
-    <button class="btn btn-primary btn-sm rounded-pill fw-semibold">
-      O'quvchi qo'shish
-    </button>
-  </div>
-  <div class="table-responsive">
-    <table class="table table-striped table-hover text-center align-middle">
-      <thead class="table-light">
-        <tr>
-          <th>#</th>
-          <th>Ism-familiya</th>
-          <th>Kurs</th>
-          <th>Qabul sanasi</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>1</td>
-          <td>Ahmad Aliyev</td>
-          <td>Matematika</td>
-          <td>2023-11-15</td>
-          <td><span class="badge bg-success rounded-pill px-3 py-2">Aktiv</span></td>
-        </tr>
-        <tr>
-          <td>2</td>
-          <td>Laylo Karimova</td>
-          <td>Fizika</td>
-          <td>2023-11-10</td>
-          <td><span class="badge bg-success rounded-pill px-3 py-2">Aktiv</span></td>
-        </tr>
-        <tr>
-          <td>3</td>
-          <td>Jasur Omonov</td>
-          <td>Ingliz tili</td>
-          <td>2023-11-05</td>
-          <td><span class="badge bg-secondary rounded-pill px-3 py-2">Tugatildi</span></td>
-        </tr>
-      </tbody>
-    </table>
+  <!-- Teacher's Accepted Students -->
+<div class="container my-5">
+  <div class="row gy-4">
+    {% for record in unseen_cashback_data %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card bg-light bg-opacity-75 shadow border-0">
+        <!-- Card Header: Student Image -->
+        <div class="card-header text-center bg-transparent border-0">
+          <img src="{{ record.photo_url }}" alt="O'quvchi Rasm"
+            class="rounded-circle img-fluid shadow"
+            style="width: 120px; height: 120px;">
+        </div>
+        <!-- Card Body: Student Info -->
+        <div class="card-body text-center">
+          <h5 class="card-title text-primary mb-2">{{ record.first_name }} {{ record.last_name }}</h5>
+          <p class="text-muted small mb-2">{{ record.kasb }} - {{ record.yonalish }}</p>
+          <p class="small text-muted mb-2">
+            <strong>Kurslar:</strong> {{ record.kurslar|default:"Yo'q" }}
+          </p>
+          <p class="small text-muted mb-2">
+            <strong>Telefon:</strong>
+            <a href="tel:{{ record.phone_number }}" class="text-decoration-none">{{ record.phone_number }}</a>
+          </p>
+          <p class="small text-muted mb-2">
+            <strong>Holati:</strong>
+            <span class="badge bg-{{ record.status_color }}">{{ record.status }}</span>
+          </p>
+        </div>
+        <!-- Card Footer: Timestamps -->
+        <div class="card-footer bg-transparent border-0">
+          <p class="small text-muted mb-1">
+            <strong>Kiritilgan:</strong> {{ record.created_at }}
+          </p>
+          <p class="small text-muted">
+            <strong>Yangilangan:</strong> {{ record.updated_at }}
+          </p>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
   </div>
 </div>
 <!-- Teacher's Accepted Students End -->
-
-<!-- Cashback Statistics -->
-<div class="card shadow-lg rounded-3">
-  <div class="card-header d-flex align-items-center justify-content-between">
-    <h5 class="m-0 fw-semibold text-dark">Cashback Statistika</h5>
-    <button class="btn btn-primary btn-sm rounded-pill fw-semibold">
-      Pul yechib olish
-    </button>
-  </div>
-  <div class="table-responsive">
-    <table class="table table-striped table-hover text-center align-middle">
-      <thead class="table-light">
-        <tr>
-          <th>#</th>
-          <th>Sana</th>
-          <th>Miqdor</th>
-          <th>Holati</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>1</td>
-          <td>2023-11-20</td>
-          <td>300,000 so'm</td>
-          <td><span class="badge bg-success rounded-pill px-3 py-2">To'langan</span></td>
-        </tr>
-        <tr>
-          <td>2</td>
-          <td>2023-11-15</td>
-          <td>200,000 so'm</td>
-          <td><span class="badge bg-warning text-dark rounded-pill px-3 py-2">Kutilyapti</span></td>
-        </tr>
-        <tr>
-          <td>3</td>
-          <td>2023-11-10</td>
-          <td>500,000 so'm</td>
-          <td><span class="badge bg-success rounded-pill px-3 py-2">To'langan</span></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-<!-- Cashback Statistics End -->
 
 
 

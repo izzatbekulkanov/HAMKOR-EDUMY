@@ -9,7 +9,7 @@ from center.views.occupation import OccupationsView, OccupationsDetailView
 from config.decorators import verified_required
 from center.views.student import StudentView, AddGroupStudentView, PayStudentView, BlockStudentView, \
     StatisticsStudentView
-from center.views.teacher import TeacherView
+from center.views.teacher import TeacherView, TeacherCashbackView
 
 urlpatterns = [
     path("learning-center/", verified_required(CenterView.as_view(template_name="learning_center.html")),name="learning-center"),
@@ -31,7 +31,7 @@ urlpatterns = [
     path("learning-courses/<int:pk>/edit/", verified_required(CoursesView.as_view(template_name="courses.html")),name="learning-courses"),
     path("learning-courses/<int:pk>/delete/", verified_required(CoursesView.as_view(template_name="courses.html")),name="learning-courses"),
 
-    path("teacher_cashback/", verified_required(TeacherView.as_view(template_name="teacher/cashback.html")), name="teacher-cashback"),
+    path("teacher_cashback/", verified_required(TeacherCashbackView.as_view(template_name="teacher/cashback.html")), name="teacher-cashback"),
     path("teacher_send_student/", verified_required(TeacherView.as_view(template_name="teacher/send_students.html")), name="teacher-send-student" ),
     path("teacher_students_list/", verified_required(TeacherView.as_view(template_name="teacher/students_list.html")), name="teacher-student-list" ),
 
