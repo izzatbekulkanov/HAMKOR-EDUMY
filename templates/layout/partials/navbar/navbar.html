@@ -310,10 +310,23 @@
     </div>
   </div>
 </div>
-
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function () {
   const csrftoken = "{{ csrf_token }}";
+
+  // Cookie o'rnatish funksiyasi
+  function setCookie(name, value, days) {
+    const expires = new Date(Date.now() + days * 864e5).toUTCString();
+    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
+  }
+
+  // Cookie olish funksiyasi
+  function getCookie(name) {
+    return document.cookie
+      .split('; ')
+      .find((row) => row.startsWith(name))
+      ?.split('=')[1];
+  }
 
   // Mushaklar va tabriklash
   function celebrateWithFireworks() {
@@ -391,6 +404,12 @@
                 </li>
               `;
             });
+
+            // Tabriklashni faqat bir marta ishlatish
+            if (!getCookie('hasCelebrated')) {
+              celebrateWithFireworks();
+              setCookie('hasCelebrated', true, 1); // 1 kun davomida cookie saqlanadi
+            }
           } else {
             notificationBadge.style.display = 'none'; // Belgini yashirish
             notificationList.innerHTML = `
