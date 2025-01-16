@@ -176,60 +176,139 @@
     <div class="table-responsive">
       <table class="table table-bordered table-hover table-sm">
         <thead class="table-light">
-        <tr>
-          <th>#</th>
-          <th>O‘qituvchi</th>
-          <th>O‘quvchi</th>
-          <th>Maktab</th>
-          <th>Sinf</th>
-          <th>Kasb</th>
-          <th>Yo‘nalish</th>
-          <th>Holati</th>
-          <th>Amallar</th>
-        </tr>
+          <tr>
+            <th>#</th>
+            <th>O'qituvchi</th>
+            <th>O'quvchi</th>
+            <th>Maktab</th>
+            <th>Sinf</th>
+            <th>Kasb</th>
+            <th>Yo'nalish</th>
+            <th>Holati</th>
+            <th>Birikkan Guruhlar</th>
+            <th>To'lov</th>
+          </tr>
         </thead>
         <tbody>
-        {% for student in all_submitted_students %}
+          {% for student in students_in_groups %}
           <tr>
             <td>{{ forloop.counter }}</td>
-            <td class="teacher-name" data-phone="{{ student.added_by.phone_number }}">
-              {{ student.added_by.first_name|lower|capfirst }} {{ student.added_by.second_name|lower|capfirst }}
-            </td>
-            <td>{{ student.first_name|lower|capfirst }} {{ student.last_name|lower|capfirst }}</td>
-            <td>{{ student.sinf.maktab.maktab_raqami|default:"-" }} - {{ student.sinf.maktab.nomi|default:"-" }}</td>
-            <td>{{ student.sinf.sinf_raqami }}-{{ student.belgisi }} Sinf</td>
-            <td>{{ student.kasb.nomi|default:"-" }}</td>
-            <td>{{ student.yonalish.nomi|default:"-" }}</td>
+            <td>{{ student.added_by.first_name }} {{ student.added_by.second_name }}</td>
+            <td>{{ student.first_name }} {{ student.last_name }}</td>
+            <td>{{ student.sinf.maktab.nomi }}</td>
+            <td>{{ student.sinf.sinf_raqami }} - {{ student.sinf.belgisi }}</td>
+            <td>{{ student.kasb.nomi }}</td>
+            <td>{{ student.yonalish.nomi }}</td>
+            <td>{{ student.get_status_display }}</td>
             <td>
-              {% if student.status == "pending" %}
-                <span class="badge bg-warning text-dark">Kutilmoqda</span>
-              {% elif student.status == "accepted" %}
-                <span class="badge bg-success">Qabul qilingan</span>
-              {% elif student.status == "accept_group" %}
-                <span class="badge bg-primary">Guruhga qabul qilindi</span>
-              {% elif student.status == "rejected" %}
-                <span class="badge bg-danger">Rad etilgan</span>
-              {% endif %}
+              {% for group in student.added_by.e_groups.all %}
+                <span class="badge bg-info">{{ group.group_name }}</span>
+              {% empty %}
+                <span class="badge bg-secondary">Guruhlar mavjud emas</span>
+              {% endfor %}
             </td>
             <td>
-              {% if student.status == "pending" %}
-                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#acceptModal">
-                  Qabul qilish
-                </button>
-              {% else %}
-                <button class="btn btn-secondary btn-sm" disabled>Qabul qilingan</button>
-              {% endif %}
+              <button
+                class="btn btn-sm btn-success"
+                data-bs-toggle="modal"
+                data-bs-target="#paymentModal"
+                onclick="openPaymentModal({{ student.id }}, '{{ student.first_name }} {{ student.last_name }}')">
+                To'lov qilish
+              </button>
             </td>
           </tr>
-        {% empty %}
-          <tr>
-            <td colspan="9" class="text-center text-muted">Hech qanday ma'lumot topilmadi.</td>
-          </tr>
-        {% endfor %}
+          {% endfor %}
         </tbody>
       </table>
     </div>
   </div>
 
+  <!-- To'lov Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="paymentModalLabel">To'lov qilish</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="paymentForm">
+          <input type="hidden" id="studentId" name="student_id">
+          <div class="mb-3">
+            <label for="studentName" class="form-label">O'quvchi ismi</label>
+            <input type="text" class="form-control" id="studentName" readonly>
+          </div>
+          <div class="mb-3">
+            <label for="paymentAmount" class="form-label">To'lov miqdori (UZS)</label>
+            <input type="number" class="form-control" id="paymentAmount" name="payment_amount" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bekor qilish</button>
+        <button type="button" class="btn btn-primary" onclick="submitPayment()">To'lovni tasdiqlash</button>
+      </div>
+    </div>
+  </div>
+</div>
 
+  <script>
+  function openPaymentModal(studentId, studentName) {
+  document.getElementById('studentId').value = studentId;
+  document.getElementById('studentName').value = studentName;
+}
+
+function submitPayment() {
+  const studentId = document.getElementById('studentId').value;
+  const paymentAmount = document.getElementById('paymentAmount').value;
+
+  if (!paymentAmount || paymentAmount <= 0) {
+    alert("Iltimos, to'lov miqdorini kiriting!");
+    return;
+  }
+
+  // To'lovni serverga yuborish
+  fetch("", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCookie("csrftoken"),
+    },
+    body: JSON.stringify({
+      student_id: studentId,
+      payment_amount: paymentAmount,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        alert("To'lov muvaffaqiyatli qabul qilindi!");
+        document.getElementById("paymentForm").reset();
+        const modal = bootstrap.Modal.getInstance(document.getElementById("paymentModal"));
+        modal.hide();
+        location.reload(); // Sahifani yangilash
+      } else {
+        alert("Xatolik yuz berdi: " + data.message);
+      }
+    })
+    .catch((error) => {
+      console.error("Xatolik yuz berdi:", error);
+    });
+}
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.startsWith(name + "=")) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+  </script>
 {% endblock %}

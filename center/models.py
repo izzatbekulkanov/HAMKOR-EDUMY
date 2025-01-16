@@ -286,3 +286,27 @@ class StudentDetails(models.Model):
     class Meta:
         verbose_name = "O'quvchining batafsil ma'lumotlari"
         verbose_name_plural = "O'quvchilarni batafsil ma'lumotlari"
+
+
+class PaymentRecord(models.Model):
+    student = models.ForeignKey(SubmittedStudent, on_delete=models.CASCADE, verbose_name="O'quvchi")
+    group = models.ForeignKey(E_groups, on_delete=models.CASCADE, verbose_name="Guruh")
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="To'langan summa")
+    payment_date = models.DateField(auto_now_add=True, verbose_name="To'lov sanasi")
+
+    def __str__(self):
+        return f"{self.student} uchun {self.amount_paid} so'm to'landi"
+
+    @staticmethod
+    def calculate_payment(student, group, start_date):
+        """
+        Kurs uchun oylik to'lovni hisoblash. O'quvchi boshlagan sanadan boshlab.
+        """
+        course_price = group.kurs.narxi
+        all_days = group.days_of_week
+        remaining_days = len([
+            day for day in all_days if day >= start_date
+        ])
+        per_day_price = course_price / len(all_days)
+        total_payment = per_day_price * remaining_days
+        return total_payment

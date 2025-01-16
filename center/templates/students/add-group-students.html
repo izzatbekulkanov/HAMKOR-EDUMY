@@ -1,235 +1,505 @@
 {% extends layout_path %}
-
 {% load static %}
 {% load i18n %}
-
 {% block title %}O'quvchilarni qabul qilish{% endblock %}
-
 {% block vendor_css %}
-  {{ block.super }}
-  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
-  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css' %}" />
-  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css' %}" />
-  <link rel="stylesheet" href="{% static 'vendor/libs/select2/select2.css' %}" />
-  <link rel="stylesheet" href="{% static 'vendor/libs/toastr/toastr.css' %}" />
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
+<link rel="stylesheet" href="{% static 'vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css' %}" />
+<link rel="stylesheet" href="{% static 'vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css' %}" />
+<link rel="stylesheet" href="{% static 'vendor/libs/select2/select2.css' %}" />
+<link rel="stylesheet" href="{% static 'vendor/libs/toastr/toastr.css' %}" />
+    <link rel="stylesheet" href="{% static 'vendor/libs/sweetalert2/sweetalert2.css' %}" />
+
 {% endblock vendor_css %}
-
 {% block vendor_js %}
-  {{ block.super }}
-  <script src="{% static 'vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
-  <script src="{% static 'vendor/libs/select2/select2.js' %}"></script>
-  <script src="{% static 'vendor/libs/toastr/toastr.js' %}"></script>
+{{ block.super }}
+<script src="{% static 'vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
+<script src="{% static 'vendor/libs/select2/select2.js' %}"></script>
+<script src="{% static 'vendor/libs/toastr/toastr.js' %}"></script>
+    <script src="{% static 'vendor/libs/sweetalert2/sweetalert2.js' %}"></script>
+
 {% endblock vendor_js %}
-
 {% block page_css %}
-  {{ block.super }}
-
+{{ block.super }}
 {% endblock page_css %}
-
 {% block page_js %}
-  {{ block.super }}
-
+{{ block.super }}
 {% endblock page_js %}
-
 {% block content %}
-  {% include 'students/navbar-student.html' %}
-  
-  <div class="container py-4">
-    <h4 class="mb-4">O‘qituvchilar yuborgan o‘quvchilar ro‘yxati</h4>
-
-    <!-- Filters -->
-    <div class="row mb-3">
-      <!-- Filterlar uchun karta -->
-      <div class="col-md-2">
-        <div class="card shadow-sm">
-          <div class="card-body py-2">
-            <label for="teacherFilter" class="form-label mb-1">
-              <i class="ti ti-user fs-5 text-primary me-1"></i> O'qituvchi
-            </label>
-            <select id="teacherFilter" class="form-select form-select-sm">
-              <option value="">Barchasi</option>
-              {% for teacher in teachers %}
-                <option value="{{ teacher.first_name }} {{ teacher.second_name }}">
-                  {{ teacher.first_name|lower|capfirst }} {{ teacher.second_name|lower|capfirst }}
-                </option>
-              {% endfor %}
-            </select>
-          </div>
+{% include 'students/navbar-student.html' %}
+<div class="container py-4">
+  <h4 class="mb-4">O‘qituvchilar yuborgan o‘quvchilar ro‘yxati</h4>
+  <!-- Filters -->
+  <div class="row mb-3">
+    <!-- Filterlar uchun karta -->
+    <div class="col-md-2">
+      <div class="card shadow-sm">
+        <div class="card-body py-2">
+          <label for="teacherFilter" class="form-label mb-1">
+          <i class="ti ti-user fs-5 text-primary me-1"></i> O'qituvchi
+          </label>
+          <!-- O'qituvchi filteri -->
+          <select id="teacherFilter" class="form-select form-select-sm">
+            <option value="">Barchasi</option>
+            {% for teacher in teachers %}
+            <option value="{{ teacher.first_name }} {{ teacher.last_name }}">
+              {{ teacher.first_name|lower|capfirst }} {{ teacher.last_name|lower|capfirst }}
+            </option>
+            {% endfor %}
+          </select>
         </div>
       </div>
-
-      <!-- Maktab Filter -->
-      <div class="col-md-2">
-        <div class="card shadow-sm">
-          <div class="card-body py-2">
-            <label for="schoolFilter" class="form-label mb-1">
-              <i class="ti ti-building fs-5 text-secondary me-1"></i> Maktab
-            </label>
-            <select id="schoolFilter" class="form-select form-select-sm">
-              <option value="">Barchasi</option>
-              {% for school in schools %}
-                <option value="{{ school.maktab_raqami }}">
-                  {{ school.maktab_raqami }} - {{ school.nomi }}
-                </option>
-              {% endfor %}
-            </select>
-          </div>
+    </div>
+    <!-- Maktab Filter -->
+    <div class="col-md-2">
+      <div class="card shadow-sm">
+        <div class="card-body py-2">
+          <label for="schoolFilter" class="form-label mb-1">
+          <i class="ti ti-building fs-5 text-secondary me-1"></i> Maktab
+          </label>
+          <!-- Maktab filteri -->
+          <select id="schoolFilter" class="form-select form-select-sm">
+            <option value="">Barchasi</option>
+            {% for school in schools %}
+            <option value="{{ school.maktab_raqami }}">
+              {{ school.maktab_raqami }} - {{ school.nomi }}
+            </option>
+            {% endfor %}
+          </select>
         </div>
       </div>
-
-      <!-- Sinf Filter -->
-      <div class="col-md-2">
-        <div class="card shadow-sm">
-          <div class="card-body py-2">
-            <label for="classFilter" class="form-label mb-1">
-              <i class="ti ti-books fs-5 text-info me-1"></i> Sinf
-            </label>
-            <select id="classFilter" class="form-select form-select-sm">
-              <option value="">Barchasi</option>
-              {% for sinf in sinflar %}
-                <option value="{{ sinf.sinf_raqami }}">
-                  {{ sinf.sinf_raqami }}-{{ sinf.belgisi }}
-                </option>
-              {% endfor %}
-            </select>
-          </div>
+    </div>
+    <!-- Sinf Filter -->
+    <div class="col-md-2">
+      <div class="card shadow-sm">
+        <div class="card-body py-2">
+          <label for="classFilter" class="form-label mb-1">
+          <i class="ti ti-books fs-5 text-info me-1"></i> Sinf
+          </label>
+          <!-- Sinf filteri -->
+          <select id="classFilter" class="form-select form-select-sm">
+            <option value="">Barchasi</option>
+            {% for sinf in sinflar %}
+            <option value="{{ sinf.sinf_raqami }}">
+              {{ sinf.sinf_raqami }}-{{ sinf.belgisi }}
+            </option>
+            {% endfor %}
+          </select>
         </div>
       </div>
-
-      <!-- Kasb Filter -->
-      <div class="col-md-2">
-        <div class="card shadow-sm">
-          <div class="card-body py-2">
-            <label for="occupationFilter" class="form-label mb-1">
-              <i class="ti ti-briefcase fs-5 text-success me-1"></i> Kasb
-            </label>
-            <select id="occupationFilter" class="form-select form-select-sm">
-              <option value="">Barchasi</option>
-              {% for kasb in kasblar %}
-                <option value="{{ kasb.nomi|lower|capfirst }}">{{ kasb.nomi|lower|capfirst }}</option>
-              {% endfor %}
-            </select>
-          </div>
+    </div>
+    <!-- Kasb Filter -->
+    <div class="col-md-2">
+      <div class="card shadow-sm">
+        <div class="card-body py-2">
+          <label for="occupationFilter" class="form-label mb-1">
+          <i class="ti ti-briefcase fs-5 text-success me-1"></i> Kasb
+          </label>
+          <!-- Kasb filteri -->
+          <select id="occupationFilter" class="form-select form-select-sm">
+            <option value="">Barchasi</option>
+            {% for kasb in kasblar %}
+            <option value="{{ kasb.nomi|lower|capfirst }}">{{ kasb.nomi|lower|capfirst }}</option>
+            {% endfor %}
+          </select>
         </div>
       </div>
-
-      <!-- Yo'nalish Filter -->
-      <div class="col-md-2">
-        <div class="card shadow-sm">
-          <div class="card-body py-2">
-            <label for="directionFilter" class="form-label mb-1">
-              <i class="ti ti-directions fs-5 text-warning me-1"></i> Yo'nalish
-            </label>
-            <select id="directionFilter" class="form-select form-select-sm">
-              <option value="">Barchasi</option>
-              {% for yonalish in yonalishlar %}
-                <option value="{{ yonalish.nomi|lower|capfirst }}">{{ yonalish.nomi|lower|capfirst }}</option>
-              {% endfor %}
-            </select>
-          </div>
+    </div>
+    <!-- Yo'nalish Filter -->
+    <div class="col-md-2">
+      <div class="card shadow-sm">
+        <div class="card-body py-2">
+          <label for="directionFilter" class="form-label mb-1">
+          <i class="ti ti-directions fs-5 text-warning me-1"></i> Yo'nalish
+          </label>
+          <!-- Yo'nalish filteri -->
+          <select id="directionFilter" class="form-select form-select-sm">
+            <option value="">Barchasi</option>
+            {% for yonalish in yonalishlar %}
+            <option value="{{ yonalish.nomi|lower|capfirst }}">{{ yonalish.nomi|lower|capfirst }}</option>
+            {% endfor %}
+          </select>
         </div>
       </div>
-
-      <!-- Holat Filter -->
-      <div class="col-md-2">
-        <div class="card shadow-sm">
-          <div class="card-body py-2">
-            <label for="statusFilter" class="form-label mb-1">
-              <i class="ti ti-alert-circle fs-5 text-danger me-1"></i> Holati
-            </label>
-            <select id="statusFilter" class="form-select form-select-sm">
-              <option value="">Barchasi</option>
-              <option value="Kutilmoqda">Kutilmoqda</option>
-              <option value="Qabul qilingan">Qabul qilingan</option>
-              <option value="Guruhga qabul qilindi">Guruhga qabul qilindi</option>
-              <option value="Rad etilgan">Rad etilgan</option>
-            </select>
-          </div>
+    </div>
+    <!-- Holat Filter -->
+    <div class="col-md-2">
+      <div class="card shadow-sm">
+        <div class="card-body py-2">
+          <label for="statusFilter" class="form-label mb-1">
+          <i class="ti ti-alert-circle fs-5 text-danger me-1"></i> Holati
+          </label>
+          <select id="statusFilter" class="form-select form-select-sm">
+            <option value="">Barchasi</option>
+            <option value="Kutilmoqda">Kutilmoqda</option>
+            <option value="Qabul qilingan">Qabul qilingan</option>
+            <option value="Guruhga qabul qilindi">Guruhga qabul qilindi</option>
+            <option value="Rad etilgan">Rad etilgan</option>
+          </select>
         </div>
       </div>
-
-      <!-- Qidiruv Input va Tozalash -->
-      <div class="col-md-3 mt-3 w-100">
-        <div class="card shadow-sm">
-          <div class="card-body py-2">
-            <label for="studentSearch" class="form-label mb-1">
-              <i class="ti ti-search fs-5 text-info me-1"></i> O'quvchi qidirish
-            </label>
-            <div class="input-group input-group-sm">
-              <input
-                type="text"
-                id="studentSearch"
-                class="form-control"
-                placeholder="Ism yoki familiya"
+    </div>
+    <!-- Qidiruv Input va Tozalash -->
+    <div class="col-md-3 mt-3 w-100">
+      <div class="card shadow-sm">
+        <div class="card-body py-2">
+          <label for="studentSearch" class="form-label mb-1">
+          <i class="ti ti-search fs-5 text-info me-1"></i> O'quvchi qidirish
+          </label>
+          <div class="input-group input-group-sm">
+            <input
+              type="text"
+              id="studentSearch"
+              class="form-control"
+              placeholder="Ism yoki familiya"
               />
-              <button id="resetFilters" class="btn btn-danger" type="button">
-                <i class="ti ti-trash"></i>
-              </button>
-            </div>
+            <button id="resetFilters" class="btn btn-danger" type="button">
+            <i class="ti ti-trash"></i>
+            </button>
           </div>
         </div>
       </div>
     </div>
-
-
-    <!-- Static Table -->
-    <div class="table-responsive">
-      <table class="table table-bordered table-hover table-sm">
-        <thead class="table-light">
+  </div>
+  <!-- Static Table -->
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover table-sm">
+      <thead class="table-light">
         <tr>
           <th>#</th>
-          <th>O‘qituvchi</th>
-          <th>O‘quvchi</th>
+          <th>O'qituvchi</th>
+          <th>O'quvchi</th>
           <th>Maktab</th>
           <th>Sinf</th>
           <th>Kasb</th>
-          <th>Yo‘nalish</th>
+          <th>Yo'nalish</th>
           <th>Holati</th>
           <th>Amallar</th>
         </tr>
-        </thead>
-        <tbody>
-        {% for student in all_submitted_students %}
-          <tr>
-            <td>{{ forloop.counter }}</td>
-            <td class="teacher-name" data-phone="{{ student.added_by.phone_number }}">
-              {{ student.added_by.first_name|lower|capfirst }} {{ student.added_by.second_name|lower|capfirst }}
-            </td>
-            <td>{{ student.first_name|lower|capfirst }} {{ student.last_name|lower|capfirst }}</td>
-            <td>{{ student.sinf.maktab.maktab_raqami|default:"-" }} - {{ student.sinf.maktab.nomi|default:"-" }}</td>
-            <td>{{ student.sinf.sinf_raqami }}-{{ student.belgisi }} Sinf</td>
-            <td>{{ student.kasb.nomi|default:"-" }}</td>
-            <td>{{ student.yonalish.nomi|default:"-" }}</td>
-            <td>
-              {% if student.status == "pending" %}
-                <span class="badge bg-warning text-dark">Kutilmoqda</span>
-              {% elif student.status == "accepted" %}
-                <span class="badge bg-success">Qabul qilingan</span>
-              {% elif student.status == "accept_group" %}
-                <span class="badge bg-primary">Guruhga qabul qilindi</span>
-              {% elif student.status == "rejected" %}
-                <span class="badge bg-danger">Rad etilgan</span>
-              {% endif %}
-            </td>
-            <td>
-              {% if student.status == "pending" %}
-                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#acceptModal">
-                  Qabul qilish
-                </button>
-              {% else %}
-                <button class="btn btn-secondary btn-sm" disabled>Qabul qilingan</button>
-              {% endif %}
-            </td>
-          </tr>
-        {% empty %}
-          <tr>
-            <td colspan="9" class="text-center text-muted">Hech qanday ma'lumot topilmadi.</td>
-          </tr>
+      </thead>
+      <tbody>
+        {% for student in accepted_students %}
+        <tr data-student-id="{{ student.id }}" data-added-by-id="{{ student.added_by.id }}">
+          <td>{{ forloop.counter }}</td>
+          <td>{{ student.added_by.first_name }} {{ student.added_by.second_name }}</td>
+          <td>{{ student.first_name }} {{ student.last_name }}</td>
+          <td>{{ student.sinf.maktab.maktab_raqami }} - {{ student.sinf.maktab.nomi }}</td>
+          <!-- Maktab nomi -->
+          <td>{{ student.sinf.sinf_raqami }} - {{ student.sinf.belgisi }}</td>
+          <td>{{ student.kasb.nomi }}</td>
+          <td>{{ student.yonalish.nomi }}</td>
+          <td>
+            {% if student.status == "accepted" %}
+            <span class="badge bg-success">{{ student.get_status_display }}</span>
+            {% elif student.status == "pending" %}
+            <span class="badge bg-warning text-dark">{{ student.get_status_display }}</span>
+            {% elif student.status == "rejected" %}
+            <span class="badge bg-danger">{{ student.get_status_display }}</span>
+            {% else %}
+            <span class="badge bg-secondary">{{ student.get_status_display }}</span>
+            {% endif %}
+          </td>
+          <td>
+            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="openModal(this)">
+              Qo'shish
+            </button>
+          </td>
+        </tr>
         {% endfor %}
-        </tbody>
-      </table>
+      </tbody>
+    </table>
+  </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Qo'shish</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Yopish"></button>
+      </div>
+      <div class="modal-body">
+        <form id="modalForm">
+          <div class="mb-3">
+            <label for="groupSelect" class="form-label">Guruhni tanlang</label>
+            <select id="groupSelect" class="form-select">
+              <option value="">Guruh tanlang</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bekor qilish</button>
+        <button type="button" class="btn btn-primary" id="confirmButton">Tasdiqlash</button>
+      </div>
     </div>
   </div>
-  
+</div>
 
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const openModal = (button) => {
+    const modal = document.getElementById('exampleModal');
+    const modalTitle = modal.querySelector('.modal-title');
+    const groupSelect = modal.querySelector('#groupSelect');
+    const confirmButton = modal.querySelector('#confirmButton'); // Tasdiqlash tugmasi
+
+    // Bosilgan tugma orqali jadvaldagi satrni olish
+    const row = button.closest('tr');
+    const studentId = row.dataset.studentId; // SubmittedStudent ID
+    const addedById = row.dataset.addedById; // Added_by ID
+    const studentName = row.querySelector('td:nth-child(3)').textContent.trim();
+
+    // Modal header qismida o'quvchi ismini ko'rsatish
+    modalTitle.textContent = `${studentName} uchun guruh tanlash`;
+
+    // Modalni tozalash
+    groupSelect.innerHTML = '<option value="">Guruh tanlang</option>';
+
+    // Guruhlarni yuklash
+    fetchGroups(groupSelect);
+
+    // Select2-ni faollashtirish
+    $(groupSelect).select2({
+      width: '100%',
+      placeholder: 'Guruhni tanlang',
+      allowClear: true,
+      dropdownParent: $('#exampleModal'),
+      templateResult: formatGroupOption,
+      templateSelection: formatSelectedGroup,
+    });
+
+    // Tasdiqlash bosilganda
+    confirmButton.onclick = () => {
+      const selectedGroupId = groupSelect.value;
+      if (!selectedGroupId) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Iltimos, guruhni tanlang!',
+          confirmButtonText: 'OK',
+          customClass: {
+            confirmButton: 'btn btn-secondary',
+          },
+          buttonsStyling: false,
+        });
+        return;
+      }
+
+      Swal.fire({
+        title: 'Tasdiqlaysizmi?',
+        text: `O'quvchini ${studentName} guruhiga qo'shmoqchimisiz?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Ha, qo\'shish!',
+        cancelButtonText: 'Bekor qilish',
+        customClass: {
+          confirmButton: 'btn btn-primary',
+          cancelButton: 'btn btn-secondary',
+        },
+        buttonsStyling: false,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // POST so'rovni yuborish
+          const currentUrl = window.location.href; // Joriy URL
+          fetch(currentUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken'), // CSRF token olish
+            },
+            body: JSON.stringify({
+              group_id: selectedGroupId,
+              submitted_student_id: studentId,
+              added_by_id: addedById,
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Muvaffaqiyatli!',
+                  text: 'O\'quvchi guruhga muvaffaqiyatli qo\'shildi!',
+                  confirmButtonText: 'OK',
+                  customClass: {
+                    confirmButton: 'btn btn-success',
+                  },
+                  buttonsStyling: false,
+                }).then(() => {
+                  modal.querySelector('.btn-close').click(); // Modalni yopish
+                  location.reload(); // Sahifani yangilash
+                });
+              } else {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Xatolik yuz berdi!',
+                  text: data.message,
+                  confirmButtonText: 'OK',
+                  customClass: {
+                    confirmButton: 'btn btn-danger',
+                  },
+                  buttonsStyling: false,
+                });
+              }
+            })
+            .catch((error) => {
+              console.error('Xatolik yuz berdi:', error);
+              Swal.fire({
+                icon: 'error',
+                title: 'Xatolik yuz berdi!',
+                text: 'Ma\'lumotni saqlashda muammo yuzaga keldi.',
+                confirmButtonText: 'OK',
+                customClass: {
+                  confirmButton: 'btn btn-danger',
+                },
+                buttonsStyling: false,
+              });
+            });
+        }
+      });
+    };
+  };
+
+  const fetchGroups = (groupSelect) => {
+    fetch("{% url 'get_groups' %}")
+      .then((response) => response.json())
+      .then((data) => {
+        const groups = data.groups;
+
+        groups.forEach((group) => {
+          const option = document.createElement('option');
+          option.value = group.id;
+          option.textContent = group.name;
+          option.dataset.course = group.course;
+          option.dataset.price = group.price;
+          option.dataset.days = group.days;
+          option.dataset.students = group.student_count;
+          groupSelect.appendChild(option);
+        });
+
+        console.log('Guruhlar yuklandi:', groups);
+      })
+      .catch((error) => {
+        console.error('Guruhlarni yuklashda xatolik:', error);
+      });
+  };
+
+  const formatGroupOption = (option) => {
+    if (!option.id) {
+      return option.text;
+    }
+    const course = $(option.element).data('course') || 'Kurs nomi yo‘q';
+    const price = $(option.element).data('price') || 'Narx mavjud emas';
+    const days = $(option.element).data('days') || 'Hafta kunlari mavjud emas';
+    const students = $(option.element).data('students') || '0';
+
+    return $(`
+      <div>
+        <strong>${option.text}</strong><br>
+        <small>Kurs: ${course}</small><br>
+        <small>Narx: ${price} UZS</small><br>
+        <small>Hafta kunlari: ${days}</small><br>
+        <small>O'quvchilar soni: ${students}</small>
+      </div>
+    `);
+  };
+
+  const formatSelectedGroup = (option) => {
+    if (!option.id) {
+      return option.text;
+    }
+    const course = $(option.element).data('course') || 'Kurs nomi yo‘q';
+    const price = $(option.element).data('price') || 'Narx mavjud emas';
+
+    return $(`
+      <div>
+        <strong>${option.text}</strong> (${course}, ${price} UZS)
+      </div>
+    `);
+  };
+
+  const getCookie = (name) => {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.startsWith(name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  };
+
+  // Globalga `openModal` funksiyasini export qilish
+  window.openModal = openModal;
+});
+</script>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+  const initFilters = () => {
+    // Filter elementlarini tanlash
+    const filters = {
+      teacher: document.getElementById('teacherFilter'),
+      school: document.getElementById('schoolFilter'),
+      class: document.getElementById('classFilter'),
+      occupation: document.getElementById('occupationFilter'),
+      direction: document.getElementById('directionFilter'),
+      status: document.getElementById('statusFilter'),
+      studentSearch: document.getElementById('studentSearch')
+    };
+
+    // Jadvaldagi barcha satrlarni tanlash
+    const rows = document.querySelectorAll('tbody tr');
+
+    // Jadvalni filtrlash funksiyasi
+    const filterTable = () => {
+      // Har bir filterning qiymatini olish
+      const searchValues = Object.fromEntries(
+        Object.entries(filters).map(([key, element]) => [key, element.value.trim().toLowerCase()])
+      );
+
+      // Har bir satr uchun moslikni tekshirish
+      rows.forEach((row) => {
+        const cells = Array.from(row.children).map((cell) => cell.textContent.trim().toLowerCase());
+        const matches = [
+          !searchValues.teacher || cells[1].includes(searchValues.teacher), // O'qituvchi
+          !searchValues.school || cells[3].includes(searchValues.school),   // Maktab
+          !searchValues.class || cells[4].includes(searchValues.class),     // Sinf
+          !searchValues.occupation || cells[5].includes(searchValues.occupation), // Kasb
+          !searchValues.direction || cells[6].includes(searchValues.direction),   // Yo'nalish
+          !searchValues.status || cells[7].includes(searchValues.status),         // Holat
+          !searchValues.studentSearch || cells[2].includes(searchValues.studentSearch) // O'quvchi
+        ].every(Boolean);
+
+        // Agar mos bo'lsa, satrni ko'rsatish; bo'lmasa, yashirish
+        row.style.display = matches ? '' : 'none';
+      });
+    };
+
+    // Filterlarga o'zgarishlar uchun event qo'shish
+    Object.values(filters).forEach((filter) =>
+      ['input', 'change'].forEach((event) => filter.addEventListener(event, filterTable))
+    );
+
+    // Filterlarni tozalash tugmasi
+    document.getElementById('resetFilters').addEventListener('click', () => {
+      Object.values(filters).forEach((filter) => (filter.value = ''));
+      filterTable();
+    });
+
+    // Jadvalni boshlang'ich holatda filtrlash
+    filterTable();
+  };
+
+  // Filtrlarni ishga tushirish
+  initFilters();
+  });
+</script>
 {% endblock %}

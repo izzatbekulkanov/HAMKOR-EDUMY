@@ -4,7 +4,7 @@ from django.forms.widgets import CheckboxSelectMultiple
 from django.utils.html import format_html
 
 from .models import Center, Images, Filial, Kasb, Yonalish, Kurs, E_groups, GroupMembership, SubmittedStudent, \
-    StudentDetails
+    StudentDetails, PaymentRecord
 
 
 @admin.register(Center)
@@ -301,3 +301,9 @@ class StudentDetailsAdmin(admin.ModelAdmin):
     def student(self, obj):
         return f"{obj.student.first_name} {obj.student.last_name}"
     student.short_description = "O'quvchi"
+
+@admin.register(PaymentRecord)
+class PaymentRecordAdmin(admin.ModelAdmin):
+    list_display = ('student', 'group', 'amount_paid', 'payment_date')
+    list_filter = ('payment_date', 'group')
+    search_fields = ('student__first_name', 'student__last_name', 'group__group_name')

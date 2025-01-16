@@ -8,7 +8,7 @@ from center.views.lines import LinesView, LinesDetailView
 from center.views.occupation import OccupationsView, OccupationsDetailView
 from config.decorators import verified_required
 from center.views.student import StudentView, AddGroupStudentView, PayStudentView, BlockStudentView, \
-    StatisticsStudentView
+    StatisticsStudentView, get_groups
 from center.views.teacher import TeacherView, TeacherCashbackView
 
 urlpatterns = [
@@ -40,6 +40,8 @@ urlpatterns = [
     path("pay_students/", verified_required(PayStudentView.as_view(template_name="students/pay-student.html")),name="pay-students"),
     path("block_students/", verified_required(BlockStudentView.as_view(template_name="students/block-student.html")),name="block-students"),
     path("statistics_students/", verified_required(StatisticsStudentView.as_view(template_name="students/statistics-student.html")),name="statistics-students"),
+
+    path('get-groups/', get_groups, name='get_groups'),
 
     # New URL pattern for Filial Detail View
     path("filial-detail/<int:pk>/", verified_required(FilialDetailUpdateView.as_view(template_name="fillial_details.html")), name="filial-detail" ),
