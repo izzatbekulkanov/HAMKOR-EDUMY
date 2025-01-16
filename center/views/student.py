@@ -190,22 +190,20 @@ class AddGroupStudentView(TemplateView):
         data = json.loads(request.body)
         group_id = data.get('group_id')
         submitted_student_id = data.get('submitted_student_id')
-        added_by_id = data.get('added_by_id')
 
         try:
             group = E_groups.objects.get(id=group_id)
             student = SubmittedStudent.objects.get(id=submitted_student_id)
-            added_by = CustomUser.objects.get(id=added_by_id)
 
             # Tekshirish: O'quvchi ushbu guruhga allaqachon qo'shilganmi?
-            if GroupMembership.objects.filter(group=group, student=student.added_by).exists():
+            if GroupMembership.objects.filter(group=group, student=student).exists():
                 return JsonResponse({
                     "success": False,
                     "message": f"{student.first_name} {student.last_name} ushbu guruhga allaqachon qo'shilgan."
                 }, status=400)
 
             # Guruhga o'quvchini qo'shish
-            GroupMembership.objects.create(group=group, student=student.added_by)
+            GroupMembership.objects.create(group=group, student=student)
 
             # SubmittedStudent statusini yangilash
             student.status = 'accept_group'

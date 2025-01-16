@@ -138,8 +138,8 @@ class E_groups(models.Model):
     )
     # Many-to-ManyField with through argument
     students = models.ManyToManyField(
-        'account.CustomUser',
-        through='GroupMembership',
+        'center.SubmittedStudent',
+        through='GroupMembership',  # Yangi GroupMembership modeli bilan bog'lanish
         related_name='student_groups',
         verbose_name="O'quvchilar"
     )
@@ -147,7 +147,8 @@ class E_groups(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaratilgan vaqti")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="O'zgartirilgan vaqti")
     is_active = models.BooleanField(default=True, verbose_name="Faolmi")
-    center = models.ForeignKey('Center', on_delete=models.CASCADE, related_name='guruhlar', verbose_name="Markaz", null=True, blank=True )
+    center = models.ForeignKey('Center', on_delete=models.CASCADE, related_name='guruhlar', verbose_name="Markaz", null=True, blank=True)
+
     def __str__(self):
         return f"{self.group_name} - {self.kurs.nomi}"
 
@@ -157,22 +158,21 @@ class E_groups(models.Model):
 
 class GroupMembership(models.Model):
     group = models.ForeignKey(
-        "center.E_groups",  # 'to' parametridan foydalanildi
+        "center.E_groups",  # Guruhni belgilash
         on_delete=models.CASCADE,
         verbose_name="Guruh"
     )
     student = models.ForeignKey(
-        "account.CustomUser",  # 'to' parametridan foydalanildi
+        "center.SubmittedStudent",  # SubmittedStudent bilan bog'lash
         on_delete=models.CASCADE,
         verbose_name="O'quvchi"
     )
     is_active = models.BooleanField(default=True, verbose_name="Faolmi")
-
     joined_at = models.DateTimeField(auto_now_add=True, verbose_name="Guruhga qo'shilgan vaqti")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="O'zgartirilgan vaqti")
 
     def __str__(self):
-        return f"{self.student} - {self.group.group_name} - {'Faol' if self.is_active else 'Nofaol'}"
+        return f"{self.student.first_name} {self.student.last_name} - {self.group.group_name} - {'Faol' if self.is_active else 'Nofaol'}"
 
 
 class SubmittedStudent(models.Model):
