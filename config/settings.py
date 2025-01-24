@@ -20,7 +20,6 @@ ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1", "ref.edumy.uz", "updatehub
 
 ENVIRONMENT = config('DJANGO_ENVIRONMENT', default='local')
 
-os.environ.get
 LOCAL_APPS = [
     "account",
     "center",

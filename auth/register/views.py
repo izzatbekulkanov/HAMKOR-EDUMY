@@ -10,15 +10,17 @@ import json
 from account.models import Regions, District, Roles, Gender
 from school.models import Maktab
 from django.shortcuts import redirect
-User = get_user_model()  # CustomUser modelini olish
 
+User = get_user_model()  # CustomUser modelini olish
 
 @method_decorator(csrf_exempt, name="dispatch")
 class RegisterView(View):
     def post(self, request, *args, **kwargs):
         try:
-            data = json.loads(request.body)  # JSON ma'lumotlarini o'qish
+            print("POST so'rovi qabul qilindi.")
 
+            # JSON ma'lumotlarini o'qish
+            data = json.loads(request.body)
             print("Kiritilgan ma'lumotlar:", data)
 
             # Foydalanuvchidan kelgan ma'lumotlarni olish
@@ -46,20 +48,28 @@ class RegisterView(View):
                 return JsonResponse({"error": "Bu telefon raqami bilan foydalanuvchi allaqachon mavjud."}, status=400)
 
             # Region, district va maktab obyektlarini olish
+            print("Region, district va maktab ma'lumotlari olinmoqda...")
             region_obj = Regions.objects.filter(name=region).first()
             district_obj = District.objects.filter(name=district).first()
             school_obj = Maktab.objects.filter(id=school_id).first()
+            print(f"Region: {region_obj}, District: {district_obj}, School: {school_obj}")
 
             # Familiya bo'yicha jinsni aniqlash
             gender_name = "Ayol" if last_name.lower().endswith("va") else "Erkak"
             gender_obj = Gender.objects.filter(name=gender_name).first()
+            print(f"Gender aniqlanmoqda: {gender_name}, Obyekt: {gender_obj}")
 
             if not gender_obj:
+                print(f"Xatolik: {gender_name} jinsi mavjud emas.")
                 return JsonResponse({"error": f"{gender_name} jinsi mavjud emas."}, status=400)
 
             # Role modeli orqali "O'qituvchi" rolini olish
+            print("O'qituvchi roli olinmoqda...")
             teacher_role = Roles.objects.filter(code="2").first()
+            print(f"Role: {teacher_role}")
+
             if not teacher_role:
+                print("Xatolik: O'qituvchi roli mavjud emas.")
                 return JsonResponse({"error": "O'qituvchi roli mavjud emas."}, status=400)
 
             # Foydalanuvchini yaratish
@@ -79,13 +89,16 @@ class RegisterView(View):
                 gender=gender_obj,
                 now_role="2",
             )
+            print(f"Foydalanuvchi yaratildi: {user}")
 
             # Foydalanuvchiga "O'qituvchi" rolini bog'lash
+            print("Foydalanuvchiga rol bog'lanmoqda...")
             user.roles.add(teacher_role)
             user.save()
-            print(f"Foydalanuvchi yaratildi va roli bog'landi: {user}")
+            print(f"Foydalanuvchi roli bog'landi: {user.roles.all()}")
 
             # Foydalanuvchini autentifikatsiya qilish
+            print("Foydalanuvchini autentifikatsiya qilish...")
             authenticated_user = authenticate(username=phone_number, password=password)
             if authenticated_user:
                 login(request, authenticated_user)
@@ -103,5 +116,3 @@ class RegisterView(View):
         except Exception as e:
             print("Server xatosi:", e)
             return JsonResponse({"error": f"Server xatosi: {str(e)}"}, status=500)
-
-
