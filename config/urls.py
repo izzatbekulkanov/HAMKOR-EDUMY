@@ -26,10 +26,17 @@ page_urlpatterns = [
 urlpatterns = main_urlpatterns + page_urlpatterns
 
 if settings.DEBUG:
-    # Static files
+    # Static va Media fayllarni server orqali yetkazish
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=BASE_DIR / "src" / "assets")
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+else:
+    from django.views.static import serve
+    from django.urls import re_path
+
+    urlpatterns += [
+        re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+    ]
 
 # Xatolik ishlovchilari faqat maxsus sahifalar uchun
 handler404 = SystemView.as_view(template_name="pages_misc_error404.html", status=404)
