@@ -1,3 +1,6 @@
+from datetime import date, timedelta
+from decimal import Decimal
+
 from django.db import models
 from django.contrib.auth import get_user_model
 from account.models import CustomUser
@@ -7,7 +10,7 @@ from django.core.validators import RegexValidator
 
 # Django 3.1 va undan yuqori versiyalarga mos keladigan JSONField
 try:
-    from django.db.models import JSONField
+    from django.db.models import JSONField, Sum
 except ImportError:
     from django.contrib.postgres.fields import JSONField  # Django versiyasi past bo'lsa
 
@@ -181,6 +184,7 @@ class SubmittedStudent(models.Model):
         ('accepted', 'Qabul qilingan'),
         ('accept_group', 'Guruhga qabul qilindi'),
         ('rejected', 'Rad etilgan'),
+        ('paid', 'To‘lov qilindi'),  # ✅ Yangi holat qo‘shildi
     ]
 
     # Shaxsiy ma'lumotlar
@@ -221,7 +225,6 @@ class SubmittedStudent(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {self.status}"
-
 
 class StudentDetails(models.Model):
     student = models.OneToOneField(
@@ -289,24 +292,85 @@ class StudentDetails(models.Model):
 
 
 class PaymentRecord(models.Model):
-    student = models.ForeignKey(SubmittedStudent, on_delete=models.CASCADE, verbose_name="O'quvchi")
-    group = models.ForeignKey(E_groups, on_delete=models.CASCADE, verbose_name="Guruh")
-    amount_paid = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="To'langan summa")
-    payment_date = models.DateField(auto_now_add=True, verbose_name="To'lov sanasi")
+    student = models.ForeignKey(
+        "center.SubmittedStudent", on_delete=models.CASCADE, verbose_name="O'quvchi"
+    )
+    group = models.ForeignKey(
+        "center.E_groups", on_delete=models.CASCADE, verbose_name="Guruh"
+    )
+    amount_paid = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0, verbose_name="To'langan summa"
+    )
+    total_debt = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0, verbose_name="Umumiy qarzdorlik"
+    )
+    remaining_balance = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0, verbose_name="Qoldiq qarz"
+    )
+    total_lessons_in_month = models.PositiveIntegerField(
+        default=0, verbose_name="Butun oy ichidagi darslar soni"
+    )
+    attended_lessons = models.PositiveIntegerField(
+        default=0, verbose_name="O'quvchi kelgan kundan boshlab darslar soni"
+    )
+    payment_date = models.DateField(
+        auto_now_add=True, verbose_name="To'lov sanasi"
+    )
+    month = models.PositiveIntegerField(verbose_name="To'lov oyi")
+    year = models.PositiveIntegerField(verbose_name="To'lov yili")
+    course_total_price = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0, verbose_name="Kursning umumiy narxi"
+    )
 
     def __str__(self):
-        return f"{self.student} uchun {self.amount_paid} so'm to'landi"
+        return f"{self.student} - {self.group.group_name} uchun {self.amount_paid} so'm to'landi"
 
-    @staticmethod
-    def calculate_payment(student, group, start_date):
+    @classmethod
+    def calculate_payment(cls, student, group, start_date=None):
         """
-        Kurs uchun oylik to'lovni hisoblash. O'quvchi boshlagan sanadan boshlab.
+        O‘quvchi guruhga kelgan sanadan boshlab, oy oxirigacha qancha dars borligini hisoblaydi.
         """
-        course_price = group.kurs.narxi
-        all_days = group.days_of_week
-        remaining_days = len([
-            day for day in all_days if day >= start_date
-        ])
-        per_day_price = course_price / len(all_days)
-        total_payment = per_day_price * remaining_days
-        return total_payment
+        if not start_date:
+            start_date = now().date()
+
+        # **Oyning oxirgi kunini olish**
+        end_of_month = date(start_date.year, start_date.month, 1) + timedelta(days=32)
+        end_of_month = date(end_of_month.year, end_of_month.month, 1) - timedelta(days=1)
+
+        # **Guruhning dars kunlarini olish**
+        lesson_days = group.days_of_week  # Masalan: ["Monday", "Wednesday", "Friday"]
+
+        # **Jami oy ichidagi barcha dars kunlarini hisoblash**
+        total_lessons_in_month = sum(
+            1 for i in range((end_of_month - date(start_date.year, start_date.month, 1)).days + 1)
+            if (date(start_date.year, start_date.month, 1) + timedelta(days=i)).strftime('%A') in lesson_days
+        )
+
+        # **O‘quvchi kelgan kundan boshlab, oy oxirigacha nechta dars borligini hisoblash**
+        attended_lessons = sum(
+            1 for i in range((end_of_month - start_date).days + 1)
+            if (start_date + timedelta(days=i)).strftime('%A') in lesson_days
+        )
+
+        # 🔴 **Agar dars kuni bo‘lmasa, nolga bo‘linishdan qochish**
+        if total_lessons_in_month == 0:
+            total_payment_due = Decimal("0")
+        else:
+            per_lesson_price = Decimal(str(group.kurs.narxi)) / Decimal(total_lessons_in_month)
+            total_payment_due = per_lesson_price * Decimal(attended_lessons)
+
+        # **O‘quvchining oldin to‘lagan summasi**
+        total_paid = cls.objects.filter(
+            student=student, group=group, month=start_date.month, year=start_date.year
+        ).aggregate(Sum('amount_paid'))['amount_paid__sum'] or Decimal("0")
+
+        # **Qolgan qarzdorlik**
+        remaining_balance = max(total_payment_due - total_paid, Decimal("0"))
+
+        return {
+            'total_debt': int(total_payment_due),  # `Decimal` emas `int` qaytarish
+            'remaining_balance': int(remaining_balance),
+            'total_paid': int(total_paid),
+            'total_lessons_in_month': total_lessons_in_month,
+            'attended_lessons': attended_lessons,
+        }

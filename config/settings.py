@@ -14,7 +14,7 @@ SECRET_KEY = config('SECRET_KEY', default='fallback-secret-key')
 
 # DEBUG = config('DEBUG', default=False, cast=bool)
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1", "ref.edumy.uz", "updatehub.namspi.uz"]
 

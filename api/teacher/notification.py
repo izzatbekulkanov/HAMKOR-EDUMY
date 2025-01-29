@@ -12,7 +12,6 @@ class GetNotificationsView(View):
 
         # Foydalanuvchi o'qituvchi emasligini tekshirish
         if teacher.user_type != "2":  # Faqat o'qituvchilar uchun
-            print("Foydalanuvchi o'qituvchi emas.")
             return JsonResponse({
                 "success": True,
                 "notifications": [],  # Bo'sh bildirishnomalar ro'yxati

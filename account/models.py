@@ -213,7 +213,7 @@ class Cashback(models.Model):
         CustomUser.type_choice dan faqat ruxsat etilgan turlarni olish uchun.
         """
         User = get_user_model()
-        return [choice for choice in User.type_choice if choice[0] not in ["4", "5"]]
+        return [(choice[0], choice[1]) for choice in User.type_choice if choice[0] not in ["4", "5"]]
 
     @property
     def filtered_user_type_choices(self):

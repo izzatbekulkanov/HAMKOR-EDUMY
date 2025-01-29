@@ -134,3 +134,5 @@ templates/layout/bootstrap/__pycache__/layout_vertical.cpython-312.pyc
 *.pyc
 *.pyc
 /api/center/__pycache__
+
+.codegpt

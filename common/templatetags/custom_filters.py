@@ -35,3 +35,9 @@ def phone_format(value):
     Telefon raqamni +998 (99) 999-99-99 formatida ko'rsatish uchun.
     """
     return format_phone_number(value)
+
+
+@register.filter
+def get_item(dictionary, key):
+    """Lug‘atdan (dict) ma‘lumot olish uchun filter"""
+    return dictionary.get(key, 0)  # Agar key mavjud bo‘lmasa, 0 qaytadi

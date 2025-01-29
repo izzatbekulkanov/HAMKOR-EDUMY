@@ -302,8 +302,40 @@ class StudentDetailsAdmin(admin.ModelAdmin):
         return f"{obj.student.first_name} {obj.student.last_name}"
     student.short_description = "O'quvchi"
 
+
 @admin.register(PaymentRecord)
 class PaymentRecordAdmin(admin.ModelAdmin):
-    list_display = ('student', 'group', 'amount_paid', 'payment_date')
-    list_filter = ('payment_date', 'group')
+    list_display = (
+        'student', 'group', 'amount_paid', 'total_debt', 'remaining_balance', 'payment_date',
+        'attended_lessons', 'total_lessons_in_month', 'status_display', 'month', 'year', 'course_total_price'
+    )
+    list_filter = ('group', 'month', 'year')
     search_fields = ('student__first_name', 'student__last_name', 'group__group_name')
+    date_hierarchy = 'payment_date'
+    ordering = ('-payment_date',)
+
+    readonly_fields = (
+        'payment_date', 'remaining_balance', 'total_debt', 'attended_lessons',
+        'total_lessons_in_month', 'course_total_price'
+    )
+
+    def status_display(self, obj):
+        """O'quvchining qarzdorligini rangli ko'rinishda chiqarish"""
+        if obj.remaining_balance == 0:
+            color = "green"
+            text = "To‘lov to‘liq qilingan"
+        else:
+            color = "red"
+            text = f"Qoldiq qarz: {obj.remaining_balance} so‘m"
+        return format_html('<span style="color: {};">{}</span>', color, text)
+
+    status_display.short_description = "Holati"
+
+    actions = ["mark_as_fully_paid"]
+
+    def mark_as_fully_paid(self, request, queryset):
+        """Tanlangan to‘lovlarni to‘liq to‘langan deb belgilash"""
+        queryset.update(remaining_balance=0)
+        self.message_user(request, "Tanlangan to‘lovlar to‘liq qilingan deb belgilandi.")
+
+    mark_as_fully_paid.short_description = "To‘lovni to‘liq qilingan deb belgilash"

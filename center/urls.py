@@ -8,7 +8,7 @@ from center.views.lines import LinesView, LinesDetailView
 from center.views.occupation import OccupationsView, OccupationsDetailView
 from config.decorators import verified_required
 from center.views.student import StudentView, AddGroupStudentView, PayStudentView, BlockStudentView, \
-    StatisticsStudentView, get_groups
+    StatisticsStudentView, get_groups, add_payment
 from center.views.teacher import TeacherView, TeacherCashbackView
 
 urlpatterns = [
@@ -38,6 +38,7 @@ urlpatterns = [
     path("accept_students/", verified_required(StudentView.as_view(template_name="students/accept_students.html")),name="accept-students"),
     path("add_group_students/", verified_required(AddGroupStudentView.as_view(template_name="students/add-group-students.html")),name="add-group-students"),
     path("pay_students/", verified_required(PayStudentView.as_view(template_name="students/pay-student.html")),name="pay-students"),
+    path("add_payment/", add_payment, name="add-payment"),
     path("block_students/", verified_required(BlockStudentView.as_view(template_name="students/block-student.html")),name="block-students"),
     path("statistics_students/", verified_required(StatisticsStudentView.as_view(template_name="students/statistics-student.html")),name="statistics-students"),
 

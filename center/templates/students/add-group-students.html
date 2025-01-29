@@ -244,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('exampleModal');
     const modalTitle = modal.querySelector('.modal-title');
     const groupSelect = modal.querySelector('#groupSelect');
-    const confirmButton = modal.querySelector('#confirmButton'); // Tasdiqlash tugmasi
+    const confirmButton = modal.querySelector('#confirmButton');
 
     // Bosilgan tugma orqali jadvaldagi satrni olish
     const row = button.closest('tr');
@@ -317,11 +317,14 @@ document.addEventListener('DOMContentLoaded', () => {
           })
             .then((response) => response.json())
             .then((data) => {
+              console.log(data.success)
               if (data.success) {
                 Swal.fire({
                   icon: 'success',
                   title: 'Muvaffaqiyatli!',
-                  text: 'O\'quvchi guruhga muvaffaqiyatli qo\'shildi!',
+                  html: `<strong>${studentName}</strong> guruhga qo‘shildi!<br><br>
+                         🔹 <strong>Jami qarzdorlik:</strong> ${data.total_debt} so‘m<br>
+                         🔹 <strong>Qoldiq qarz:</strong> ${data.remaining_balance} so‘m`,
                   confirmButtonText: 'OK',
                   customClass: {
                     confirmButton: 'btn btn-success',

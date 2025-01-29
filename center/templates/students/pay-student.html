@@ -2,6 +2,8 @@
 
 {% load static %}
 {% load i18n %}
+{% load custom_filters %}
+
 
 {% block title %}O'quvchilarni qabul qilish{% endblock %}
 
@@ -12,6 +14,8 @@
   <link rel="stylesheet" href="{% static 'vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css' %}" />
   <link rel="stylesheet" href="{% static 'vendor/libs/select2/select2.css' %}" />
   <link rel="stylesheet" href="{% static 'vendor/libs/toastr/toastr.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/sweetalert2/sweetalert2.css' %}" />
+
 {% endblock vendor_css %}
 
 {% block vendor_js %}
@@ -19,10 +23,16 @@
   <script src="{% static 'vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
   <script src="{% static 'vendor/libs/select2/select2.js' %}"></script>
   <script src="{% static 'vendor/libs/toastr/toastr.js' %}"></script>
+  <script src="{% static 'vendor/libs/sweetalert2/sweetalert2.js' %}"></script>
+
 {% endblock vendor_js %}
 
 {% block page_css %}
   {{ block.super }}
+
+  <style>
+
+  </style>
 
 {% endblock page_css %}
 
@@ -32,283 +42,210 @@
 {% endblock page_js %}
 
 {% block content %}
-  {% include 'students/navbar-student.html' %}
+{% include 'students/navbar-student.html' %}
 
-  <div class="container py-4">
-    <h4 class="mb-4">O‘qituvchilar yuborgan o‘quvchilar ro‘yxati</h4>
+<div class="mt-4">
+    <h2 class="mb-4 text-center">O'quvchilarning To'lovlari</h2>
 
-    <!-- Filters -->
-    <div class="row mb-3">
-      <!-- Filterlar uchun karta -->
-      <div class="col-md-2">
-        <div class="card shadow-sm">
-          <div class="card-body py-2">
-            <label for="teacherFilter" class="form-label mb-1">
-              <i class="ti ti-user fs-5 text-primary me-1"></i> O'qituvchi
-            </label>
-            <select id="teacherFilter" class="form-select form-select-sm">
-              <option value="">Barchasi</option>
-              {% for teacher in teachers %}
-                <option value="{{ teacher.first_name }} {{ teacher.second_name }}">
-                  {{ teacher.first_name|lower|capfirst }} {{ teacher.second_name|lower|capfirst }}
-                </option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- Maktab Filter -->
-      <div class="col-md-2">
-        <div class="card shadow-sm">
-          <div class="card-body py-2">
-            <label for="schoolFilter" class="form-label mb-1">
-              <i class="ti ti-building fs-5 text-secondary me-1"></i> Maktab
-            </label>
-            <select id="schoolFilter" class="form-select form-select-sm">
-              <option value="">Barchasi</option>
-              {% for school in schools %}
-                <option value="{{ school.maktab_raqami }}">
-                  {{ school.maktab_raqami }} - {{ school.nomi }}
-                </option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sinf Filter -->
-      <div class="col-md-2">
-        <div class="card shadow-sm">
-          <div class="card-body py-2">
-            <label for="classFilter" class="form-label mb-1">
-              <i class="ti ti-books fs-5 text-info me-1"></i> Sinf
-            </label>
-            <select id="classFilter" class="form-select form-select-sm">
-              <option value="">Barchasi</option>
-              {% for sinf in sinflar %}
-                <option value="{{ sinf.sinf_raqami }}">
-                  {{ sinf.sinf_raqami }}-{{ sinf.belgisi }}
-                </option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- Kasb Filter -->
-      <div class="col-md-2">
-        <div class="card shadow-sm">
-          <div class="card-body py-2">
-            <label for="occupationFilter" class="form-label mb-1">
-              <i class="ti ti-briefcase fs-5 text-success me-1"></i> Kasb
-            </label>
-            <select id="occupationFilter" class="form-select form-select-sm">
-              <option value="">Barchasi</option>
-              {% for kasb in kasblar %}
-                <option value="{{ kasb.nomi|lower|capfirst }}">{{ kasb.nomi|lower|capfirst }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- Yo'nalish Filter -->
-      <div class="col-md-2">
-        <div class="card shadow-sm">
-          <div class="card-body py-2">
-            <label for="directionFilter" class="form-label mb-1">
-              <i class="ti ti-directions fs-5 text-warning me-1"></i> Yo'nalish
-            </label>
-            <select id="directionFilter" class="form-select form-select-sm">
-              <option value="">Barchasi</option>
-              {% for yonalish in yonalishlar %}
-                <option value="{{ yonalish.nomi|lower|capfirst }}">{{ yonalish.nomi|lower|capfirst }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- Holat Filter -->
-      <div class="col-md-2">
-        <div class="card shadow-sm">
-          <div class="card-body py-2">
-            <label for="statusFilter" class="form-label mb-1">
-              <i class="ti ti-alert-circle fs-5 text-danger me-1"></i> Holati
-            </label>
-            <select id="statusFilter" class="form-select form-select-sm">
-              <option value="">Barchasi</option>
-              <option value="Kutilmoqda">Kutilmoqda</option>
-              <option value="Qabul qilingan">Qabul qilingan</option>
-              <option value="Guruhga qabul qilindi">Guruhga qabul qilindi</option>
-              <option value="Rad etilgan">Rad etilgan</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- Qidiruv Input va Tozalash -->
-      <div class="col-md-3 mt-3 w-100">
-        <div class="card shadow-sm">
-          <div class="card-body py-2">
-            <label for="studentSearch" class="form-label mb-1">
-              <i class="ti ti-search fs-5 text-info me-1"></i> O'quvchi qidirish
-            </label>
-            <div class="input-group input-group-sm">
-              <input
-                type="text"
-                id="studentSearch"
-                class="form-control"
-                placeholder="Ism yoki familiya"
-              />
-              <button id="resetFilters" class="btn btn-danger" type="button">
-                <i class="ti ti-trash"></i>
-              </button>
+    <div class="row">
+        <!-- 📌 Chap taraf: Yillar Sidebar ko‘rinishida -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header text-center fw-bold">Yillar</div>
+                <ul class="list-group list-group-flush">
+                    {% for year in years %}
+                    <li class="list-group-item {% if selected_year == year %}active text-white{% endif %}">
+                        <a href="?year={{ year }}" class="text-decoration-none {% if selected_year == year %}text-white{% else %}text-dark{% endif %} d-block">
+                            {{ year }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
             </div>
-          </div>
         </div>
-      </div>
-    </div>
 
+        <!-- 📌 O'ng taraf: Oylar, Guruhlar va To‘lovlar -->
+        <div class="col-md-9">
+            <!-- 📌 Oylar tanlovi -->
+            <div class="card mb-4">
+                <div class="card-header fw-bold text-center">
+                    {{ selected_year }} yil - {{ selected_month }} oyi bo‘yicha qarzdorlik
+                </div>
+                <div class="card-body d-flex flex-wrap justify-content-center">
+                    {% for month in months %}
+                    <div class="position-relative mx-1 mb-2">
+                        <a href="?year={{ selected_year }}&month={{ month }}"
+                            class="btn btn-sm {% if selected_month == month %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                            {{ month }}
+                        </a>
+                        {% if month_debt_counts|get_item:month %}
+                        <span class="badge bg-danger rounded-circle position-absolute top-0 start-100 translate-middle"
+                            style="width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;">
+                            {{ month_debt_counts|get_item:month }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
 
-    <!-- Static Table -->
-    <div class="table-responsive">
-      <table class="table table-bordered table-hover table-sm">
-        <thead class="table-light">
-          <tr>
-            <th>#</th>
-            <th>O'qituvchi</th>
-            <th>O'quvchi</th>
-            <th>Maktab</th>
-            <th>Sinf</th>
-            <th>Kasb</th>
-            <th>Yo'nalish</th>
-            <th>Holati</th>
-            <th>Birikkan Guruhlar</th>
-            <th>To'lov</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for student in students_in_groups %}
-          <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{{ student.added_by.first_name }} {{ student.added_by.second_name }}</td>
-            <td>{{ student.first_name }} {{ student.last_name }}</td>
-            <td>{{ student.sinf.maktab.nomi }}</td>
-            <td>{{ student.sinf.sinf_raqami }} - {{ student.sinf.belgisi }}</td>
-            <td>{{ student.kasb.nomi }}</td>
-            <td>{{ student.yonalish.nomi }}</td>
-            <td>{{ student.get_status_display }}</td>
-            <td>
-              {% for group in student.added_by.e_groups.all %}
-                <span class="badge bg-info">{{ group.group_name }}</span>
-              {% empty %}
-                <span class="badge bg-secondary">Guruhlar mavjud emas</span>
-              {% endfor %}
-            </td>
-            <td>
-              <button
-                class="btn btn-sm btn-success"
-                data-bs-toggle="modal"
-                data-bs-target="#paymentModal"
-                onclick="openPaymentModal({{ student.id }}, '{{ student.first_name }} {{ student.last_name }}')">
-                To'lov qilish
-              </button>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
+            <!-- 📌 Guruhlar tanlovi -->
+            <div class="card mb-4">
+                <div class="card-header fw-bold">Guruhlar</div>
+                <div class="card-body">
+                    <select id="groupSelect" class="form-select">
+                        <option value="">Guruh tanlang</option>
+                        {% for group in groups %}
+                        <option value="{{ group.id }}" {% if selected_group_id == group.id|stringformat:"s" %}selected{% endif %}>
+                            {{ group.group_name }} - ({{ group.kurs.narxi }} so‘m)
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
 
-  <!-- To'lov Modal -->
-<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="paymentModalLabel">To'lov qilish</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="paymentForm">
-          <input type="hidden" id="studentId" name="student_id">
-          <div class="mb-3">
-            <label for="studentName" class="form-label">O'quvchi ismi</label>
-            <input type="text" class="form-control" id="studentName" readonly>
-          </div>
-          <div class="mb-3">
-            <label for="paymentAmount" class="form-label">To'lov miqdori (UZS)</label>
-            <input type="number" class="form-control" id="paymentAmount" name="payment_amount" required>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bekor qilish</button>
-        <button type="button" class="btn btn-primary" onclick="submitPayment()">To'lovni tasdiqlash</button>
-      </div>
+            <!-- 📌 Tanlangan guruh uchun to‘lovlar jadvali -->
+            <div id="paymentTable">
+                {% for group in group_data %}
+                <div class="card mb-4">
+                    <div class="card-header fw-bold">
+                        {{ group.group_name }} - Kurs narxi: {{ group.kurs_narxi }} so‘m
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>O'quvchi</th>
+                                    <th>Jami qarzdorlik</th>
+                                    <th>Jami to‘langan</th>
+                                    <th>Qolgan qarz</th>
+                                    <th>To‘lov</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in group.students %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ student.full_name }}</td>
+                                    <td class="text-danger fw-bold">{{ student.total_debt|floatformat:0 }} so‘m</td>
+                                    <td class="text-success fw-bold">{{ student.total_paid|floatformat:0 }} so‘m</td>
+                                    <td class="text-warning fw-bold" id="debt-{{ student.id }}">{{ student.remaining_balance|floatformat:0 }} so‘m</td>
+                                    <td>
+                                        {% if student.status == "paid" %}
+                                            <span class="badge bg-success px-3 py-2">
+                                                <i class="fas fa-check-circle"></i> To‘lov qilindi
+                                            </span>
+                                        {% else %}
+                                            <button class="btn btn-sm btn-primary d-flex align-items-center"
+                                                onclick="openPaymentModal({{ student.id }}, '{{ student.full_name }}', {{ student.remaining_balance }}, {{ student.total_debt }}, {{ student.total_paid }}, {{ group.group_id }})">
+                                                <i class="fas fa-money-bill-wave me-1"></i> To‘lov qilish
+                                            </button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">Bu guruhda o‘quvchilar yo‘q</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted text-center">Guruh tanlang!</p>
+                {% endfor %}
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
-  <script>
-  function openPaymentModal(studentId, studentName) {
-  document.getElementById('studentId').value = studentId;
-  document.getElementById('studentName').value = studentName;
-}
+<!-- 📌 To‘lov qilish modal oynasi -->
+<script>
+function openPaymentModal(studentId, studentName, maxAmount, totalDebt, totalPaid, groupId) {
+    Swal.fire({
+        title: `${studentName} uchun to‘lov`,
+        html: `
+            <p><strong>Jami qarzdorlik:</strong> ${totalDebt} so‘m</p>
+            <p><strong>Jami to‘langan:</strong> ${totalPaid} so‘m</p>
+            <div class="input-group mb-3">
+                <input type="number" id="paymentAmount" class="form-control" placeholder="To‘lov summasi" min="1" max="${maxAmount}">
+                <button type="button" id="maxPaymentBtn" class="btn btn-primary">Maksimal</button>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: "To‘lov qilish",
+        cancelButtonText: "Bekor qilish",
+        customClass: {
+            confirmButton: 'btn btn-primary',
+            cancelButton: 'btn btn-secondary'
+        },
+        buttonsStyling: false,
+        didOpen: () => {
+            const maxBtn = document.getElementById("maxPaymentBtn");
+            const paymentInput = document.getElementById("paymentAmount");
 
-function submitPayment() {
-  const studentId = document.getElementById('studentId').value;
-  const paymentAmount = document.getElementById('paymentAmount').value;
+            maxBtn.addEventListener("click", () => {
+                paymentInput.value = maxAmount; // Maksimal summani inputga yozish
+            });
+        },
+        preConfirm: () => {
+            const amount = document.getElementById("paymentAmount").value;
 
-  if (!paymentAmount || paymentAmount <= 0) {
-    alert("Iltimos, to'lov miqdorini kiriting!");
-    return;
-  }
-
-  // To'lovni serverga yuborish
-  fetch("", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-CSRFToken": getCookie("csrftoken"),
-    },
-    body: JSON.stringify({
-      student_id: studentId,
-      payment_amount: paymentAmount,
-    }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.success) {
-        alert("To'lov muvaffaqiyatli qabul qilindi!");
-        document.getElementById("paymentForm").reset();
-        const modal = bootstrap.Modal.getInstance(document.getElementById("paymentModal"));
-        modal.hide();
-        location.reload(); // Sahifani yangilash
-      } else {
-        alert("Xatolik yuz berdi: " + data.message);
-      }
-    })
-    .catch((error) => {
-      console.error("Xatolik yuz berdi:", error);
+            if (!amount || amount <= 0) {
+                Swal.showValidationMessage("To‘lov summasini kiriting!");
+            }
+            if (amount > maxAmount) {
+                Swal.showValidationMessage("To‘lov qarzdorlikdan ko‘p bo‘lishi mumkin emas!");
+            }
+            return amount;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            addPayment(studentId, result.value, groupId);
+        }
     });
 }
 
-function getCookie(name) {
-  let cookieValue = null;
-  if (document.cookie && document.cookie !== "") {
-    const cookies = document.cookie.split(";");
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trim();
-      if (cookie.startsWith(name + "=")) {
-        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-        break;
-      }
-    }
-  }
-  return cookieValue;
+// 📌 AJAX orqali to‘lovni serverga yuborish
+function addPayment(studentId, amount, groupId) {
+    fetch("{% url 'add-payment' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({
+            student_id: studentId,
+            amount_paid: amount,
+            group_id: groupId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        Swal.fire({
+            title: data.success ? "Muvaffaqiyatli!" : "Xatolik!",
+            text: data.message,
+            icon: data.success ? "success" : "error",
+            confirmButtonText: "OK",
+            customClass: {
+                confirmButton: data.success ? "btn btn-success" : "btn btn-danger"
+            },
+            buttonsStyling: false
+        }).then(() => {
+            if (data.success) location.reload();
+        });
+    })
+    .catch(error => console.error("Xatolik:", error));
 }
-  </script>
+</script>
+  <script>
+document.getElementById("groupSelect").addEventListener("change", function () {
+    const groupId = this.value;
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('group_id', groupId);
+    window.location.search = urlParams.toString();
+});
+</script>
 {% endblock %}

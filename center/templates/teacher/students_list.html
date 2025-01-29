@@ -164,19 +164,40 @@ document.addEventListener("DOMContentLoaded", function () {
             </td>
             <td>
               <span class="d-flex justify-content-center align-items-center">
-                {% if student.get_status_display == "Kutilmoqda" %}
-                <i class="ti ti-clock text-warning me-1"></i>
-                <span class="badge bg-warning text-dark">{{ student.get_status_display }}</span>
-                {% elif student.get_status_display == "Qabul qilingan" %}
-                <i class="ti ti-check-circle text-primary me-1"></i>
-                <span class="badge bg-primary">{{ student.get_status_display }}</span>
-                {% elif student.get_status_display == "Guruhga qabul qilindi" %}
-                <i class="ti ti-users text-success me-1"></i>
-                <span class="badge bg-success">{{ student.get_status_display }}</span>
-                {% elif student.get_status_display == "Rad etilgan" %}
-                <i class="ti ti-ban text-danger me-1"></i>
-                <span class="badge bg-danger">{{ student.get_status_display }}</span>
-                {% endif %}
+                {% with student.get_status_display as status %}
+                  {% if status == "Kutilmoqda" %}
+                    <i class="ti ti-clock text-warning me-1"></i>
+                    <span class="badge bg-warning text-dark">{{ status }}</span>
+
+                  {% elif status == "Qabul qilingan" %}
+                    <i class="ti ti-check-circle text-primary me-1"></i>
+                    <span class="badge bg-primary">{{ status }}</span>
+
+                  {% elif status == "Guruhga qabul qilindi" %}
+                    <i class="ti ti-users text-success me-1"></i>
+                    <span class="badge bg-success">{{ status }}</span>
+
+                  {% elif status == "Kurs uchun to'lov" %}
+                    <i class="ti ti-cash text-info me-1"></i>
+                    <span class="badge bg-info">{{ status }}</span>
+
+                  {% elif status == "To‘lov qilindi" %}
+                    <i class="ti ti-check-double text-success me-1"></i>
+                    <span class="badge bg-success">{{ status }}</span>
+
+                  {% elif status == "Qarzdor" %}
+                    <i class="ti ti-alert-circle text-warning me-1"></i>
+                    <span class="badge bg-warning">{{ status }}</span>
+
+                  {% elif status == "Rad etilgan" %}
+                    <i class="ti ti-ban text-danger me-1"></i>
+                    <span class="badge bg-danger">{{ status }}</span>
+
+                  {% else %}
+                    <i class="ti ti-help-circle text-secondary me-1"></i>
+                    <span class="badge bg-secondary">Noma’lum</span>
+                  {% endif %}
+                {% endwith %}
               </span>
             </td>
             <td class="text-muted small">{{ student.created_at|date:"Y-m-d" }}</td>
