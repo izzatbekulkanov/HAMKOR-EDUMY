@@ -64,12 +64,12 @@ class TeacherView(TemplateView):
 
         teacher = self.request.user
 
-        # Foydalanuvchi tekshiruvi
-        if teacher.user_type != "2":  # Faqat o'qituvchilar uchun
+        # Faqat o'qituvchilar uchun ma'lumotlarni olish
+        if teacher.user_type != "2":
             context['error'] = "Sizda statistik ma'lumotlar mavjud emas."
             return context
 
-        # Cashback yozuvlari
+        # Faqat ushbu o‘qituvchiga tegishli cashback yozuvlarini olish
         cashback_records = CashbackRecord.objects.filter(teacher=teacher)
 
         # Umumiy statistikalar
@@ -78,13 +78,11 @@ class TeacherView(TemplateView):
         total_available = total_cashback - total_paid
         total_students = cashback_records.count()
 
-        # Haftalik o'zgarish statistikasi (misol uchun 7 kun ichida qo'shilgan o'quvchilar)
+        # Haftalik o‘zgarish statistikasi
         last_week_students = cashback_records.filter(
             created_at__gte=now() - timedelta(days=7)
         ).count()
-        weekly_change = (
-            ((last_week_students / total_students) * 100) if total_students > 0 else 0
-        )
+        weekly_change = ((last_week_students / total_students) * 100) if total_students > 0 else 0
 
         # Faqat oxirgi 1 kun ichida o'zgargan va ko'rilmagan yozuvlarni olish
         unseen_cashback_records = cashback_records.filter(
@@ -92,41 +90,39 @@ class TeacherView(TemplateView):
             updated_at__gte=now() - timedelta(days=1)
         ).select_related(
             'student', 'student__kasb', 'student__yonalish', 'student__filial', 'student__sinf'
-        ).prefetch_related('student__kurslar')  # Kurslar uchun prefetch_related ishlatiladi
+        ).prefetch_related('student__kurslar')
 
         unseen_cashback_data = []
 
-        # Ko'rilmagan yozuvlarni yig'ish
+        # Ko‘rilmagan cashback yozuvlarini yig‘ish
         for record in unseen_cashback_records:
-            student = record.student
+            student = record.student  # O'quvchi obyektini olish
             unseen_cashback_data.append({
-                "first_name": student.first_name,
-                "last_name": student.last_name,
-                "kasb": student.kasb.nomi if student.kasb else "Noma'lum",
-                "yonalish": student.yonalish.nomi if student.yonalish else "Noma'lum",
-                "kurslar": ", ".join([kurs.nomi for kurs in student.kurslar.all()]),
-                "phone_number": student.phone_number,
-                "status": student.get_status_display(),
+                "first_name": student.first_name if student else "Noma'lum",
+                "last_name": student.last_name if student else "Noma'lum",
+                "kasb": student.kasb.nomi if student and student.kasb else "Noma'lum",
+                "yonalish": student.yonalish.nomi if student and student.yonalish else "Noma'lum",
+                "kurslar": ", ".join([kurs.nomi for kurs in student.kurslar.all()]) if student else "Noma'lum",
+                "phone_number": student.phone_number if student else "Noma'lum",
+                "status": student.get_status_display() if student else "Noma'lum",
                 "created_at": record.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                 "updated_at": record.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
-                "photo_url": student.details.photo.url if student.details and student.details.photo else settings.STATIC_URL + 'default/user.png',
+                "photo_url": student.details.photo.url if student and student.details and student.details.photo else settings.STATIC_URL + 'default/user.png',
             })
 
-        # Foydalanuvchi tomonidan ko'rilgan yozuvlarni yangilash
-        # unseen_cashback_records.update(is_viewed=True)
-
-        # Contextga qo'shish
+        # Contextga qo‘shish
         context.update({
             'total_cashback': total_cashback,
             'total_paid': total_paid,
             'total_available': total_available,
             'total_students': total_students,
             'last_week_students': last_week_students,
-            'weekly_change': round(weekly_change, 2),  # Statistikani 2 xonaga yuvarlaydi
-            'unseen_cashback_data': unseen_cashback_data,  # Ko'rilmagan cashback yozuvlari
+            'weekly_change': round(weekly_change, 2),  # Statistikani 2 xonaga cheklash
+            'unseen_cashback_data': unseen_cashback_data,  # Ko‘rilmagan cashback yozuvlari
         })
 
         return context
+
 
 
 @csrf_exempt

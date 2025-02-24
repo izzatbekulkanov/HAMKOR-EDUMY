@@ -1,0 +1,105 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Mening o'quvchilarim{% endblock %}
+
+{% block vendor_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css' %}" />
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+  {{ block.super }}
+  <script src="{% static 'vendor/libs/moment/moment.js' %}"></script>
+  <script src="{% static 'vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
+{% endblock vendor_js %}
+
+{% block page_js %}
+  {{ block.super }}
+
+{% endblock page_js %}
+
+{% block content %}
+<div class="card p-3">
+    <h4 class="mb-3">📋 To'lovlar markazi</h4>
+
+    <!-- 🔹 Qidirish va Filtrlash -->
+    <form method="GET" class="mb-3">
+        <div class="row">
+            <div class="col-md-3">
+                <label for="sender">📤 To‘lov yuboruvchi:</label>
+                <input type="text" id="sender" name="sender" class="form-control" value="{{ request.GET.sender }}">
+            </div>
+            <div class="col-md-3">
+                <label for="receiver">📥 To‘lov oluvchi:</label>
+                <input type="text" id="receiver" name="receiver" class="form-control" value="{{ request.GET.receiver }}">
+            </div>
+            <div class="col-md-3">
+                <label for="status">📌 Holat:</label>
+                <select id="status" name="status" class="form-control">
+                    <option value="">Barchasi</option>
+                    {% for key, value in status_choices %}
+                    <option value="{{ key }}" {% if request.GET.status == key %}selected{% endif %}>{{ value }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">🔍 Qidirish</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- 🔹 Jadval -->
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>📤 Yuboruvchi</th>
+                <th>📥 Qabul qiluvchi</th>
+                <th>💰 Summasi</th>
+                <th>💳 Karta raqami</th>
+                <th>📌 Holat</th>
+                <th>🕒 Sana</th>
+                <th>🖼 Chek</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for payment in payments %}
+            <tr>
+                <td>{{ payment.sender.username }}</td>
+                <td>{{ payment.receiver.username }}</td>
+                <td>{{ payment.amount }} so‘m</td>
+                <td>{{ payment.card_number }}</td>
+                <td>
+                    {% if payment.status == "pending" %}
+                        <span class="badge bg-warning">Kutilmoqda</span>
+                    {% elif payment.status == "paid" %}
+                        <span class="badge bg-success">To'landi</span>
+                    {% elif payment.status == "delayed" %}
+                        <span class="badge bg-danger">Kechiktirildi</span>
+                    {% endif %}
+                </td>
+                <td>{{ payment.created_at|date:"Y-m-d H:i" }}</td>
+                <td>
+                    {% if payment.proof_image %}
+                        <a href="{{ payment.proof_image.url }}" target="_blank">📄 Rasm</a>
+                    {% elif payment.proof_link %}
+                        <a href="{{ payment.proof_link }}" target="_blank">🔗 Havola</a>
+                    {% else %}
+                        ❌ Yo‘q
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center">📌 Hech qanday to'lov topilmadi.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+

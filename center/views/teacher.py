@@ -1,23 +1,12 @@
 import json
-from collections import defaultdict
-
-from django.utils.formats import number_format
-
-from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count, Sum
-from django.http import JsonResponse, HttpResponseRedirect
-from django.shortcuts import redirect, get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import TemplateView, DetailView, UpdateView
-from django.db import transaction
-from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.generic import TemplateView
 from account.models import CustomUser, CashbackRecord
-from center.models import Center, Filial, Images, SubmittedStudent, Kasb, Yonalish, Kurs, E_groups
+from center.models import Filial, SubmittedStudent, Kasb, Yonalish, Kurs
+from config.send_telegram import send_telegram_message
 from school.models import Sinf, Maktab, Belgisi
 from web_project import TemplateLayout
-from django.utils.decorators import method_decorator
-from django.urls import reverse
+
 
 
 
@@ -32,7 +21,7 @@ class TeacherCashbackView(TemplateView):
             context['error'] = "Sizda cashback yozuvlari yo'q."
             return context
 
-        # Cashback yozuvlarini olish
+        # Faqat o‘ziga tegishli cashback yozuvlarini olish
         cashback_records = CashbackRecord.objects.filter(teacher=teacher).select_related(
             'cashback', 'student', 'student__sinf', 'student__sinf__maktab'
         )
@@ -44,9 +33,14 @@ class TeacherCashbackView(TemplateView):
         total_from_students = 0
         student_count = 0
 
+        # Faqat quyidagi turlarga tegishli cashbacklarni hisobga olish
+        valid_types = {"2", "3", "6"}
+
         cashback_data = []
         for record in cashback_records:
-            maktab = record.student.sinf.maktab if record.student.sinf and record.student.sinf.maktab else None
+            student = record.student  # O'quvchi obyektini olish
+            sinf = student.sinf if student else None  # Sinfni tekshirish
+            maktab = sinf.maktab if sinf else None  # Maktabni tekshirish
             cashback_amount = record.cashback.summasi
 
             # Umumiy summalarni yangilash
@@ -56,23 +50,27 @@ class TeacherCashbackView(TemplateView):
             else:
                 unpaid_cashback += cashback_amount
                 total_from_students += cashback_amount
-                student_count += 1
+
+                # Faqat ma'lum turdagi cashbacklar uchun student_count ni oshirish
+                if record.cashback.type in valid_types:
+                    student_count += 1
 
             cashback_data.append({
-                "maktab_raqami": maktab.maktab_raqami if maktab else "Noma'lum",
-                "maktab_nomi": maktab.nomi if maktab else "Noma'lum",
-                "student": {
-                    "class_number": record.student.sinf.sinf_raqami if record.student.sinf else "Noma'lum",
-                    "belgisi": record.student.belgisi,
-                    "first_name": record.student.first_name,
-                    "last_name": record.student.last_name,
-                    "phone_number": record.student.phone_number,
-                },
+                "cashback_name": record.cashback.name,  # Cashback turi nomi qo'shildi
                 "cashback_amount": cashback_amount,
                 "is_paid": record.is_paid,
                 "created_at": record.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-                "student_status": record.student.get_status_display(),
-                "status_color": self.get_status_color(record.student.status),
+                "maktab_raqami": maktab.maktab_raqami if maktab else "Noma'lum",
+                "maktab_nomi": maktab.nomi if maktab else "Noma'lum",
+                "student": {
+                    "class_number": sinf.sinf_raqami if sinf else "Noma'lum",
+                    "belgisi": student.belgisi if student else "Noma'lum",
+                    "first_name": student.first_name if student else "Noma'lum",
+                    "last_name": student.last_name if student else "Noma'lum",
+                    "phone_number": student.phone_number if student else "Noma'lum",
+                } if student else "O'quvchi ma'lumotlari yo‘q",
+                "student_status": student.get_status_display() if student else "Noma'lum",
+                "status_color": self.get_status_color(student.status if student else None),
             })
 
         # Konteksga summalarni qo‘shish
@@ -81,7 +79,7 @@ class TeacherCashbackView(TemplateView):
         context['paid_cashback'] = paid_cashback
         context['unpaid_cashback'] = unpaid_cashback
         context['total_from_students'] = total_from_students
-        context['student_count'] = student_count
+        context['student_count'] = student_count  # Faqat tegishli cashbacklar bo‘lsa oshiriladi
 
         return context
 
@@ -99,24 +97,25 @@ class TeacherCashbackView(TemplateView):
         return color_map.get(status, 'secondary')  # Default rang: secondary
 
 
+
 class TeacherView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = TemplateLayout.init(self, super().get_context_data(**kwargs))
+        user = self.request.user  # Joriy foydalanuvchi
 
-        # SubmittedStudents ma'lumotlarini olish
-        submitted_students = SubmittedStudent.objects.select_related(
+        # Faqat joriy foydalanuvchi qo'shgan o'quvchilarni olish
+        submitted_students = SubmittedStudent.objects.filter(
+            added_by=user
+        ).select_related(
             'filial', 'sinf', 'kasb', 'yonalish'
         ).prefetch_related('kurslar').order_by('-created_at')
 
         context.update({
             'grades': range(1, 12),  # 1-dan 11-gacha sinflar
-            'submitted_students': submitted_students,  # Talabalar ma'lumotlari
+            'submitted_students': submitted_students,  # Faqat joriy foydalanuvchi qo‘shgan talabalar
         })
         return context
-    @method_decorator(csrf_exempt)
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         try:
@@ -194,9 +193,24 @@ class TeacherView(TemplateView):
             )
             print(f"Yaratilgan talaba: {submitted_student}")  # Debug
 
+
             # Kurslarni bog‘lash
             submitted_student.kurslar.set(kurslar)
             print(f"Talabaga kurslar bog'landi: {kurslar}")  # Debug
+
+
+            # 🔹 **Telegramga xabar yuborish**
+            message = (
+                f"📢 <b>Yangi o'quvchi qo'shildi!</b>\n"
+                f"👤 <b>Ism:</b> {first_name} {last_name}\n"
+                f"📞 <b>Telefon:</b> {phone_number}\n"
+                f"🏫 <b>Maktab:</b> {school.nomi}\n"
+                f"🎓 <b>Kasb:</b> {kasb.nomi}\n"
+                f"📌 <b>Yo‘nalish:</b> {yonalish.nomi}\n"
+                f"🏢 <b>Filial:</b> {filial.location}\n"
+                f"🔖 <b>Sinf:</b> {sinf_raqami} - {belgisi.nomi}\n"
+            )
+            send_telegram_message(message)  # Telegramga xabar yuborish
 
             return JsonResponse({"success": True, "message": "Talaba muvaffaqiyatli qo‘shildi."}, status=201)
 

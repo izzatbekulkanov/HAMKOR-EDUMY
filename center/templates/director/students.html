@@ -1,0 +1,146 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Mening o'quvchilarim{% endblock %}
+
+{% block vendor_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
+<link rel="stylesheet" href="{% static 'vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css' %}" />
+<link rel="stylesheet" href="{% static 'vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css' %}" />
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+{{ block.super }}
+<script src="{% static 'vendor/libs/moment/moment.js' %}"></script>
+<script src="{% static 'vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
+{% endblock vendor_js %}
+
+{% block page_js %}
+{{ block.super }}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // 🔹 DataTable qo‘shish
+    var table = $("#studentsTable").DataTable({
+        "paging": true,
+        "searching": true,
+        "ordering": true,
+        "info": true,
+        "lengthChange": false,
+        "pageLength": 10,
+        "language": {
+            "search": "🔍 Qidirish:",
+            "paginate": {
+                "first": "Birinchi",
+                "last": "Oxirgi",
+                "next": "Keyingi",
+                "previous": "Oldingi"
+            },
+            "zeroRecords": "📌 Cashback topilmadi",
+            "info": "Jami _TOTAL_ ta cashbackdan _START_ - _END_ oralig‘ida ko‘rsatilmoqda",
+            "infoEmpty": "📌 Ma'lumot yo‘q",
+            "infoFiltered": "(Jami _MAX_ cashbackdan filtrlandi)"
+        }
+    });
+
+    // 🔹 Foydalanuvchi bo‘yicha filtr
+    $("#filterUser").on("change", function () {
+        let val = $(this).val();
+        table.column(1).search(val).draw();
+    });
+
+    // 🔹 Cashback turi bo‘yicha filtr
+    $("#filterType").on("change", function () {
+        let val = $(this).val();
+        table.column(3).search(val).draw();
+    });
+});
+</script>
+
+{% endblock page_js %}
+
+{% block content %}
+
+<div class="card p-3">
+    <h4 class="mb-3">📋 O‘quvchilar ro‘yxati</h4>
+
+    <!-- 🔹 Filtrlar -->
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <label for="filterCourse">📚 Kurs:</label>
+            <select id="filterCourse" class="form-control">
+                <option value="">Barchasi</option>
+                {% for kurs in kurslar %}
+                <option value="{{ kurs.id }}" class="text-dark">{{ kurs.nomi }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="filterDirection">📌 Yo‘nalish:</label>
+            <select id="filterDirection" class="form-control">
+                <option value="">Barchasi</option>
+                {% for yonalish in yonalishlar %}
+                <option value="{{ yonalish.id }}">{{ yonalish.nomi }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="searchTeacher">👨‍🏫 O‘qituvchi:</label>
+            <input type="text" id="searchTeacher" class="form-control" placeholder="O‘qituvchi ismini yozing...">
+        </div>
+        <div class="col-md-3">
+            <label for="searchStudent">🔍 Talaba:</label>
+            <input type="text" id="searchStudent" class="form-control" placeholder="Ism yoki familiya...">
+        </div>
+    </div>
+
+    <!-- 🔹 Jadval -->
+    <table id="studentsTable" class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>👤 Ism-Familiya</th>
+                <th>📚 Kurs</th>
+                <th>📌 Yo‘nalish</th>
+                <th>👨‍💼 Kabsi</th>
+                <th>👨‍🏫 O‘qituvchi</th>
+                <th>📅 Qo‘shilgan sana</th>
+                <th>🔍 Holat</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ student.first_name }} {{ student.last_name }}</td>
+                <td>
+                    {% for kurs in student.kurslar.all %}
+                    <span class="badge bg-primary">{{ kurs.nomi }}</span>
+                    {% endfor %}
+                </td>
+                <td>{{ student.yonalish.nomi }}</td>
+                <td>{{ student.kasb.nomi }}</td>
+                <td>{{ student.added_by.get_full_name }}</td>
+                <td>{{ student.created_at|date:"Y-m-d" }}</td>
+                <td>
+                    {% if student.status == "pending" %}
+                        <span class="badge bg-warning">Kutilmoqda</span>
+                    {% elif student.status == "accepted" %}
+                        <span class="badge bg-success">Qabul qilingan</span>
+                    {% elif student.status == "accept_group" %}
+                        <span class="badge bg-info">Guruhga qabul qilindi</span>
+                    {% elif student.status == "rejected" %}
+                        <span class="badge bg-danger">Rad etilgan</span>
+                    {% elif student.status == "paid" %}
+                        <span class="badge bg-success">To‘lov qilindi</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock content %}

@@ -219,12 +219,23 @@ class SubmittedStudent(models.Model):
     # Qo'shgan foydalanuvchi
     added_by = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Qo'shgan foydalanuvchi")
 
+    # ✅ Qabul qilgan foydalanuvchi
+    accepted_by = models.ForeignKey(
+        get_user_model(),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Qabul qilgan foydalanuvchi",
+        related_name="accepted_students"
+    )
+
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaratilgan vaqti")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Yangilangan vaqti")
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {self.status}"
+
 
 class StudentDetails(models.Model):
     student = models.OneToOneField(
@@ -374,3 +385,24 @@ class PaymentRecord(models.Model):
             'total_lessons_in_month': total_lessons_in_month,
             'attended_lessons': attended_lessons,
         }
+
+class PaymentOrder(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Kutilmoqda"),
+        ("paid", "To'landi"),
+        ("delayed", "Kechiktirildi"),
+    ]
+
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_payments", verbose_name="To‘lov yuboruvchi")
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name="received_payments", verbose_name="To‘lov oluvchi")
+    amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="To‘lov summasi")
+    card_number = models.CharField(max_length=16, verbose_name="Plastik karta raqami")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pending", verbose_name="To‘lov holati")
+    proof_image = models.ImageField(upload_to="payment_proofs/", null=True, blank=True, verbose_name="To‘lov cheki (rasm)")
+    proof_link = models.URLField(null=True, blank=True, verbose_name="To‘lov cheki havolasi")
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="updated_payments", verbose_name="Tahrir qilgan foydalanuvchi")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaratilgan sana")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Yangilangan sana")
+
+    def __str__(self):
+        return f"{self.sender} → {self.receiver}: {self.amount} so‘m | {self.get_status_display()}"

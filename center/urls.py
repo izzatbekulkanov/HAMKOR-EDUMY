@@ -1,15 +1,19 @@
 from django.urls import path
 
+from center.views.addStudents import AddStudentCenterView
 from center.views.center import CenterView, CenterDetailView
 from center.views.course import CoursesView
+from center.views.director import DirectorStudentView, DirectorCashbackView
 from center.views.egroups import LearningGroupView, add_or_remove_day
 from center.views.fillial import FilialDetailUpdateView
 from center.views.lines import LinesView, LinesDetailView
 from center.views.occupation import OccupationsView, OccupationsDetailView
+from center.views.payment import PaymentCenterView, create_payment_request
 from config.decorators import verified_required
 from center.views.student import StudentView, AddGroupStudentView, PayStudentView, BlockStudentView, \
     StatisticsStudentView, get_groups, add_payment
 from center.views.teacher import TeacherView, TeacherCashbackView
+
 
 urlpatterns = [
     path("learning-center/", verified_required(CenterView.as_view(template_name="learning_center.html")),name="learning-center"),
@@ -47,4 +51,14 @@ urlpatterns = [
     # New URL pattern for Filial Detail View
     path("filial-detail/<int:pk>/", verified_required(FilialDetailUpdateView.as_view(template_name="fillial_details.html")), name="filial-detail" ),
     path("center-detail/<int:pk>/", verified_required(CenterDetailView.as_view(template_name="center_detail.html")), name="center-detail" ),
+
+    path("director_students/", verified_required(DirectorStudentView.as_view(template_name="director/students.html")),name="director-students"),
+    path("director_cashback/", verified_required(DirectorCashbackView.as_view(template_name="director/cashbacks.html")),name="director-cashback"),
+    path("payment_center/", verified_required(PaymentCenterView.as_view(template_name="payment.html")),name="payment-center"),
+    path('create_payment_request/', create_payment_request, name='create_payment_request'),
+
+    path("add-student-center-view/", verified_required(AddStudentCenterView.as_view(template_name="add-students.html")),name="add-student-center-view"),
+
+
+
 ]

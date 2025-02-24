@@ -35,38 +35,106 @@
 {% block page_js %}
   {{ block.super }}
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const paidButton = document.getElementById('paid_button');
-      const totalCashback = {{ total_cashback|default:0 }};
+document.addEventListener('DOMContentLoaded', function() {
+    const paidButton = document.getElementById('paid_button');
 
-      if (paidButton) {
+    if (paidButton) {
         paidButton.addEventListener('click', function() {
-          if (totalCashback < 200000) {
-            Swal.fire({
-              icon: 'warning',
-              title: 'Eslatma',
-              text: 'Siz hali minimal 200 ming so\'m jamg\'armadingiz.',
-              confirmButtonText: 'OK',
-              customClass: {
-                confirmButton: 'btn btn-primary'
-              },
-              buttonsStyling: false
+            let cardNumber = document.getElementById('cardNumber').value;
+            let withdrawAmount = document.getElementById('withdrawAmount').value;
+            let totalCashback = parseFloat("{{ total_cashback|default:0 }}");
+
+            if (totalCashback < 20000) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Eslatma',
+                    text: 'Siz hali minimal 200 ming so\'m jamg\'armadingiz.',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        confirmButton: 'btn btn-primary'
+                    },
+                    buttonsStyling: false
+                });
+                return;
+            }
+
+            if (!cardNumber || !withdrawAmount) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Xatolik!',
+                    text: 'Iltimos, barcha maydonlarni to‘ldiring.',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        confirmButton: 'btn btn-danger'
+                    },
+                    buttonsStyling: false
+                });
+                return;
+            }
+
+            let paymentData = {
+                card_number: cardNumber,
+                amount: withdrawAmount.replace(/,/g, '')  // Summani to'g'ri formatga keltirish
+            };
+
+            fetch("{% url 'create_payment_request' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCSRFToken()
+                },
+                body: JSON.stringify(paymentData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Yuborish muvaffaqiyatli!',
+                        text: 'Pul uchun arizangiz muvaffaqiyatli yuborildi.',
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            confirmButton: 'btn btn-success'
+                        },
+                        buttonsStyling: false
+                    }).then(() => {
+                        window.location.reload();  // Sahifani yangilash
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Xatolik!',
+                        text: data.error,
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            confirmButton: 'btn btn-danger'
+                        },
+                        buttonsStyling: false
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Xatolik:", error);
             });
-          } else {
-            Swal.fire({
-              icon: 'success',
-              title: 'Yuborish muvaffaqiyatli!',
-              text: 'Pul muvaffaqiyatli yuborildi.',
-              confirmButtonText: 'OK',
-              customClass: {
-                confirmButton: 'btn btn-success'
-              },
-              buttonsStyling: false
-            });
-          }
         });
-      }
+    }
+});
+
+// 📌 CSRF token olish funksiyasi
+function getCSRFToken() {
+    let cookieValue = null;
+    let cookies = document.cookie.split(";");
+
+    cookies.forEach(cookie => {
+        let trimmedCookie = cookie.trim();
+        if (trimmedCookie.startsWith("csrftoken=")) {
+            cookieValue = trimmedCookie.substring("csrftoken=".length, trimmedCookie.length);
+        }
     });
+
+    return cookieValue;
+}
+
   </script>
 {% endblock page_js %}
 
@@ -110,7 +178,7 @@
         <div class="col-md-6 col-lg-3 mb-4">
           <div class="card text-center shadow-sm">
             <div class="card-body">
-              <h5 class="card-title">O'quvchilardan Tushgan</h5>
+              <h5 class="card-title">Barcha keshbeklar</h5>
               <p class="fs-4 text-info fw-bold">{{ total_from_students|intcomma }} so'm</p>
               <p class="text-muted">({{ student_count }} o'quvchidan tushgan)</p>
             </div>
@@ -130,6 +198,7 @@
               <tr>
                 <th>Maktab</th>
                 <th>O'quvchi</th>
+                <th>Keshbek Nomi</th> <!-- Yangi ustun qo'shildi -->
                 <th>Keshbek Miqdori</th>
                 <th>To'langan</th>
                 <th>Yaratilgan</th>
@@ -151,6 +220,9 @@
                     Telefon: {{ record.student.phone_number|phone_format }}
                   </td>
 
+                  <!-- Cashback nomi qo‘shildi -->
+                  <td>{{ record.cashback_name }}</td>
+
                   <!-- Keshbek tafsilotlari -->
                   <td>{{ record.cashback_amount|intcomma }} so'm</td>
                   <td>
@@ -169,7 +241,7 @@
               </tbody>
               <tfoot>
               <tr>
-                <th colspan="2" class="text-end">Jami:</th>
+                <th colspan="3" class="text-end">Jami:</th> <!-- Colspan 2 -> 3 qilib o‘zgartirildi -->
                 <th>{{ total_cashback|intcomma }} so'm</th>
                 <th colspan="3"></th>
               </tr>
@@ -179,55 +251,49 @@
         </div>
       </div>
 
-
       <!-- Yechish Uchun Form -->
-      <div class="card mt-4">
-        <div class="card-header">
-          <h5 class="card-title mb-0">Pul Yechish</h5>
-        </div>
-        <div class="card-body">
-          <form>
+      <!-- Yechish Uchun Form -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Pul Yechish</h5>
+    </div>
+    <div class="card-body">
+        <form>
             <div class="row g-3">
-              <!-- Plastik Raqam -->
-              <div class="col-md-6">
-                <label for="cardNumber" class="form-label">Plastik Raqam</label>
-                <input
-                  type="text"
-                  id="cardNumber"
-                  class="form-control"
-                  placeholder="8600 1234 5678 9012"
-                  maxlength="19"
-                  required
-                />
-              </div>
+                <!-- Plastik Raqam -->
+                <div class="col-md-6">
+                    <label for="cardNumber" class="form-label">Plastik Raqam</label>
+                    <input
+                        type="text"
+                        id="cardNumber"
+                        class="form-control"
+                        placeholder="8600 1234 5678 9012"
+                        maxlength="19"
+                        required
+                    />
+                </div>
 
-              <!-- Yechiladigan Summa -->
-              <div class="col-md-6">
-                <label for="withdrawAmount" class="form-label">Yechiladigan Summa</label>
-                <input
-                  type="text"
-                  id="withdrawAmount"
-                  class="form-control"
-                  placeholder="1,200,000"
-                  required
-                />
-              </div>
+                <!-- Yechiladigan Summa -->
+                <div class="col-md-6">
+                    <label for="withdrawAmount" class="form-label">Yechiladigan Summa</label>
+                    <input
+                        type="text"
+                        id="withdrawAmount"
+                        class="form-control"
+                        placeholder="1,200,000"
+                        required
+                    />
+                </div>
             </div>
 
             <div class="mt-4 text-end">
-              {% if total_cashback < 200000 %}
-                <button type="button" class="btn btn-success" id="paid_button" >
-                  <i class="ti ti-credit-card"></i> Yuborish
-                </button>
-              {% else %}
                 <button type="button" class="btn btn-success" id="paid_button">
-                  <i class="ti ti-credit-card"></i> Yuborish
+                    <i class="ti ti-credit-card"></i> Yuborish
                 </button>
-              {% endif %}
             </div>
-          </form>
-        </div>
-      </div>
+        </form>
+    </div>
+</div>
     </div>
   </div>
 {% endblock %}

@@ -166,7 +166,7 @@ class CashbackAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('name', 'summasi', 'parent_summ', 'type', 'user_type')
+            'fields': ('name', 'summasi', 'parent_summ', 'type', 'user_type', 'center')
         }),
         ('Status', {
             'fields': ('is_active',)

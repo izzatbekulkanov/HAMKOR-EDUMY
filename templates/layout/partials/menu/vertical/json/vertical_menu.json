@@ -4,7 +4,6 @@
       "menu_header": "Foydalanuvchilar",
       "allowed_roles": [
         "6",
-
         "5"
       ]
     },
@@ -41,9 +40,9 @@
       "icon": "menu-icon tf-icons ti ti-briefcase",
       "slug": "layouts",
       "allowed_roles": [
-            "5",
-            "4"
-          ],
+        "5",
+        "4"
+      ],
       "submenu": [
         {
           "url": "occupations",
@@ -77,6 +76,25 @@
       "allowed_roles": [
         "5",
         "4"
+      ]
+    },
+    {
+      "url": "add-student-center-view",
+      "name": "O'quvchi qo'shish",
+      "icon": "menu-icon tf-icons ti ti-user-plus",
+      "slug": "add-student-center-view",
+      "allowed_roles": [
+        "5",
+        "4"
+      ]
+    },
+    {
+      "url": "payment-center",
+      "name": "To'lov bo'limi",
+      "icon": "menu-icon tf-icons ti ti-credit-card",
+      "slug": "payment-center",
+      "allowed_roles": [
+        "5"
       ]
     },
     {
@@ -184,6 +202,24 @@
       "slug": "main-teacher",
       "allowed_roles": [
         "2"
+      ]
+    },
+    {
+      "url": "director-students",
+      "name": "Mening o'quvchilarim",
+      "icon": "menu-icon tf-icons ti ti-users",
+      "slug": "director-students",
+      "allowed_roles": [
+        "3"
+      ]
+    },
+    {
+      "url": "director-cashback",
+      "name": "Cashback boshqaruvi",
+      "icon": "menu-icon tf-icons ti ti-coin",
+      "slug": "director-cashback",
+      "allowed_roles": [
+        "3"
       ]
     },
     {

@@ -196,7 +196,9 @@ class Cashback(models.Model):
 
     name = models.CharField(max_length=255, verbose_name="Cashback turi")
     summasi = models.BigIntegerField(verbose_name="Cashback summa", default=0)
+    percentage = models.FloatField(verbose_name="Cashback foizi", default=0.0)  # ✅ Cashback foizi
     parent_summ = models.BigIntegerField(verbose_name="Parent uchun summa", default=0)
+    parent_percentage = models.FloatField(verbose_name="Ota-onaga foiz", default=0.0)  # ✅ Ota-onalar uchun foiz
     type = models.CharField(max_length=20, choices=type_choices, verbose_name="Turi", null=True, blank=True)
     user_type = models.CharField(max_length=20, choices=user_type_choices, verbose_name="Foydalanuvchi turi")
     submitted_student = models.ForeignKey(
@@ -228,14 +230,16 @@ class Cashback(models.Model):
 class CashbackRecord(models.Model):
     cashback = models.ForeignKey(Cashback, on_delete=models.CASCADE, verbose_name="Asosiy Cashback")
     teacher = models.ForeignKey('account.CustomUser', on_delete=models.CASCADE, verbose_name="O'qituvchi")
-    student = models.ForeignKey('center.SubmittedStudent', on_delete=models.CASCADE, verbose_name="O'quvchi")
+    student = models.ForeignKey('center.SubmittedStudent', on_delete=models.CASCADE, verbose_name="O'quvchi", null=True, blank=True)  # 🔹 null va blank qo'shildi
     is_viewed = models.BooleanField(default=False, verbose_name="Ko'rilganmi")
     is_paid = models.BooleanField(default=False, verbose_name="To'langanmi")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaratilgan vaqti")
-    updated_at = models.DateTimeField(auto_now=True, verbose_name="Yangilangan vaqti")  # Yangilandi
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Yangilangan vaqti")
+    summasi = models.BigIntegerField(verbose_name="Cashback summa", default=0)
 
     def __str__(self):
         return f"{self.cashback.name} - {self.teacher.first_name} {self.teacher.second_name} uchun"
+
 
 class UserActivity(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="activities", verbose_name="Foydalanuvchi")

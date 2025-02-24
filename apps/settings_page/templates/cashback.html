@@ -51,17 +51,33 @@
                            placeholder="Cashback nomini kiriting" required>
                   </div>
                   <div class="row">
+                    <!-- Cashback summa va foiz -->
                     <div class="mb-3 col-6">
-                      <label for="cashbackAmount" class="form-label">Summasi</label>
-                      <input type="number" id="cashbackAmount" name="summasi" class="form-control"
-                             placeholder="Cashback summasini kiriting" required>
+                      <label for="cashbackAmount" class="form-label">Cashback Summasi va Foiz</label>
+                      <div class="input-group">
+                        <span class="input-group-text"><i class="ti ti-currency-dollar"></i></span>
+                        <input type="number" id="cashbackAmount" name="summasi" class="form-control"
+                               placeholder="Cashback summasini kiriting" >
+                        <span class="input-group-text"><i class="ti ti-percentage"></i></span>
+                        <input type="number" id="cashbackPercentage" name="percentage" class="form-control"
+                               placeholder="Foiz" min="0" max="100" step="0.01" >
+                      </div>
                     </div>
+
+                    <!-- Parent summa va ota-ona foizi -->
                     <div class="mb-3 col-6">
-                      <label for="cashbackAmount" class="form-label">Parent Summasi</label>
-                      <input type="number" id="cashbackParentAmount" name="parent_summasi" class="form-control"
-                             placeholder="Cashback summasini kiriting" required>
+                      <label for="cashbackParentAmount" class="form-label">Parent Summasi va Foiz</label>
+                      <div class="input-group">
+                        <span class="input-group-text"><i class="ti ti-user"></i></span>
+                        <input type="number" id="cashbackParentAmount" name="parent_summasi" class="form-control"
+                               placeholder="Parent cashback summasi" >
+                        <span class="input-group-text"><i class="ti ti-percentage"></i></span>
+                        <input type="number" id="parentPercentage" name="parent_percentage" class="form-control"
+                               placeholder="Ota-ona foizi" min="0" max="100" step="0.01" >
+                      </div>
                     </div>
                   </div>
+
                 </div>
                 <div class="col-6">
                   <div class="mb-3">
@@ -86,6 +102,7 @@
               </div>
               <button type="submit" class="btn btn-primary w-100">Qo'shish</button>
             </form>
+
           </div>
         </div>
       </div>

@@ -16,6 +16,7 @@ import base64
 from account.models import CustomUser, Cashback, CashbackRecord
 from center.models import Center, Filial, Images, SubmittedStudent, Kasb, Yonalish, Kurs, E_groups, StudentDetails, \
     GroupMembership, PaymentRecord
+from config.send_telegram import send_telegram_message
 from school.models import Maktab, Sinf
 from web_project import TemplateLayout
 from django.utils.timezone import now
@@ -60,6 +61,13 @@ class StudentView(TemplateView):
         })
         return context
 
+    from django.db import transaction
+    from django.http import JsonResponse
+    from django.shortcuts import get_object_or_404
+    import base64
+    from django.core.files.base import ContentFile
+    from datetime import datetime
+
     def post(self, request, *args, **kwargs):
         try:
             print("📩 [DEBUG] POST so'rovi qabul qilindi.")  # Debug log
@@ -101,49 +109,97 @@ class StudentView(TemplateView):
                     print(f"❌ [DEBUG] Rasm dekodlashda xatolik: {str(e)}")  # Debug
                     return JsonResponse({'success': False, 'message': "Rasmni qayta yuklang!"}, status=400)
 
-            # **📌 Talabaning ma'lumotlarini saqlash**
-            with transaction.atomic():
-                student_details, created = StudentDetails.objects.update_or_create(
-                    student=student,
-                    defaults={
-                        'birth_date': birth_date,
-                        'gender': gender,
-                        'address': address,
-                        'parent_name': parent_name,
-                        'parent_phone': parent_phone,
-                        'photo': photo_file,
-                    }
-                )
-                print(f"✅ [DEBUG] StudentDetails yangilandi: {student_details}")  # Debug
+            try:
+                with transaction.atomic():
+                    # **📌 Talabaning ma'lumotlarini saqlash**
+                    student_details, created = StudentDetails.objects.update_or_create(
+                        student=student,
+                        defaults={
+                            'birth_date': birth_date,
+                            'gender': gender,
+                            'address': address,
+                            'parent_name': parent_name,
+                            'parent_phone': parent_phone,
+                            'photo': photo_file,
+                        }
+                    )
+                    print(f"✅ [DEBUG] StudentDetails yangilandi: {student_details}")  # Debug
 
-                # **📌 Talabaning holatini yangilash**
-                student.status = 'accepted'
-                student.save()
-                print("✅ [DEBUG] Talabaning holati 'accepted' deb belgilandi.")  # Debug
+                    # **📌 Talabaning holatini yangilash**
+                    student.status = 'accepted'
+                    student.accepted_by = request.user
+                    student.save()
+                    print("✅ [DEBUG] Talabaning holati 'accepted' deb belgilandi.")  # Debug
 
-                # **📌 O'qituvchiga cashback tayinlash**
-                teacher = student.added_by
-                if teacher and getattr(teacher, 'user_type', None) == "2":  # O'qituvchi ekanligini tekshirish
-                    cashback = Cashback.objects.filter(type="2", user_type="2", is_active=True).first()
+                    # **📌 O'qituvchiga cashback tayinlash**
+                    teacher = student.added_by
+                    if teacher and getattr(teacher, 'user_type', None) == "2":  # O'qituvchi ekanligini tekshirish
+                        cashback = Cashback.objects.filter(type="2", user_type="2", is_active=True).first()
 
-                    if cashback:
-                        cashback_record, created = CashbackRecord.objects.get_or_create(
+                        if not cashback:
+                            # 🔹 **Telegramga xabar yuborish**
+                            message = (
+                                f"📢 <b>#Xatolik !</b>\n"
+                                f"👤 <b>Kashback topilmadi</b>\n"
+                            )
+                            send_telegram_message(message)  # Telegramga xabar yuborish
+
+                            return JsonResponse({
+                                'success': False,
+                                'message': "Talaba maʼlumotlari saqlanmadi! Cashback topilmadi."
+                            }, status=400)
+
+                        # **📌 CashbackRecord yaratish**
+                        cashback_record = CashbackRecord.objects.create(
                             cashback=cashback,
                             teacher=teacher,
                             student=student,
                         )
-                        print(f"✅ [DEBUG] CashbackRecord yaratildi: {cashback_record}")  # Debug
-                    else:
-                        print("⚠️ [DEBUG] Cashback topilmadi, lekin jarayon davom etmoqda.")  # Debug
+
+                        # **📌 Direktor uchun cashback**
+                        school = getattr(teacher, 'maktab', None)
+                        if school:
+                            director = CustomUser.objects.filter(user_type="3", maktab=school).first()
+                            if director:
+                                CashbackRecord.objects.create(
+                                    cashback=cashback,
+                                    teacher=director,
+                                    student=student,
+                                    summasi=cashback.parent_summ
+                                )
+                                message = (
+                                    f"📢 <b>✅ Direktor uchun CashbackRecord yaratildi.</b>\n"
+                                )
+                                send_telegram_message(message)  # Telegramga xabar yuborish
+                                print(f"✅ [DEBUG] Direktor uchun CashbackRecord yaratildi.")  # Debug
+                            else:
+                                message = (
+                                    f"📢 <b>#Xatolik !</b>\n"
+                                    f"👤 <b>Direktor mavjud emasligi uchun cashback birikmadi</b>\n"
+                                )
+                                send_telegram_message(message)  # Telegramga xabar yuborish
+                        else:
+                            message = (
+                                f"📢 <b>#Xatolik !</b>\n"
+                                f"👤 <b>O‘qituvchining maktabi topilmadi</b>\n"
+                            )
+                            send_telegram_message(message)  # Telegramga xabar yuborish
+
+            except Exception as e:
+                print(f"❌ [ERROR] {str(e)}")  # Xatolikni konsolga chiqarish
+                return JsonResponse({
+                    'success': False,
+                    'message': f"Talaba maʼlumotlari saqlanmadi! Xatolik: {str(e)}"
+                }, status=500)
 
             return JsonResponse({
                 'success': True,
-                'message': "Talaba maʼlumotlari muvaffaqiyatli saqlandi va qabul qilindi!"
+                'message': "Talaba ma'lumotlari muvaffaqiyatli saqlandi!"
             })
 
         except Exception as e:
-            print(f"❌ [DEBUG] Xatolik yuz berdi: {str(e)}")  # Debug
-            return JsonResponse({'success': False, 'message': f"Xatolik yuz berdi: {str(e)}"}, status=500)
+            print(f"❌ [ERROR] {str(e)}")  # Xatolikni konsolga chiqarish
+            return JsonResponse({'success': False, 'message': f"Ichki xatolik: {str(e)}"}, status=500)
 
 
 class AddGroupStudentView(TemplateView):
@@ -263,6 +319,16 @@ class AddGroupStudentView(TemplateView):
                     attended_lessons=payment_data['attended_lessons'],
                     course_total_price=group.kurs.narxi,
                 )
+
+                # ✅ **Telegramga xabar yuborish**
+                message = (
+                    f"✅ <b>Yangi guruh aʼzosi!</b>\n"
+                    f"👤 <b>{student.first_name} {student.last_name}</b>\n"
+                    f"🏫 <b>Guruh:</b> {group.group_name}\n"
+                    f"💰 <b>Qarzdorlik:</b> {payment_data['total_debt']} so'm\n"
+                    f"📅 <b>Sana:</b> {date.today().strftime('%Y-%m-%d')}\n"
+                )
+                send_telegram_message(message)
 
                 return JsonResponse({
                     "success": True,
@@ -409,7 +475,8 @@ def add_payment(request):
                     payment_record.remaining_balance = 0
 
                 payment_record.save()
-                print(f"✅ [DEBUG] Yangi to‘lov kiritildi: {amount_paid} so‘m | Qolgan qarz: {payment_record.remaining_balance}")
+                print(
+                    f"✅ [DEBUG] Yangi to‘lov kiritildi: {amount_paid} so‘m | Qolgan qarz: {payment_record.remaining_balance}")
 
                 # **📌 Agar qarzdorlik yopilgan bo‘lsa, `SubmittedStudent` holatini `paid`ga o‘zgartirish**
                 if payment_record.remaining_balance == 0:
@@ -418,26 +485,23 @@ def add_payment(request):
                     print("✅ [DEBUG] Talabaning holati 'paid' ga o‘zgartirildi.")
 
                 # **📌 O‘qituvchiga cashback hisoblash (10%)**
-                teacher = student.added_by
-                teacher_cashback_amount = (amount_paid * 10) // 100  # **Butun son olish uchun `//` ishlatilgan**
+                teacher = student.added_by if student.added_by else None
 
                 if teacher and teacher.user_type == "2":  # Faqat o‘qituvchilar uchun cashback
-                    cashback, _ = Cashback.objects.get_or_create(
-                        name="Kurs uchun to‘lov",
-                        type="3",
-                        user_type="2",
-                        is_active=True
-                    )
+                    cashback = Cashback.objects.filter(type="3", user_type="2", is_active=True).first()
 
-                    cashback_record, created = CashbackRecord.objects.get_or_create(
-                        cashback=cashback,
-                        teacher=teacher,
-                        student=student,
-                        defaults={"is_paid": False}
-                    )
-                    cashback_record.cashback.summasi += teacher_cashback_amount
-                    cashback_record.cashback.save()
-                    print(f"💰 [DEBUG] O‘qituvchiga cashback qo‘shildi: {teacher_cashback_amount} so‘m")
+                    if cashback:
+                        teacher_cashback_amount = (amount_paid * int(
+                            cashback.percentage)) // 100  # **Butun son olish uchun `//` ishlatilgan**
+
+                        CashbackRecord.objects.create(
+                            cashback=cashback,
+                            teacher=teacher,
+                            student=student,
+                            summasi=teacher_cashback_amount  # **Faqat ushbu yozuvga tegishli cashback**
+                        )
+
+                        print(f"💰 [DEBUG] O‘qituvchiga cashback qo‘shildi: {teacher_cashback_amount} so‘m")
 
                 # **📌 Maktab direktori uchun cashback hisoblash (5%)**
                 school_director = None
@@ -447,25 +511,30 @@ def add_payment(request):
                         user_type="3"  # Direktor user_type=3
                     ).first()
 
-                director_cashback_amount = (amount_paid * 5) // 100  # **Butun son olish uchun `//` ishlatilgan**
+                if cashback and school_director:
+                    director_cashback_amount = (amount_paid * int(
+                        cashback.parent_percentage)) // 100  # **Butun son olish uchun `//` ishlatilgan**
 
-                if school_director:
-                    director_cashback, _ = Cashback.objects.get_or_create(
-                        name="Maktab direktori cashback",
-                        type="5",
-                        user_type="3",
-                        is_active=True
-                    )
-
-                    director_cashback_record, created = CashbackRecord.objects.get_or_create(
-                        cashback=director_cashback,
+                    CashbackRecord.objects.create(
+                        cashback=cashback,
                         teacher=school_director,
                         student=student,
-                        defaults={"is_paid": False}
+                        summasi=director_cashback_amount  # **Faqat ushbu yozuvga tegishli cashback**
                     )
-                    director_cashback_record.cashback.summasi += director_cashback_amount
-                    director_cashback_record.cashback.save()
+
                     print(f"💰 [DEBUG] Direktorga cashback qo‘shildi: {director_cashback_amount} so‘m")
+
+            # 📌 Telegramga xabar yuborish
+            message = (
+                f"💰 <b>Yangi to‘lov!</b>\n"
+                f"👤 <b>Talaba:</b> {student.first_name} {student.last_name}\n"
+                f"📅 <b>Sana:</b> {today.strftime('%d-%m-%Y')}\n"
+                f"💵 <b>To‘langan summa:</b> {amount_paid} so‘m\n"
+                f"📉 <b>Qolgan qarz:</b> {payment_record.remaining_balance} so‘m\n"
+                f"🎓 <b>O‘qituvchi cashback:</b> {teacher_cashback_amount if teacher else 0} so‘m\n"
+                f"🏫 <b>Direktor cashback:</b> {director_cashback_amount if school_director else 0} so‘m"
+            )
+            send_telegram_message(message)  # ✅ Telegramga xabar yuborish
 
             return JsonResponse({
                 "success": True,
@@ -473,9 +542,11 @@ def add_payment(request):
                 "total_paid": payment_record.amount_paid,
                 "remaining_balance": payment_record.remaining_balance,
                 "student_status": student.status,
-                "teacher_cashback": teacher_cashback_amount,
+                "teacher_cashback": teacher_cashback_amount if teacher else 0,
                 "director_cashback": director_cashback_amount if school_director else 0
             })
+
+
 
         except Exception as e:
             print(f"❌ [DEBUG] Xatolik yuz berdi: {str(e)}")
@@ -483,6 +554,7 @@ def add_payment(request):
 
     print("❌ [DEBUG] Xato so‘rov turi!")
     return JsonResponse({"success": False, "message": "Xato so‘rov turi!"}, status=400)
+
 
 class BlockStudentView(TemplateView):
 

@@ -4,69 +4,74 @@ from account.models import Cashback, CustomUser
 from django.forms.models import model_to_dict
 
 from center.models import Center
+from config.send_telegram import send_telegram_message
 
 
-# Cashback yaratish uchun API
+# ✅ Cashback API View
 class AddCashbackAPIView(View):
     def post(self, request, *args, **kwargs):
         try:
-            name = request.POST.get('name')
-            summasi = request.POST.get('summasi')
-            cashback_type = request.POST.get('type')
-            user_type = request.POST.get('user_type')
-            parent_summasi = request.POST.get('parent_summasi')
+            # 📌 Ma'lumotlarni olish
+            data = {key: request.POST.get(key, "").strip() for key in [
+                "name", "summasi", "type", "user_type", "parent_summasi", "percentage", "parent_percentage"
+            ]}
 
-            if not all([name, summasi, cashback_type, user_type]):
-                return JsonResponse({'success': False, 'message': 'Barcha maydonlarni to\'ldiring.'}, status=400)
+            # 📌 Majburiy maydonlarni tekshirish
+            if not all([data["name"], data["type"], data["user_type"]]) or not (
+                    data["summasi"] or data["parent_summasi"]):
+                return JsonResponse({'success': False,
+                                     'message': "Majburiy maydonlarni to‘ldiring! (summasi yoki parent_summasi bo‘lishi kerak)"},
+                                    status=400)
 
-            # Foydalanuvchi birikkan markazlarni topish
-            user_centers = Center.objects.filter(rahbari=request.user)
+            # 📌 Raqamli qiymatlarni tekshirish
+            try:
+                data["summasi"] = int(data["summasi"]) if data["summasi"] else 0
+                data["parent_summasi"] = int(data["parent_summasi"]) if data["parent_summasi"] else 0
+                data["percentage"] = float(data["percentage"]) if data["percentage"] else 0.0
+                data["parent_percentage"] = float(data["parent_percentage"]) if data["parent_percentage"] else 0.0
+            except ValueError:
+                return JsonResponse({'success': False, 'message': "Summalar va foizlar noto‘g‘ri formatda!"},
+                                    status=400)
 
-            if not user_centers.exists():
-                return JsonResponse({'success': False, 'message': 'Sizga birikkan markaz topilmadi.'}, status=404)
+            # 📌 Foydalanuvchi markazini olish
+            center = Center.objects.filter(rahbari=request.user).first()
+            if not center:
+                return JsonResponse({'success': False, 'message': "Sizga birikkan markaz topilmadi."}, status=404)
 
-            # Birinchi markazni olish (agar bir nechta bo'lsa, tanlovni kengaytirish mumkin)
-            center = user_centers.first()
-
-            # Yangi cashback yaratishdan oldin mavjudligini tekshirish
-            existing_cashback = Cashback.objects.filter(
-                type=cashback_type,
-                user_type=user_type,
-                center=center
-            ).first()
-
-            if existing_cashback:
-                # Agar cashback mavjud bo'lsa, uni yangilaymiz
-                existing_cashback.name = name
-                existing_cashback.summasi = summasi
-                existing_cashback.parent_summ = parent_summasi
-                existing_cashback.save()
-
-                return JsonResponse({
-                    'success': True,
-                    'message': 'Cashback mavjud edi va muvaffaqiyatli yangilandi!',
-                    'cashback': model_to_dict(existing_cashback)
-                })
-
-            # Agar mavjud bo'lmasa, yangi cashback yaratamiz
-            cashback = Cashback.objects.create(
-                name=name,
-                summasi=summasi,
-                parent_summ=parent_summasi,
-                type=cashback_type,
-                user_type=user_type,
-                center=center,  # Markazni biriktirish
-                is_active=True
+            # 📌 Cashback yaratish yoki yangilash
+            cashback, created = Cashback.objects.update_or_create(
+                type=data["type"],
+                user_type=data["user_type"],
+                center=center,
+                defaults={
+                    "name": data["name"],
+                    "summasi": data["summasi"],
+                    "parent_summ": data["parent_summasi"],
+                    "percentage": data["percentage"],
+                    "parent_percentage": data["parent_percentage"],
+                    "is_active": True
+                }
             )
+
+            # 📌 Telegram xabari
+            message = f"📢 {'Yangi' if created else 'Yangilangan'} Cashback:\n\n" \
+                      f"🏷 Nomi: {data['name']}\n" \
+                      f"💰 Summasi: {data['summasi']:,} so‘m\n" \
+                      f"💵 Foiz: {data['percentage']}%\n" \
+                      f"👨‍👩‍👧 Ota-ona foizi: {data['parent_percentage']}%\n" \
+                      f"🏢 Markaz: {center.nomi}"
+
+            send_telegram_message(message)
 
             return JsonResponse({
                 'success': True,
-                'message': 'Cashback muvaffaqiyatli qo\'shildi!',
+                'message': "Cashback muvaffaqiyatli qo‘shildi!" if created else "Cashback yangilandi!",
                 'cashback': model_to_dict(cashback)
             })
-        except Exception as e:
-            return JsonResponse({'success': False, 'message': f'Xatolik yuz berdi: {str(e)}'}, status=500)
 
+        except Exception as e:
+            print(f"❌ Xatolik: {e}")
+            return JsonResponse({'success': False, 'message': "Server xatosi!"}, status=500)
 
 
 class CashbackListAPIView(View):
@@ -82,8 +87,8 @@ class CashbackListAPIView(View):
             else:
                 # Oddiy foydalanuvchilar uchun markazlar bilan bog‘liq cashbacklar
                 user_centers = (
-                    Center.objects.filter(rahbari=request.user) |
-                    Center.objects.filter(maktab__customuser=request.user)
+                        Center.objects.filter(rahbari=request.user) |
+                        Center.objects.filter(maktab__customuser=request.user)
                 )
                 print(f"Foydalanuvchiga tegishli markazlar: {user_centers.count()} ta.")  # Debug
 
@@ -111,7 +116,9 @@ class CashbackListAPIView(View):
                     "id": cashback.id,
                     "name": cashback.name,
                     "summasi": cashback.summasi,
+                    "percentage": cashback.percentage,  # Foiz (%) qo‘shildi
                     "parent_sum": cashback.parent_summ,
+                    "parent_percentage": cashback.parent_percentage,  # Ota-ona foizi qo‘shildi
                     "type": cashback.get_type_display(),
                     "user_type": cashback.get_user_type_display(),
                     "is_active": cashback.is_active,
@@ -125,6 +132,7 @@ class CashbackListAPIView(View):
         except Exception as e:
             print(f"Xatolik yuz berdi: {str(e)}")  # Debug
             return JsonResponse({"success": False, "message": f"Xatolik yuz berdi: {str(e)}"}, status=500)
+
 
 class UserTypeAPIView(View):
     def get(self, request, *args, **kwargs):

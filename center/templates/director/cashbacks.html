@@ -1,0 +1,107 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Mening o'quvchilarim{% endblock %}
+
+{% block vendor_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css' %}" />
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+  {{ block.super }}
+  <script src="{% static 'vendor/libs/moment/moment.js' %}"></script>
+  <script src="{% static 'vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
+{% endblock vendor_js %}
+
+{% block page_js %}
+  {{ block.super }}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 🔹 DataTable qo‘shish
+      var table = $('#cashbackTable').DataTable({
+        'paging': true,
+        'searching': true,
+        'ordering': true,
+        'info': true,
+        'lengthChange': false,
+        'pageLength': 10,
+        'language': {
+          'paginate': {
+            'first': 'Birinchi',
+            'last': 'Oxirgi',
+            'next': 'Keyingi',
+            'previous': 'Oldingi'
+          },
+          'zeroRecords': '📌 Cashback topilmadi',
+          'info': 'Jami _TOTAL_ ta cashbackdan _START_ - _END_ oralig‘ida ko‘rsatilmoqda',
+          'infoEmpty': '📌 Ma\'lumot yo‘q',
+          'infoFiltered': '(Jami _MAX_ cashbackdan filtrlandi)'
+        }
+      });
+
+      // 🔹 Filtrlash funksiyasi
+      $('#filterUser').on('change', function() {
+        let val = $(this).val();
+        table.column(1).search(val).draw();
+      });
+
+      $('#filterType').on('change', function() {
+        let val = $(this).val();
+        table.column(3).search(val).draw();
+      });
+
+    });
+  </script>
+{% endblock page_js %}
+
+{% block content %}
+
+  <div class="card p-3">
+    <h4 class="mb-3">📋 Keshbeklar ro‘yxati</h4>
+
+    <!-- 🔹 Cashbacklar jadvali -->
+    <table id="cashbackTable" class="table table-bordered table-hover">
+      <thead class="table-dark">
+      <tr>
+        <th>#</th>
+        <th>📌 O'quvchi</th>
+        <th>📌 O'qituvchi</th>
+
+        <th>💰 Keshbek summasi</th>
+        <th>🔹 Turi</th>
+        <th>📅 Sana</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for cashback in director_cashbacks %}
+        <tr>
+          <td>{{ forloop.counter }} </td>
+          <td>{{ cashback.student.first_name }} {{ cashback.student.last_name }}</td>  <!-- Keshbek oluvchi foydalanuvchi -->
+          <td>{{ cashback.student.added_by.first_name }} {{ cashback.student.added_by.second_name }}</td>  <!-- Keshbek oluvchi foydalanuvchi -->
+          <td class="text-success"><b>{{ cashback.cashback.summasi|floatformat:2 }}</b> so‘m</td>
+          <td>
+            {% if cashback.teacher == director %}
+              <span class="badge bg-primary">📌 Direktor ulushi</span>
+            {% else %}
+              <span class="badge bg-success">👨‍🏫 O‘qituvchi ulushi</span>
+            {% endif %}
+          </td>
+          <td>{{ cashback.created_at|date:"Y-m-d H:i" }}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="6" class="text-center text-muted">📌 Hozircha cashbacklar mavjud emas</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+
+  </div>
+
+{% endblock content %}
+

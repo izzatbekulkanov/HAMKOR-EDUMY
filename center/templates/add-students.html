@@ -1,0 +1,164 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Mening o'quvchilarim{% endblock %}
+
+{% block vendor_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css' %}" />
+  <link rel="stylesheet" href="{% static 'vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css' %}" />
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+  {{ block.super }}
+  <script src="{% static 'vendor/libs/moment/moment.js' %}"></script>
+  <script src="{% static 'vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
+{% endblock vendor_js %}
+
+{% block page_js %}
+  {{ block.super }}
+
+{% endblock page_js %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="card">
+    <div class="card-header">
+      <h4>O'quvchini qo'shish</h4>
+    </div>
+    <div class="card-body">
+      <form id="studentForm">
+        <div class="row g-3">
+          <!-- Ism -->
+          <div class="col-md-6">
+            <label for="firstName" class="form-label">Ism</label>
+            <input type="text" id="firstName" class="form-control" required />
+          </div>
+
+          <!-- Familiya -->
+          <div class="col-md-6">
+            <label for="lastName" class="form-label">Familiya</label>
+            <input type="text" id="lastName" class="form-control" required />
+          </div>
+
+          <!-- Telefon raqami -->
+          <div class="col-md-6">
+            <label for="phoneNumber" class="form-label">Telefon raqami</label>
+            <input type="text" id="phoneNumber" class="form-control" placeholder="+998901234567" required />
+          </div>
+
+          <!-- Sinf -->
+          <div class="col-md-6">
+            <label for="sinf" class="form-label">Sinf</label>
+            <select id="sinf" class="form-control">
+              <option value="">Tanlang...</option>
+              {% for sinf in sinflar %}
+                <option value="{{ sinf.id }}">{{ sinf.nomi }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Kasb -->
+          <div class="col-md-6">
+            <label for="kasb" class="form-label">Kasb</label>
+            <select id="kasb" class="form-control">
+              <option value="">Tanlang...</option>
+              {% for kasb in kasblar %}
+                <option value="{{ kasb.id }}">{{ kasb.nomi }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Yo'nalish -->
+          <div class="col-md-6">
+            <label for="yonalish" class="form-label">Yo'nalish</label>
+            <select id="yonalish" class="form-control">
+              <option value="">Tanlang...</option>
+              {% for yonalish in yonalishlar %}
+                <option value="{{ yonalish.id }}">{{ yonalish.nomi }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Filial -->
+          <div class="col-md-6">
+            <label for="filial" class="form-label">Filial</label>
+            <select id="filial" class="form-control">
+              <option value="">Tanlang...</option>
+              {% for filial in filiallar %}
+                <option value="{{ filial.id }}">{{ filial.nomi }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Kurslar (Ko'p tanlanadigan) -->
+          <div class="col-md-6">
+            <label for="kurslar" class="form-label">Kurslar</label>
+            <select id="kurslar" class="form-control" multiple>
+              {% for kurs in kurslar %}
+                <option value="{{ kurs.id }}">{{ kurs.nomi }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <!-- Yuborish tugmasi -->
+        <div class="mt-4 text-end">
+          <button type="button" id="submitStudent" class="btn btn-primary">
+            <i class="ti ti-user-plus"></i> O'quvchini qo'shish
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+  document.getElementById("submitStudent").addEventListener("click", function () {
+    alert("Bazadagi o'quvchilar yetarli emas")
+    let studentData = {
+      first_name: document.getElementById("firstName").value,
+      last_name: document.getElementById("lastName").value,
+      phone_number: document.getElementById("phoneNumber").value,
+      sinf: document.getElementById("sinf").value,
+      kasb: document.getElementById("kasb").value,
+      yonalish: document.getElementById("yonalish").value,
+      filial: document.getElementById("filial").value,
+      kurslar: Array.from(document.getElementById("kurslar").selectedOptions).map(option => option.value)
+    };
+
+    fetch("", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": "{{ csrf_token }}"
+      },
+      body: JSON.stringify(studentData)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        Swal.fire({
+          icon: "success",
+          title: "Qo'shildi!",
+          text: "O'quvchi muvaffaqiyatli qo'shildi.",
+          confirmButtonText: "OK"
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Xatolik!",
+          text: data.error || "Noma'lum xatolik yuz berdi.",
+          confirmButtonText: "OK"
+        });
+      }
+    })
+    .catch(error => console.error("Xatolik:", error));
+  });
+</script>
+{% endblock %}
+

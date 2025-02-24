@@ -10,11 +10,11 @@ class GetNotificationsView(View):
         teacher = request.user
         print(f"GET so'rov qilindi. Foydalanuvchi: {teacher.username}, user_type: {teacher.user_type}")
 
-        # Foydalanuvchi o'qituvchi emasligini tekshirish
-        if teacher.user_type != "2":  # Faqat o'qituvchilar uchun
+        # Faqat o‘qituvchilar uchun
+        if teacher.user_type != "2":
             return JsonResponse({
                 "success": True,
-                "notifications": [],  # Bo'sh bildirishnomalar ro'yxati
+                "notifications": [],
                 "has_unread": False
             })
 
@@ -28,10 +28,15 @@ class GetNotificationsView(View):
 
         notifications = []
         for record in cashback_records:
-            student = record.student
-            print(f"Bildirishnoma uchun ma'lumot: Student: {student.first_name} {student.last_name}, Cashback: {record.cashback.summasi}, Created At: {record.created_at}")
+            student = record.student  # O'quvchi obyektini olish
+
+            # Agar student `None` bo'lsa, uni "Noma'lum o'quvchi" deb belgilaymiz
+            student_name = f"{student.first_name} {student.last_name}" if student else "Noma'lum o'quvchi"
+
+            print(f"Bildirishnoma uchun ma'lumot: Student: {student_name}, Cashback: {record.cashback.summasi}, Created At: {record.created_at}")
+
             notifications.append({
-                "student_name": f"{student.first_name} {student.last_name}",
+                "student_name": student_name,
                 "cashback_amount": record.cashback.summasi,
                 "created_at": record.created_at.strftime("%Y-%m-%d %H:%M:%S"),
             })
@@ -41,7 +46,7 @@ class GetNotificationsView(View):
         return JsonResponse({
             "success": True,
             "notifications": notifications,
-            "has_unread": bool(cashback_records),
+            "has_unread": cashback_records.exists(),
         })
 
     def post(self, request, *args, **kwargs):
